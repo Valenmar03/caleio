@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  OWNER
+  PRO
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  CANCELED
+}
+
+enum PlanType {
+  STARTER
+  PRO
+}
+
+enum AppointmentStatus {
+  CONFIRMED
+  CANCELED
+  NO_SHOW
+  COMPLETED
+}
+
+model Business {
+  id                 String             @id @default(uuid())
+  name               String
+  timezone           String             @default("America/Argentina/Buenos_Aires")
+  plan               PlanType           @default(STARTER)
+  subscriptionStatus SubscriptionStatus @default(TRIAL)
+  createdAt          DateTime           @default(now())
+
+  users         User[]
+  professionals Professional[]
+  services      Service[]
+  clients       Client[]
+  appointments  Appointment[]
+  schedules     ProfessionalSchedule[]
+  professionalServices ProfessionalService[]
+
+  @@index([createdAt])
+}
+
+model User {
+  id           String   @id @default(uuid())
+  businessId   String
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(OWNER)
+  createdAt    DateTime @default(now())
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+}
+
+model Professional {
+  id         String   @id @default(uuid())
+  businessId String
+  name       String
+  color      String?
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  business             Business               @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  schedules            ProfessionalSchedule[]
+  appointments         Appointment[]
+  professionalServices ProfessionalService[]
+
+  @@index([businessId])
+}
+
+model ProfessionalSchedule {
+  id             String @id @default(uuid())
+  businessId     String
+  professionalId String
+
+  /// 0=Domingo ... 6=Sábado
+  dayOfWeek Int
+
+  /// Guardamos hora como string "HH:MM" para simplicidad V1
+  startTime String
+  endTime   String
+
+  createdAt DateTime @default(now())
+
+  business     Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  professional Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([professionalId, dayOfWeek])
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  businessId  String
+  name        String
+  durationMin Int
+  basePrice   Decimal
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  business     Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+  professionalServices ProfessionalService[]
+
+  @@index([businessId])
+}
+
+model ProfessionalService {
+  professionalId String
+  serviceId      String
+  businessId     String
+  createdAt      DateTime @default(now())
+
+  professional Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  service      Service      @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  business     Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@id([professionalId, serviceId])          // clave compuesta: evita duplicados
+  @@index([businessId])
+  @@index([serviceId])
+}
+
+model Client {
+  id         String   @id @default(uuid())
+  businessId String
+  fullName   String
+  phone      String
+  email      String?
+  notes      String?
+  createdAt  DateTime @default(now())
+
+  business     Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+
+  @@index([businessId])
+  @@index([phone])
+}
+
+model Appointment {
+  id             String @id @default(uuid())
+  businessId     String
+  professionalId String
+  clientId       String
+  serviceId      String
+
+  startAt    DateTime
+  endAt      DateTime
+  status     AppointmentStatus @default(CONFIRMED)
+  priceFinal Decimal?
+  notes      String?
+  createdAt  DateTime          @default(now())
+
+  business     Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  professional Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  client       Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  service      Service      @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+
+  @@index([businessId])
+  @@index([professionalId, startAt])
+  @@index([clientId])
+  @@index([serviceId])
+}

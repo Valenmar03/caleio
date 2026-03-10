@@ -1,0 +1,27 @@
+import { Router } from "express";
+import {
+  createProfessionalHandler,
+  getProfessionalsHandler,
+  updateProfessionalHandler,
+  getProfessionalSchedulesHandler,
+  replaceProfessionalScheduleForDayHandler,
+  getProfessionalServicesHandler,
+  replaceProfessionalServicesHandler,
+  getProfessionalAvailabilityHandler,
+} from "../controllers/professionals.controller";
+
+const router = Router();
+
+router.get("/", getProfessionalsHandler);
+router.post("/", createProfessionalHandler);
+router.patch("/:id", updateProfessionalHandler);
+
+router.get("/:id/schedules", getProfessionalSchedulesHandler);
+router.put("/:id/schedules/:dayOfWeek", replaceProfessionalScheduleForDayHandler);
+
+router.get("/:id/services", getProfessionalServicesHandler);
+router.put("/:id/services", replaceProfessionalServicesHandler);
+
+router.get("/:id/availability", getProfessionalAvailabilityHandler);
+
+export default router;

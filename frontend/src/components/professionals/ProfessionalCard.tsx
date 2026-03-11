@@ -1,7 +1,8 @@
 import { useProfessionalServices } from "../../hooks/useProfessionalServices";
+import type { Professional } from "../../types/entities";
 
 type Props = {
-  professional: any;
+  professional: Professional;
 };
 
 export default function ProfessionalCard({ professional }: Props) {

@@ -1,5 +1,5 @@
 import { apiFetch } from "./api";
-import type { DailyAgendaResponse, WeeklyAgendaResponse } from "../types/agenda";
+import type { DailyAgendaResponse, WeeklyAgendaResponse } from "../types/entities";
 
 export function getAgendaDaily(params: {
   professionalId?: string;

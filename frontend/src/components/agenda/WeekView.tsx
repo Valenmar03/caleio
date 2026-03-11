@@ -2,7 +2,7 @@ import { format, isSameDay, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import TimeLabel from "./TimeLabel";
 import AppointmentCard from "./AppointmentCard";
-import type { AgendaAppointment, Professional } from "../../types/agenda";
+import type { AgendaAppointment, Professional } from "../../types/entities";
 import type { AgendaView } from "../../pages/AgendaPage";
 
 type WeekViewProps = {

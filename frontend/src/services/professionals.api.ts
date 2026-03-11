@@ -1,5 +1,5 @@
 import { apiFetch } from "./api";
-import type { Professional } from "../types/agenda";
+import type { Professional } from "../types/entities";
 import type { AvailabilityResponse, ProfessionalServicesResponse } from "../types/entities";
 
 export function getProfessionals() {

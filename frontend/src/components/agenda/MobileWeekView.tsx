@@ -1,4 +1,4 @@
-import type { AgendaAppointment } from "../../types/agenda";
+import type { AgendaAppointment } from "../../types/entities";
 import MobileDayView from "./MobileDayView";
 
 type Props = {

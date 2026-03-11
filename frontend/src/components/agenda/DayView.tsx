@@ -1,7 +1,7 @@
 import { parseISO } from "date-fns";
 import TimeLabel from "./TimeLabel";
 import AppointmentCard from "./AppointmentCard";
-import type { AgendaAppointment, Professional, ScheduleBlock } from "../../types/agenda";
+import type { AgendaAppointment, Professional, ScheduleBlock } from "../../types/entities";
 
 type DayViewProps = {
   selectedProfessionalId: string;

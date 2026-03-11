@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, Plus, Search } from "lucide-react";
 
 import { useProfessionals } from "../hooks/useProfessionals";
 import { useAgendaDaily, useAgendaWeekly } from "../hooks/useAgenda";
-import type { AgendaAppointment, Professional } from "../types/agenda";
+import type { AgendaAppointment, Professional } from "../types/entities";
 import NewAppointmentModal from "../components/agenda/NewAppointmentModal";
 import DayView from "../components/agenda/DayView";
 import WeekView from "../components/agenda/WeekView";

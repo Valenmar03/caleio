@@ -23,7 +23,7 @@ import { useProfessionals } from "../../hooks/useProfessionals";
 import { useProfessionalServices } from "../../hooks/useProfessionalServices";
 import { useAvailability } from "../../hooks/useAvailability";
 
-import type { AgendaAppointment } from "../../types/agenda";
+import type { AgendaAppointment } from "../../types/entities";
 import {
   updateAppointment,
   changeAppointmentStatus,

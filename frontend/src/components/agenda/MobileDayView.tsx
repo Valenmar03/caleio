@@ -1,5 +1,5 @@
 import { format, parseISO } from "date-fns";
-import type { AgendaAppointment } from "../../types/agenda";
+import type { AgendaAppointment } from "../../types/entities";
 import MobileAppointmentCard from "./MobileAppointmentCard.tsx";
 
 type Props = {

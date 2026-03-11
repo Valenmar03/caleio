@@ -3,7 +3,7 @@ import { addDays, format, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 
-import type { AgendaAppointment, Professional } from "../../types/agenda";
+import type { AgendaAppointment, Professional } from "../../types/entities";
 import type { AgendaView } from "../../pages/AgendaPage";
 import MobileDayView from "./MobileDayView.tsx";
 import MobileWeekView from "./MobileWeekView.tsx";

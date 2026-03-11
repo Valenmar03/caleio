@@ -36,12 +36,13 @@ export async function createProfessionalHandler(req: Request, res: Response) {
 export async function updateProfessionalHandler(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    const { name, color } = req.body;
+    const { name, color, active } = req.body;
 
     const professional = await professionalService.updateProfessional({
       professionalId: String(id),
       name,
       color,
+      active,
     });
 
     return res.json({ professional });

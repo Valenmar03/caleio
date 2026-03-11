@@ -35,6 +35,25 @@ export function getProfessionalSchedules(params: { professionalId: string }) {
   );
 }
 
+export function updateProfessional(params: {
+  professionalId: string;
+  name?: string;
+  color?: string;
+  active?: boolean;
+}) {
+  return apiFetch<{ professional: Professional }>(
+    `/professionals/${params.professionalId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({
+        name: params.name,
+        color: params.color,
+        active: params.active,
+      }),
+    }
+  );
+}
+
 export function updateProfessionalSchedules(
   professionalId: string,
   body: UpdateProfessionalSchedulesPayload

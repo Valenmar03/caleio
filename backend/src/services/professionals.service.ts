@@ -82,8 +82,9 @@ export class ProfessionalService {
     professionalId: string;
     name?: string;
     color?: string;
+    active?: boolean;
   }) {
-    const { professionalId, name, color } = params;
+    const { professionalId, name, color, active } = params;
 
     const professional = await prisma.professional.findFirst({
       where: {
@@ -101,6 +102,7 @@ export class ProfessionalService {
       data: {
         ...(name !== undefined ? { name } : {}),
         ...(color !== undefined ? { color } : {}),
+        ...(active !== undefined ? { active } : {}),
       },
     });
   }

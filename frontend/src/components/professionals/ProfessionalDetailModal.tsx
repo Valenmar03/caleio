@@ -7,6 +7,7 @@ import { useProfessionalServices } from "../../hooks/useProfessionalServices";
 import { useProfessionalSchedule, useUpdateProfessionalServices } from "../../hooks/useprofessionalSchedule";
 import { useServices } from "../../hooks/useServices";
 import type { Professional } from "../../types/entities";
+import { useUpdateProfessional } from "../../hooks/useUpdateProfessional";
 
 type Props = {
   open: boolean;
@@ -120,9 +121,8 @@ export default function ProfessionalDetailModal({
 
   const { data: servicesData, isLoading: servicesLoading } = useServices();
 
-  // TODO: reemplazar por tus mutations reales
+  const updateProfessionalMutation = useUpdateProfessional();
   const updateProfessionalServicesMutation = useUpdateProfessionalServices();
-  
 
   const {
     updateScheduleForDayAsync,
@@ -255,25 +255,6 @@ export default function ProfessionalDetailModal({
     });
   };
 
-  const normalizedSchedulePayload = useMemo(() => {
-    return Object.entries(scheduleByDay)
-      .filter(([, config]) => config.enabled)
-      .flatMap(([day, config]) =>
-        config.blocks
-          .filter(
-            (block) =>
-              block.startTime &&
-              block.endTime &&
-              block.startTime < block.endTime
-          )
-          .map((block) => ({
-            dayOfWeek: Number(day),
-            startTime: block.startTime,
-            endTime: block.endTime,
-          }))
-      );
-  }, [scheduleByDay]);
-
   const isLoading =
     professionalServicesLoading || professionalScheduleLoading || servicesLoading;
 
@@ -298,11 +279,28 @@ export default function ProfessionalDetailModal({
 
   const hasScheduleErrors = Object.keys(scheduleValidation).length > 0;
 
+  const isSaving =
+  updateProfessionalMutation.isPending ||
+  updateProfessionalServicesMutation.isPending ||
+  isUpdatingSchedule;
+
   const handleSave = async () => {
     if (!professional) return;
     if (hasScheduleErrors) return;
 
     try {
+      await updateProfessionalMutation.mutateAsync({
+        professionalId: professional.id,
+        name,
+        color,
+        active,
+      });
+
+      await updateProfessionalServicesMutation.mutateAsync({
+        professionalId: professional.id,
+        serviceIds: selectedServiceIds,
+      });
+
       const daysToSave = Object.entries(scheduleByDay).map(([day, config]) => ({
         dayOfWeek: Number(day),
         blocks: config.enabled
@@ -319,11 +317,6 @@ export default function ProfessionalDetailModal({
               }))
           : [],
       }));
-
-      await updateProfessionalServicesMutation.mutateAsync({
-        professionalId: professional.id,
-        serviceIds: selectedServiceIds,
-      });
 
       await Promise.all(
         daysToSave.map((day) =>
@@ -354,9 +347,9 @@ export default function ProfessionalDetailModal({
           </Button>
           <Button
             onClick={handleSave}
-            disabled={!professional || isLoading || hasScheduleErrors}
+            disabled={!professional || isLoading || isSaving || hasScheduleErrors}
           >
-            Guardar cambios
+            {isSaving ? "Guardando..." : "Guardar cambios"}
           </Button>
         </div>
       }

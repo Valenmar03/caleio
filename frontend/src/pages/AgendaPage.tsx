@@ -11,6 +11,7 @@ import DayView from "../components/agenda/DayView";
 import WeekView from "../components/agenda/WeekView";
 import MobileAgenda from "../components/agenda/MobileAgenda.tsx";
 import CustomSelect from "../components/ui/CustomSelect.tsx";
+import AppointmentDetailModal from "../components/agenda/AppointmentDetailModal";
 
 const HOURS = Array.from({ length: 14 }, (_, i) => i + 8);
 
@@ -45,6 +46,8 @@ export default function AgendaPage() {
       date: string;
       time: string;
    } | null>(null);
+   const [selectedAppointment, setSelectedAppointment] =
+      useState<AgendaAppointment | null>(null);
 
    const { data: professionalsData, isLoading: professionalsLoading } =
       useProfessionals();
@@ -131,7 +134,7 @@ export default function AgendaPage() {
     };
 
    const handleAppointmentClick = (appointment: AgendaAppointment) => {
-      console.log("Editar/ver turno", appointment);
+      setSelectedAppointment(appointment);
    };
 
    const dayAppointments = appointments.filter((appt) => {
@@ -310,6 +313,11 @@ export default function AgendaPage() {
             }
             date={prefillSlot?.date}
             time={prefillSlot?.time}
+         />
+         <AppointmentDetailModal
+            open={!!selectedAppointment}
+            appointment={selectedAppointment} 
+            onClose={() => setSelectedAppointment(null)}
          />
       </>
    );

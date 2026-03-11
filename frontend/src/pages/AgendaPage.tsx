@@ -10,6 +10,7 @@ import NewAppointmentModal from "../components/agenda/NewAppointmentModal";
 import DayView from "../components/agenda/DayView";
 import WeekView from "../components/agenda/WeekView";
 import MobileAgenda from "../components/agenda/MobileAgenda.tsx";
+import CustomSelect from "../components/ui/CustomSelect.tsx";
 
 const HOURS = Array.from({ length: 14 }, (_, i) => i + 8);
 
@@ -203,9 +204,8 @@ export default function AgendaPage() {
                      ))}
                   </div>
                </div>
-
                <div className="flex flex-col sm:flex-row gap-2 w-full xl:w-auto">
-                  <div className="relative">
+                  <div className="relative flex items-center">
                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                      <input
                         placeholder="Buscar cliente, servicio o profesional..."
@@ -215,18 +215,24 @@ export default function AgendaPage() {
                      />
                   </div>
 
-                  <select
-                     value={selectedProfessionalId}
-                     onChange={(e) => setSelectedProfessionalId(e.target.value)}
-                     className="h-9 min-w-56 rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-teal-500"
-                  >
-                     <option value="all">Todos los profesionales</option>
-                     {professionals.map((p: Professional) => (
-                        <option key={p.id} value={p.id}>
-                           {p.name}
-                        </option>
-                     ))}
-                  </select>
+                  <div className="min-w-56">
+                     <CustomSelect
+                        value={selectedProfessionalId}
+                        onChange={setSelectedProfessionalId}
+                        placeholder="Todos los profesionales"
+                        options={[
+                        {
+                           value: "all",
+                           label: "Todos los profesionales",
+                        },
+                        ...professionals.map((p: Professional) => ({
+                           value: p.id,
+                           label: p.name,
+                           color: p.color || "#0D9488"
+                        })),
+                        ]}
+                     />
+                  </div>
                </div>
             </div>
 
@@ -241,21 +247,21 @@ export default function AgendaPage() {
             ) : (
                <>
                   <div className="block md:hidden">
-                    <MobileAgenda
-                      view={view}
-                      setView={setView}
-                      currentDate={currentDate}
-                      setCurrentDate={setCurrentDate}
-                      weekDays={weekDays}
-                      appointments={appointments}
-                      HOURS={HOURS}
-                      selectedProfessionalId={selectedProfessionalId}
-                      selectedProfessional={selectedProfessional}
-                      professionals={professionals}
-                      setSelectedProfessionalId={setSelectedProfessionalId}
-                      handleSlotClick={handleSlotClick}
-                      handleAppointmentClick={handleAppointmentClick}
-                    />
+                     <MobileAgenda
+                        view={view}
+                        setView={setView}
+                        currentDate={currentDate}
+                        setCurrentDate={setCurrentDate}
+                        weekDays={weekDays}
+                        appointments={appointments}
+                        HOURS={HOURS}
+                        selectedProfessionalId={selectedProfessionalId}
+                        selectedProfessional={selectedProfessional}
+                        professionals={professionals}
+                        setSelectedProfessionalId={setSelectedProfessionalId}
+                        handleSlotClick={handleSlotClick}
+                        handleAppointmentClick={handleAppointmentClick}
+                     />
                   </div>
 
                   <div className="hidden md:block bg-white rounded-xl border border-slate-200/80 overflow-hidden">

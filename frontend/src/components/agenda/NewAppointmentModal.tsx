@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { Check, ChevronDown, Search, X } from "lucide-react";
+import CustomSelect from "../ui/CustomSelect";
+import CustomDatePicker from "../ui/CustomDatePicker";
 
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
@@ -90,6 +92,7 @@ export default function NewAppointmentModal({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+  
 
   const clients = clientsData?.clients ?? [];
   const professionals = (professionalsData?.professionals ?? []).filter((p) => p.active);
@@ -202,6 +205,25 @@ export default function NewAppointmentModal({
     const localIso = `${nextDate}T${time}:00:00-03:00`;
     setSelectedStartAt(localIso);
   };
+
+    const professionalOptions = useMemo(
+    () =>
+      professionals.map((professional) => ({
+        value: professional.id,
+        label: professional.name,
+      })),
+    [professionals]
+  );
+
+  const serviceOptions = useMemo(
+    () =>
+      professionalServices.map((item) => ({
+        value: item.service.id,
+        label: item.service.name,
+        description: `${item.service.durationMin} min`,
+      })),
+    [professionalServices]
+  );
 
   return (
     <Modal
@@ -322,88 +344,47 @@ export default function NewAppointmentModal({
           )}
         </div>
 
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">
-            Profesional
-          </label>
-          <select
-            value={selectedProfessionalId}
-            onChange={(e) => handleProfessionalChange(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal-500"
-          >
-            <option value="">Seleccionar profesional</option>
-            {professionals.map((professional) => (
-              <option key={professional.id} value={professional.id}>
-                {professional.name}
-              </option>
-            ))}
-          </select>
+        <CustomSelect
+          label="Profesional"
+          placeholder="Seleccionar profesional"
+          value={selectedProfessionalId}
+          onChange={handleProfessionalChange}
+          options={professionalOptions}
+          loading={professionalsLoading}
+          loadingText="Cargando profesionales..."
+          emptyText="No hay profesionales disponibles."
+        />
 
-          {professionalsLoading && (
-            <p className="mt-1 text-xs text-slate-500">Cargando profesionales...</p>
-          )}
-        </div>
+        <CustomSelect
+          label="Servicio"
+          placeholder={
+            !selectedProfessionalId
+              ? "Seleccionar profesional primero"
+              : "Seleccionar servicio"
+          }
+          value={serviceId}
+          onChange={(nextServiceId) => {
+            setServiceId(nextServiceId);
+            setSelectedStartAt("");
+          }}
+          options={serviceOptions}
+          disabled={!selectedProfessionalId}
+          loading={professionalServicesLoading}
+          loadingText="Cargando servicios..."
+          emptyText="Este profesional no tiene servicios asignados."
+          helperText={
+            selectedProfessional
+              ? `Profesional seleccionado: ${selectedProfessional.name}`
+              : undefined
+          }
+        />
 
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">
-            Servicio
-          </label>
-          <select
-            value={serviceId}
-            onChange={(e) => {
-              setServiceId(e.target.value);
-              setSelectedStartAt("");
-            }}
-            disabled={!selectedProfessionalId}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal-500 bg-white disabled:bg-slate-50 disabled:text-slate-400"
-          >
-            <option value="">
-              {!selectedProfessionalId
-                ? "Seleccionar profesional primero"
-                : "Seleccionar servicio"}
-            </option>
-
-            {professionalServices.map((item) => (
-              <option key={item.service.id} value={item.service.id}>
-                {item.service.name} · {item.service.durationMin} min
-              </option>
-            ))}
-          </select>
-
-          {professionalServicesLoading && (
-            <p className="mt-1 text-xs text-slate-500">Cargando servicios...</p>
-          )}
-
-          {!professionalServicesLoading &&
-            selectedProfessionalId &&
-            professionalServices.length === 0 && (
-              <p className="mt-1 text-xs text-slate-500">
-                Este profesional no tiene servicios asignados.
-              </p>
-            )}
-
-          {selectedProfessional && (
-            <p className="mt-1 text-xs text-slate-500">
-              Profesional seleccionado:{" "}
-              <span className="font-medium text-slate-700">
-                {selectedProfessional.name}
-              </span>
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">
-            Fecha
-          </label>
-
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => handleDateChange(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal-500"
-          />
-        </div>
+        <CustomDatePicker
+          label="Fecha"
+          value={selectedDate}
+          onChange={handleDateChange}
+          color="teal"
+        />
 
         <div>
           <div className="mb-2 flex items-center justify-between">

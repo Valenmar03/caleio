@@ -59,7 +59,7 @@ export default function Modal({
       />
 
       <div
-        className={`relative z-101 w-full ${sizeClasses[size]} rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden`}
+        className={`relative z-101 w-full ${sizeClasses[size]} rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-visible`}
       >
         {(title || description) && (
           <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-4">

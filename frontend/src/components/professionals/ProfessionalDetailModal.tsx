@@ -332,6 +332,7 @@ export default function ProfessionalDetailModal({
       await Promise.all(
         daysToSave.map((day) =>
           updateScheduleForDayAsync({
+            professionalId: professional.id,
             dayOfWeek: day.dayOfWeek,
             blocks: day.blocks,
           })

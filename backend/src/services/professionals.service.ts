@@ -66,14 +66,15 @@ export class ProfessionalService {
     });
   }
 
-  async createProfessional(params: { name: string; color?: string }) {
-    const { name, color } = params;
+  async createProfessional(params: { name: string; color?: string, active?: boolean  }) {
+    const { name, color, active } = params;
 
     return prisma.professional.create({
       data: {
         businessId: BUSINESS_ID,
         name,
         color,
+        active: active ?? true
       },
     });
   }

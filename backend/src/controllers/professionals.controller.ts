@@ -14,7 +14,7 @@ export async function getProfessionalsHandler(req: Request, res: Response) {
 
 export async function createProfessionalHandler(req: Request, res: Response) {
   try {
-    const { name, color } = req.body;
+    const { name, color, active } = req.body;
 
     if (!name) {
       return res.status(400).json({ error: "Missing name" });
@@ -23,6 +23,7 @@ export async function createProfessionalHandler(req: Request, res: Response) {
     const professional = await professionalService.createProfessional({
       name,
       color,
+      active
     });
 
     return res.json({ professional });

@@ -29,17 +29,18 @@ export function useProfessionalSchedule(professionalId?: string) {
 
   const updateDayMutation = useMutation({
     mutationFn: (params: {
+      professionalId: string;
       dayOfWeek: number;
       blocks: { startTime: string; endTime: string }[];
     }) =>
       updateProfessionalScheduleForDay({
-        professionalId: professionalId!,
+        professionalId: params.professionalId,
         dayOfWeek: params.dayOfWeek,
         blocks: params.blocks,
       }),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["professional-schedule", professionalId],
+        queryKey: ["professional-schedule", variables.professionalId],
       });
     },
   });

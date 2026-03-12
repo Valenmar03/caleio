@@ -60,6 +60,10 @@ export type Professional = {
   active: boolean;
 };
 
+export type CreateProfessionalResponse = {
+  professional: Professional;
+};
+
 export type AgendaAppointment = {
   id: string;
   professionalId: string;
@@ -124,6 +128,12 @@ export type ProfessionalScheduleBlock = {
   startTime: string;
   endTime: string;
   createdAt: string;
+};
+
+export type CreateProfessionalPayload = {
+  name: string;
+  color?: string;
+  active?: boolean;
 };
 
 export type ProfessionalSchedulesResponse = {

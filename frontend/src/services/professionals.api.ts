@@ -1,9 +1,17 @@
 import { apiFetch } from "./api";
-import type { Professional, ProfessionalSchedulesResponse, UpdateProfessionalSchedulesPayload } from "../types/entities";
+import type { CreateProfessionalPayload, CreateProfessionalResponse, Professional, ProfessionalSchedulesResponse, UpdateProfessionalSchedulesPayload } from "../types/entities";
 import type { AvailabilityResponse, ProfessionalServicesResponse } from "../types/entities";
 
 export function getProfessionals() {
   return apiFetch<{ professionals: Professional[] }>("/professionals");
+}
+
+export async function createProfessional(payload: CreateProfessionalPayload) {
+  return apiFetch<CreateProfessionalResponse>("/professionals", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  
 }
 
 export function getProfessionalAvailability(params: {

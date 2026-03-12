@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 
 import ProfessionalCard from "../components/professionals/ProfessionalCard";
 import ProfessionalDetailModal from "../components/professionals/ProfessionalDetailModal";
+import NewProfessionalFormModal from "../components/professionals/NewProfessionalFormModal";
 import ProfessionalSkeleton from "../components/ui/Skeleton/ProfessionalSkeleton";
 import { useProfessionals } from "../hooks/useProfessionals";
 import Button from "../components/ui/Button";
@@ -17,13 +18,12 @@ export default function ProfessionalsPage() {
   const [selectedProfessional, setSelectedProfessional] =
     useState<Professional | null>(null);
   const [showProfessionalModal, setShowProfessionalModal] = useState(false);
+  const [showNewProfessionalModal, setShowNewProfessionalModal] = useState(false);
 
   const { data: professionalsData, isLoading: professionalsLoading } =
     useProfessionals();
 
-  const professionals = (professionalsData?.professionals ?? []).filter(
-    (p) => p.active
-  );
+  const professionals = professionalsData?.professionals ?? [];
 
   const normalize = (str: string) =>
     str
@@ -39,8 +39,7 @@ export default function ProfessionalsPage() {
   }, [professionals, search]);
 
   const handleNewProfessional = () => {
-    setSelectedProfessional(null);
-    setShowProfessionalModal(true);
+    setShowNewProfessionalModal(true);
   };
 
   const handleOpenProfessional = (professional: Professional) => {
@@ -51,6 +50,10 @@ export default function ProfessionalsPage() {
   const handleCloseProfessionalModal = () => {
     setSelectedProfessional(null);
     setShowProfessionalModal(false);
+  };
+
+  const handleCloseNewProfessionalModal = () => {
+    setShowNewProfessionalModal(false);
   };
 
   return (
@@ -162,6 +165,11 @@ export default function ProfessionalsPage() {
         open={showProfessionalModal}
         onClose={handleCloseProfessionalModal}
         professional={selectedProfessional}
+      />
+
+      <NewProfessionalFormModal
+        open={showNewProfessionalModal}
+        onClose={handleCloseNewProfessionalModal}
       />
     </>
   );

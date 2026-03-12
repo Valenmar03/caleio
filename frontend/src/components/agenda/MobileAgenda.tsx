@@ -7,6 +7,7 @@ import type { AgendaAppointment, Professional } from "../../types/entities";
 import type { AgendaView } from "../../pages/AgendaPage";
 import MobileDayView from "./MobileDayView.tsx";
 import MobileWeekView from "./MobileWeekView.tsx";
+import CustomSelect from "../ui/CustomSelect.tsx";
 
 type Props = {
   view: AgendaView;
@@ -118,18 +119,22 @@ export default function MobileAgenda({
           </div>
 
             <div>
-                <select
-                    value={selectedProfessionalId}
-                    onChange={(e) => setSelectedProfessionalId(e.target.value)}
-                    className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-teal-500"
-                >
-                    <option value="all">Todos los profesionales</option>
-                    {professionals.map((p) => (
-                    <option key={p.id} value={p.id}>
-                        {p.name}
-                    </option>
-                    ))}
-                </select>
+                <CustomSelect
+                  value={selectedProfessionalId}
+                  onChange={setSelectedProfessionalId}
+                  placeholder="Todos los profesionales"
+                  options={[
+                  {
+                      value: "all",
+                      label: "Todos los profesionales",
+                  },
+                  ...professionals.map((p: Professional) => ({
+                      value: p.id,
+                      label: p.name,
+                      color: p.color || "#0D9488"
+                  })),
+                  ]}
+                />
             </div>
         </div>
 
@@ -177,6 +182,7 @@ export default function MobileAgenda({
           date={currentDate}
           appointments={appointments}
           HOURS={HOURS}
+          professionals={professionals}
           selectedProfessionalId={selectedProfessionalId}
           handleSlotClick={handleSlotClick}
           handleAppointmentClick={handleAppointmentClick}
@@ -185,7 +191,8 @@ export default function MobileAgenda({
         <MobileWeekView
           selectedDay={selectedWeekDay}
           appointments={appointments}
-          HOURS={HOURS}
+          HOURS={HOURS}          
+          professionals={professionals}
           selectedProfessionalId={selectedProfessionalId}
           handleSlotClick={handleSlotClick}
           handleAppointmentClick={handleAppointmentClick}

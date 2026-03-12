@@ -1,10 +1,11 @@
-import type { AgendaAppointment } from "../../types/entities";
+import type { AgendaAppointment, Professional } from "../../types/entities";
 import MobileDayView from "./MobileDayView";
 
 type Props = {
   selectedDay: Date;
   appointments: AgendaAppointment[];
   HOURS: number[];
+  professionals: Professional[]
   selectedProfessionalId: string;
   handleSlotClick: (
     date: Date,

@@ -55,8 +55,6 @@ export default function ProfessionalsPage() {
     [professionals]
   );
 
-  console.log(totalInactive, professionals)
-
   const handleNewProfessional = () => {
     setShowNewProfessionalModal(true);
   };

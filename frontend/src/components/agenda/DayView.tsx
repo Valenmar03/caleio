@@ -207,14 +207,20 @@ export default function DayView({
                   </div>
 
                   <div className="flex flex-wrap justify-center gap-2">
-                    {blocks.map((block) => (
-                      <span
-                        key={block.id}
-                        className="inline-flex items-center rounded-full bg-white border border-slate-200 px-3 py-1 text-xs text-slate-600"
-                      >
-                        {block.startTime} - {block.endTime}
-                      </span>
-                    ))}
+                    {
+                      blocks.length > 0 ? (
+                        blocks.map((block) => (
+                          <span
+                            key={block.id}
+                            className="inline-flex items-center rounded-full bg-white border border-slate-200 px-3 py-1 text-xs text-slate-600"
+                          >
+                            {block.startTime} - {block.endTime}
+                          </span>
+                        ))
+                      ) : (
+                        <p className="text-xs text-slate-400">No tiene horarios hoy</p>
+                      )
+                    }
                   </div>
                 </div>
               </div>
@@ -302,14 +308,20 @@ export default function DayView({
               </div>
 
               <div className="flex flex-wrap justify-center gap-2">
-                {blocks.map((block) => (
-                  <span
-                    key={block.id}
-                    className="inline-flex items-center rounded-full bg-white border border-slate-200 px-3 py-1 text-xs text-slate-600"
-                  >
-                    {block.startTime} - {block.endTime}
-                  </span>
-                ))}
+                {
+                  blocks.length > 0 ? (
+                    blocks.map((block) => (
+                      <span
+                        key={block.id}
+                        className="inline-flex items-center rounded-full bg-white border border-slate-200 px-3 py-1 text-xs text-slate-600"
+                      >
+                        {block.startTime} - {block.endTime}
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-xs text-slate-400">No tiene horarios hoy</p>
+                  )
+                }
               </div>
             </div>
           </div>

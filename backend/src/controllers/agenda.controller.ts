@@ -50,7 +50,9 @@ export async function agendaDailyHandler(req: Request, res: Response) {
         date: ymd,
         professionalId: profId,
         range,
-        scheduleBlocks,
+        scheduleBlocksByProfessional: {
+          [profId]: scheduleBlocks,
+        },
         appointments,
       });
     }

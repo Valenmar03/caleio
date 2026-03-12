@@ -7,19 +7,19 @@ const BUSINESS_ID = "8c0fe826-dacb-48bf-924a-c6eaa9e1fe76";
 
 export class ProfessionalScheduleService {
     async getScheduleBlocksForDay(params: {
-    professionalId: string;
-    dayOfWeek: number;
+        professionalId: string;
+        dayOfWeek: number;
     }) {
-    const { professionalId, dayOfWeek } = params;
+        const { professionalId, dayOfWeek } = params;
 
-    return prisma.professionalSchedule.findMany({
-        where: {
-        businessId: BUSINESS_ID,
-        professionalId,
-        dayOfWeek,
-        },
-        orderBy: [{ startTime: "asc" }],
-    });
+        return prisma.professionalSchedule.findMany({
+            where: {
+            businessId: BUSINESS_ID,
+            professionalId,
+            dayOfWeek,
+            },
+            orderBy: [{ startTime: "asc" }],
+        });
     }
 
     async getScheduleBlocksForWeek(params: {

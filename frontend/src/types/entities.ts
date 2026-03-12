@@ -1,3 +1,4 @@
+//CLIENT
 export type Client = {
   id: string;
   businessId: string;
@@ -8,6 +9,7 @@ export type Client = {
   createdAt: string;
 };
 
+//SERVICE
 export type Service = {
   id: string;
   businessId: string;
@@ -16,21 +18,30 @@ export type Service = {
   basePrice: string;
   active: boolean;
   createdAt: string;
+  description?: string
 };
 
-export type AvailabilitySlot = {
-  startAt: string;
-  endAt: string;
-  label: string;
+
+export type ServiceWithProfessional = {
+  id: string;
+  name: string;
+  durationMin: number;
+  basePrice: number;
+  active: boolean;
+  description?: string;
+  professionalServices: {
+    professional: {
+      id: string;
+      name: string;
+      active: boolean;
+      color?: string;
+    };
+  }[];
 };
 
-export type AvailabilityResponse = {
-  date: string;
-  professionalId: string;
-  serviceId: string;
-  stepMin: number;
-  slots: AvailabilitySlot[];
-};
+
+
+//PROFESSIONAL - SERVICE
 
 export type ProfessionalService = {
   professionalId: string;
@@ -52,6 +63,25 @@ export type ProfessionalServicesResponse = {
   services: ProfessionalService[];
 };
 
+// AVAILABILITY
+
+export type AvailabilitySlot = {
+  startAt: string;
+  endAt: string;
+  label: string;
+};
+
+export type AvailabilityResponse = {
+  date: string;
+  professionalId: string;
+  serviceId: string;
+  stepMin: number;
+  slots: AvailabilitySlot[];
+};
+
+
+// PROFESSIONAL
+
 export type Professional = {
   id: string;
   businessId: string;
@@ -64,28 +94,6 @@ export type CreateProfessionalResponse = {
   professional: Professional;
 };
 
-export type AgendaAppointment = {
-  id: string;
-  professionalId: string;
-  professional?: {
-    id: string;
-    name: string;
-    color?: string | null;
-  };
-  client: {
-    id: string;
-    fullName: string;
-  };
-  service: {
-    id: string;
-    name: string;
-  };
-  startAt: string;
-  endAt: string;
-  status?: string;
-  isPendingResolution?: boolean;
-};
-
 export type ScheduleBlock = {
   id: string;
   professionalId?: string;
@@ -94,31 +102,6 @@ export type ScheduleBlock = {
   endTime: string;
 };
 
-export type DailyAgendaResponse = {
-  kind: "daily";
-  date: string;
-  professionalId?: string;
-  range: {
-    from: string;
-    to: string;
-  };
-  scheduleBlocks?: ScheduleBlock[];
-  scheduleBlocksByProfessional?: Record<string, ScheduleBlock[]>;
-  appointments: AgendaAppointment[];
-};
-
-export type WeeklyAgendaResponse = {
-  kind: "weekly";
-  date: string;
-  professionalId?: string;
-  range: {
-    from: string;
-    to: string;
-  };
-  scheduleBlocksByDay?: Record<string, ScheduleBlock[]>;
-  scheduleBlocksByProfessional?: Record<string, ScheduleBlock[]>;
-  appointments: AgendaAppointment[];
-};
 
 export type ProfessionalScheduleBlock = {
   id: string;
@@ -149,18 +132,52 @@ export type UpdateProfessionalSchedulesPayload = {
 };
 
 
-export type ServiceWithProfessional = {
+// AGENDA
+
+export type AgendaAppointment = {
   id: string;
-  name: string;
-  durationMin: number;
-  basePrice: number;
-  active: boolean;
-  professionalServices: {
-    professional: {
-      id: string;
-      name: string;
-      active: boolean;
-      color?: string;
-    };
-  }[];
+  professionalId: string;
+  professional?: {
+    id: string;
+    name: string;
+    color?: string | null;
+  };
+  client: {
+    id: string;
+    fullName: string;
+  };
+  service: {
+    id: string;
+    name: string;
+  };
+  startAt: string;
+  endAt: string;
+  status?: string;
+  isPendingResolution?: boolean;
+};
+
+export type DailyAgendaResponse = {
+  kind: "daily";
+  date: string;
+  professionalId?: string;
+  range: {
+    from: string;
+    to: string;
+  };
+  scheduleBlocks?: ScheduleBlock[];
+  scheduleBlocksByProfessional?: Record<string, ScheduleBlock[]>;
+  appointments: AgendaAppointment[];
+};
+
+export type WeeklyAgendaResponse = {
+  kind: "weekly";
+  date: string;
+  professionalId?: string;
+  range: {
+    from: string;
+    to: string;
+  };
+  scheduleBlocksByDay?: Record<string, ScheduleBlock[]>;
+  scheduleBlocksByProfessional?: Record<string, ScheduleBlock[]>;
+  appointments: AgendaAppointment[];
 };

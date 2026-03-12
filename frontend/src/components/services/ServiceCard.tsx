@@ -32,6 +32,9 @@ export default function ServiceCard({service}: Props) {
                 {service.active ? "Activo" : "Inactivo"}
               </span>
          </div>
+         {service.description && (
+            <p className="text-xs text-slate-500 mt-1 line-clamp-2">{service.description}</p>
+         )}
          <div className="flex items-center gap-4 mt-3 text-xs text-slate-500">
             <span className="flex items-center gap-1">
                <Clock className="w-3 h-3" /> {service.durationMin} min

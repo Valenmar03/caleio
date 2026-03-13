@@ -20,7 +20,7 @@ class ClientService {
   async listClients(params?: { search?: string }) {
     const search = params?.search?.trim();
 
-    return prisma.client.findMany({
+    const clients = await prisma.client.findMany({
       where: {
         businessId: BUSINESS_ID,
         ...(search
@@ -48,10 +48,40 @@ class ClientService {
             }
           : {}),
       },
-      orderBy: [
-        { fullName: "asc" },
-        { createdAt: "desc" },
-      ],
+      include: {
+        appointments: {
+          select: {
+            id: true,
+            priceFinal: true,
+            status: true,
+          },
+        },
+      },
+      orderBy: [{ fullName: "asc" }, { createdAt: "desc" }],
+    });
+
+    return clients.map((client) => {
+      const validAppointments = client.appointments.filter(
+        (appt) => appt.status !== "CANCELED"
+      );
+
+      const visitsCount = validAppointments.length;
+
+      const totalSpent = validAppointments.reduce((acc, appt) => {
+        return acc + Number(appt.priceFinal ?? 0);
+      }, 0);
+
+      return {
+        id: client.id,
+        businessId: client.businessId,
+        fullName: client.fullName,
+        phone: client.phone,
+        email: client.email,
+        notes: client.notes,
+        createdAt: client.createdAt,
+        visitsCount,
+        totalSpent,
+      };
     });
   }
 
@@ -61,6 +91,15 @@ class ClientService {
         id,
         businessId: BUSINESS_ID,
       },
+      include: {
+        appointments: {
+          select: {
+            id: true,
+            priceFinal: true,
+            status: true,
+          },
+        },
+      },
     });
 
     if (!client) {
@@ -69,7 +108,27 @@ class ClientService {
       throw error;
     }
 
-    return client;
+    const validAppointments = client.appointments.filter(
+      (appt) => appt.status !== "CANCELED"
+    );
+
+    const visitsCount = validAppointments.length;
+
+    const totalSpent = validAppointments.reduce((acc, appt) => {
+      return acc + Number(appt.priceFinal ?? 0);
+    }, 0);
+
+    return {
+      id: client.id,
+      businessId: client.businessId,
+      fullName: client.fullName,
+      phone: client.phone,
+      email: client.email,
+      notes: client.notes,
+      createdAt: client.createdAt,
+      visitsCount,
+      totalSpent,
+    };
   }
 
   async createClient(data: CreateClientInput) {
@@ -176,6 +235,40 @@ class ClientService {
 
     return prisma.client.delete({
       where: { id },
+    });
+  }
+
+  async searchClients(params: { q: string; limit?: number }) {
+    const q = params.q.trim();
+    const limit = Math.min(params.limit ?? 8, 20);
+
+    if (!q) return [];
+
+    return prisma.client.findMany({
+      where: {
+        businessId: BUSINESS_ID,
+        OR: [
+          {
+            fullName: {
+              contains: q,
+              mode: "insensitive",
+            },
+          },
+          {
+            phone: {
+              contains: q,
+            },
+          },
+          {
+            email: {
+              contains: q,
+              mode: "insensitive",
+            },
+          },
+        ],
+      },
+      orderBy: [{ fullName: "asc" }, { createdAt: "desc" }],
+      take: limit,
     });
   }
 }

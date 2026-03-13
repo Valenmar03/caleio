@@ -1,12 +1,28 @@
 //CLIENT
 export type Client = {
   id: string;
-  businessId: string;
   fullName: string;
   phone: string;
-  email: string | null;
-  notes: string | null;
+  email?: string | null;
+  notes?: string | null;
   createdAt: string;
+  visitsCount?: number;
+  totalSpent?: number;
+};
+
+export type CreateClientPayload = {
+  fullName: string;
+  phone: string;
+  email?: string;
+  notes?: string;
+};
+
+export type UpdateClientPayload = {
+  clientId: string;
+  fullName?: string;
+  phone?: string;
+  email?: string;
+  notes?: string;
 };
 
 //SERVICE

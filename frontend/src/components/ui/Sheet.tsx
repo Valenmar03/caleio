@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 type Props = {
   open: boolean;
@@ -19,35 +19,72 @@ export default function Sheet({
   children,
   width = "md",
 }: Props) {
+  const [mounted, setMounted] = useState(false);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    let openRaf = 0;
+    let closeTimeout: number | undefined;
+
+    if (open) {
+      setMounted(true);
+      document.body.style.overflow = "hidden";
+
+      openRaf = window.requestAnimationFrame(() => {
+        openRaf = window.requestAnimationFrame(() => {
+          setVisible(true);
+        });
+      });
+    } else {
+      setVisible(false);
+      document.body.style.overflow = "";
+
+      closeTimeout = window.setTimeout(() => {
+        setMounted(false);
+      }, 300);
+    }
+
+    return () => {
+      if (openRaf) window.cancelAnimationFrame(openRaf);
+      if (closeTimeout) window.clearTimeout(closeTimeout);
+    };
+  }, [open]);
+
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
 
-    if (open) {
+    if (mounted) {
       document.addEventListener("keydown", handleEsc);
-      document.body.style.overflow = "hidden";
     }
 
     return () => {
       document.removeEventListener("keydown", handleEsc);
+    };
+  }, [mounted, onClose]);
+
+  useEffect(() => {
+    return () => {
       document.body.style.overflow = "";
     };
-  }, [open, onClose]);
+  }, []);
 
-  if (!open) return null;
+  if (!mounted) return null;
 
   return (
     <>
-      {/* overlay */}
       <div
-        className="fixed inset-0 bg-black/40 z-40"
         onClick={onClose}
+        className={`fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-opacity duration-300 ${
+          visible ? "opacity-100" : "opacity-0"
+        }`}
       />
 
-      {/* panel */}
       <div
-        className={`fixed right-0 top-0 h-full w-full ${widthMap[width]} bg-white shadow-xl z-50 animate-slideIn`}
+        className={`fixed right-0 top-0 z-50 h-full w-full ${widthMap[width]} bg-white shadow-xl transition-transform duration-300 ease-out ${
+          visible ? "translate-x-0" : "translate-x-full"
+        }`}
       >
         <div className="h-full overflow-y-auto">{children}</div>
       </div>

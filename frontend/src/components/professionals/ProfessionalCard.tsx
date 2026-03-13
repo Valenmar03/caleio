@@ -161,17 +161,7 @@ export default function ProfessionalCard({ professional, onClick }: Props) {
         </div>
       </div>
 
-      <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between">
-        <div className="flex gap-4 text-xs text-slate-500">
-          <span>
-            <span className="font-semibold text-slate-700">0</span> hoy
-          </span>
-
-          <span>
-            <span className="font-semibold text-slate-700">11</span> total
-          </span>
-        </div>
-
+      <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
         <span className="text-xs text-slate-400 font-medium">
           {loadingProfessionalServices ? "..." : `${servicesCount} servicios`}
         </span>

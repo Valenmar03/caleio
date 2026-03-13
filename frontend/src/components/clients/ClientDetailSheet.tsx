@@ -1,5 +1,5 @@
 import Sheet from "../ui/Sheet";
-import { Phone, Mail, Calendar, DollarSign, Hash, Clock3, Trash2, UserX2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Phone, Mail, Calendar, DollarSign, Hash, Clock3, Trash2, UserX2, CheckCircle2, AlertCircle, X } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -65,7 +65,6 @@ function formatStatus(status: string) {
 export default function ClientDetailSheet({ open, onClose, client }: Props) {
    const { data, isLoading } = useClientAppointments(client?.id);
    const appointments = data?.appointments ?? [];
-   console.log(appointments);
 
    if (!client) return null;
 
@@ -74,7 +73,27 @@ export default function ClientDetailSheet({ open, onClose, client }: Props) {
 
    return (
       <Sheet open={open} onClose={onClose} width="lg">
-         <div className="p-6 space-y-6">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:px-6">
+            <div>
+                <h2 className="text-sm font-semibold text-slate-900">
+                    Ficha de cliente
+                </h2>
+                <p className="text-xs text-slate-500">
+                    Detalle e historial
+                </p>
+            </div>
+
+            <button
+                type="button"
+                onClick={onClose}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700"
+                aria-label="Cerrar"
+            >
+                <X className="h-4 w-4" />
+            </button>
+        </div>
+
+        <div className="p-4 sm:p-6 space-y-6">
             <div className="flex items-center gap-4">
                <div className="w-14 h-14 rounded-xl bg-teal-100 flex items-center justify-center text-teal-700 font-bold text-xl">
                   {getInitials(client.fullName)}

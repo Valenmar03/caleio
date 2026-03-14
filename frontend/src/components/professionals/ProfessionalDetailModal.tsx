@@ -3,11 +3,11 @@ import { Clock3, Plus, User2, X } from "lucide-react";
 
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
-import { useProfessionalServices } from "../../hooks/useProfessionalServices";
-import { useProfessionalSchedule, useUpdateProfessionalServices } from "../../hooks/useprofessionalSchedule";
+import { useProfessionalServices, useUpdateProfessionalServices } from "../../hooks/useProfessionalServices";
+import { useProfessionalSchedule } from "../../hooks/useProfessionalSchedule";
 import { useServices } from "../../hooks/useServices";
 import type { Professional } from "../../types/entities";
-import { useUpdateProfessional } from "../../hooks/useUpdateProfessional";
+import { useUpdateProfessional } from "../../hooks/useProfessionals";
 
 type Props = {
   open: boolean;

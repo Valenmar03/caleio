@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getProfessionalSchedules,
   updateProfessionalScheduleForDay,
-  updateProfessionalServices,
 } from "../services/professionals.api";
 
 const EMPTY_SCHEDULES = {
@@ -55,20 +54,3 @@ export function useProfessionalSchedule(professionalId?: string) {
   };
 }
 
-export function useUpdateProfessionalServices() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-      mutationFn: (params: { professionalId: string; serviceIds: string[] }) =>
-        updateProfessionalServices(params),
-      onSuccess: (_, variables) => {
-        queryClient.invalidateQueries({
-          queryKey: ["professional-services", variables.professionalId],
-        });
-
-        queryClient.invalidateQueries({
-          queryKey: ["professionals"],
-        });
-      },
-    });
-  }

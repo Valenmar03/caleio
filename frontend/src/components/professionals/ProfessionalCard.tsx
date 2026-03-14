@@ -1,5 +1,5 @@
 import { Clock3 } from "lucide-react";
-import { useProfessionalSchedule } from "../../hooks/useprofessionalSchedule";
+import { useProfessionalSchedule } from "../../hooks/useProfessionalSchedule";
 import { useProfessionalServices } from "../../hooks/useProfessionalServices";
 import type { Professional } from "../../types/entities";
 

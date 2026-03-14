@@ -4,9 +4,9 @@ import { Clock3, Plus, User2, X } from "lucide-react";
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
 import { useServices } from "../../hooks/useServices";
-import { useCreateProfessional } from "../../hooks/useCreateProfessional";
-import { useUpdateProfessionalServices } from "../../hooks/useprofessionalSchedule";
-import { useProfessionalSchedule } from "../../hooks/useprofessionalSchedule";
+import { useCreateProfessional } from "../../hooks/useProfessionals";
+import { useUpdateProfessionalServices } from "../../hooks/useProfessionalServices";
+import { useProfessionalSchedule } from "../../hooks/useProfessionalSchedule";
 
 type Props = {
   open: boolean;

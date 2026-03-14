@@ -2,7 +2,7 @@ import { prisma } from "../db/prisma";
 
 
 
-const BUSINESS_ID = "8c0fe826-dacb-48bf-924a-c6eaa9e1fe76";
+const BUSINESS_ID = "976dac1d-a819-4f13-8e60-32f6ab65c60a";
 
 
 export class ProfessionalScheduleService {

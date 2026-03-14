@@ -8,7 +8,7 @@ CREATE TYPE "SubscriptionStatus" AS ENUM ('TRIAL', 'ACTIVE', 'PAST_DUE', 'CANCEL
 CREATE TYPE "PlanType" AS ENUM ('STARTER', 'PRO');
 
 -- CreateEnum
-CREATE TYPE "AppointmentStatus" AS ENUM ('CONFIRMED', 'CANCELED', 'NO_SHOW', 'COMPLETED');
+CREATE TYPE "AppointmentStatus" AS ENUM ('RESERVED', 'DEPOSIT_PAID', 'CANCELED', 'NO_SHOW', 'COMPLETED');
 
 -- CreateTable
 CREATE TABLE "Business" (
@@ -39,6 +39,7 @@ CREATE TABLE "Professional" (
     "id" TEXT NOT NULL,
     "businessId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "color" TEXT,
     "active" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -64,11 +65,22 @@ CREATE TABLE "Service" (
     "businessId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "durationMin" INTEGER NOT NULL,
+    "description" TEXT,
     "basePrice" DECIMAL(65,30) NOT NULL,
     "active" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Service_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ProfessionalService" (
+    "professionalId" TEXT NOT NULL,
+    "serviceId" TEXT NOT NULL,
+    "businessId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "ProfessionalService_pkey" PRIMARY KEY ("professionalId","serviceId")
 );
 
 -- CreateTable
@@ -93,8 +105,10 @@ CREATE TABLE "Appointment" (
     "serviceId" TEXT NOT NULL,
     "startAt" TIMESTAMP(3) NOT NULL,
     "endAt" TIMESTAMP(3) NOT NULL,
-    "status" "AppointmentStatus" NOT NULL DEFAULT 'CONFIRMED',
+    "status" "AppointmentStatus" NOT NULL DEFAULT 'RESERVED',
     "priceFinal" DECIMAL(65,30),
+    "depositAmount" DECIMAL(65,30) NOT NULL DEFAULT 0,
+    "depositPaidAt" TIMESTAMP(3),
     "notes" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -123,10 +137,19 @@ CREATE INDEX "ProfessionalSchedule_professionalId_dayOfWeek_idx" ON "Professiona
 CREATE INDEX "Service_businessId_idx" ON "Service"("businessId");
 
 -- CreateIndex
+CREATE INDEX "ProfessionalService_businessId_idx" ON "ProfessionalService"("businessId");
+
+-- CreateIndex
+CREATE INDEX "ProfessionalService_serviceId_idx" ON "ProfessionalService"("serviceId");
+
+-- CreateIndex
 CREATE INDEX "Client_businessId_idx" ON "Client"("businessId");
 
 -- CreateIndex
 CREATE INDEX "Client_phone_idx" ON "Client"("phone");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Client_businessId_phone_key" ON "Client"("businessId", "phone");
 
 -- CreateIndex
 CREATE INDEX "Appointment_businessId_idx" ON "Appointment"("businessId");
@@ -154,6 +177,15 @@ ALTER TABLE "ProfessionalSchedule" ADD CONSTRAINT "ProfessionalSchedule_professi
 
 -- AddForeignKey
 ALTER TABLE "Service" ADD CONSTRAINT "Service_businessId_fkey" FOREIGN KEY ("businessId") REFERENCES "Business"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ProfessionalService" ADD CONSTRAINT "ProfessionalService_professionalId_fkey" FOREIGN KEY ("professionalId") REFERENCES "Professional"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ProfessionalService" ADD CONSTRAINT "ProfessionalService_serviceId_fkey" FOREIGN KEY ("serviceId") REFERENCES "Service"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ProfessionalService" ADD CONSTRAINT "ProfessionalService_businessId_fkey" FOREIGN KEY ("businessId") REFERENCES "Business"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Client" ADD CONSTRAINT "Client_businessId_fkey" FOREIGN KEY ("businessId") REFERENCES "Business"("id") ON DELETE CASCADE ON UPDATE CASCADE;

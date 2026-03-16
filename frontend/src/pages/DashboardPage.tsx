@@ -13,10 +13,10 @@ import StatCard from "../components/dashboard/StatCard";
 import { useClients } from "../hooks/useClients";
 import { useProfessionals } from "../hooks/useProfessionals";
 import { useAgendaDaily } from "../hooks/useAgenda";
-import { useNavigate } from "react-router-dom";
 import DashboardSideSkeleton from "../components/dashboard/skeleton/DashboardSideSkeleton";
 import DashboardStatSkeleton from "../components/dashboard/skeleton/DashboardStatSkeleton";
 import UpcomingAppointmentsSkeleton from "../components/dashboard/skeleton/UpcomingAppointmentSkeleton";
+import RevenueBreakdownCard from "../components/dashboard/RevenueBreakDownCard";
 
 function getInitials(name: string) {
   return name
@@ -66,10 +66,10 @@ export default function DashboardPage() {
     currentDateYMD
   );
 
-  const navigate = useNavigate();
 
   const appointments = dailyAgenda?.appointments ?? [];
 
+  console.log(appointments)
 
   const dashboardData = useMemo(() => {
     const now = new Date();
@@ -149,6 +149,23 @@ export default function DashboardPage() {
       );
     });
 
+
+    const depositToday = completedAppointments.reduce(
+      (acc, appt) => acc + Number(appt.depositAmount ?? 0),
+      0
+    );
+
+    const cashToday = completedAppointments.reduce((acc, appt) => {
+      const price = Number(appt.priceFinal ?? 0);
+      const deposit = Number(appt.depositAmount ?? 0);
+      return acc + Math.max(price - deposit, 0);
+    }, 0);
+
+    const totalToday = completedAppointments.reduce(
+      (acc, appt) => acc + Number(appt.priceFinal ?? 0),
+      0
+);
+
     const activeTeam = professionals
       .map((professional) => ({
         id: professional.id,
@@ -162,10 +179,13 @@ export default function DashboardPage() {
       stats: {
         appointmentsToday: normalizedAppointments.length,
         pendingToday: pendingAppointments.length,
-        revenueToday,
+        depositToday,
+        cashToday,
+        totalToday,
         completedToday: completedAppointments.length,
         professionals: professionals.length,
         clients: clients.length,
+        revenueToday
       },
       upcomingAppointments,
       popularServices,
@@ -192,7 +212,27 @@ export default function DashboardPage() {
         isLoading? (
           <DashboardStatSkeleton />
         ) : (
-          <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
+            <StatCard
+              title="Cobro de turnos hoy"
+              value={isLoading ? "..." : formatCurrency(dashboardData.stats.revenueToday)}
+              subtitle={
+                isLoading
+                  ? "Cargando..."
+                  : `${dashboardData.stats.completedToday} completados`
+              }
+              icon={<DollarSign className="h-5 w-5" />}
+              iconBg="bg-blue-50"
+              iconColor="text-blue-600"
+            />
+
+            <RevenueBreakdownCard
+              isLoading={isLoading}
+              deposit={dashboardData.stats.depositToday}
+              cash={dashboardData.stats.cashToday}
+              total={dashboardData.stats.totalToday}
+            />
+
             <StatCard
               title="Turnos hoy"
               value={dashboardData.stats.appointmentsToday}
@@ -206,18 +246,6 @@ export default function DashboardPage() {
               iconColor="text-teal-600"
             />
 
-            <StatCard
-              title="Ingresos hoy"
-              value={isLoading ? "..." : formatCurrency(dashboardData.stats.revenueToday)}
-              subtitle={
-                isLoading
-                  ? "Cargando..."
-                  : `${dashboardData.stats.completedToday} completados`
-              }
-              icon={<DollarSign className="h-5 w-5" />}
-              iconBg="bg-blue-50"
-              iconColor="text-blue-600"
-            />
 
             <StatCard
               title="Profesionales"
@@ -250,9 +278,6 @@ export default function DashboardPage() {
             <SectionCard
               title="Próximos turnos de hoy"
               actionLabel="Ver agenda"
-              onActionClick={() => {
-                () => navigate("/agenda")
-              }}
             >
               {isLoading ? (
                 <div className="flex min-h-47.5 items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/70">

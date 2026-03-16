@@ -16,9 +16,9 @@ export default function StatCard({
   iconColor,
 }: StatCardProps) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-start justify-between gap-4">
-        <div>
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between h-full">
+      <div className="flex items-start justify-between gap-4 h-full">
+        <div className="flex flex-col h-full justify-between">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
             {title}
           </p>

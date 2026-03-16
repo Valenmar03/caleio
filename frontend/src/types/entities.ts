@@ -243,9 +243,23 @@ export const AppointmentStatus = {
   COMPLETED: "COMPLETED",
 } as const;
 
+export type AppointmentUiStatus = AppointmentStatus | "PENDING_RESOLUTION"
+
 export type AppointmentStatus =
   (typeof AppointmentStatus)[keyof typeof AppointmentStatus];
 
-export type AppointmentUiStatus =
-  | AppointmentStatus
-  | "PENDING_RESOLUTION";
+export const appointmentStatusLabels: Record<AppointmentStatus, string> = {
+  [AppointmentStatus.RESERVED]: "Reservado",
+  [AppointmentStatus.DEPOSIT_PAID]: "Señado",
+  [AppointmentStatus.CANCELED]: "Cancelado",
+  [AppointmentStatus.NO_SHOW]: "No asistió",
+  [AppointmentStatus.COMPLETED]: "Completado",
+};
+
+export const appointmentStatusColors: Record<AppointmentStatus, string> = {
+  [AppointmentStatus.RESERVED]: "bg-blue-100 text-blue-700",
+  [AppointmentStatus.DEPOSIT_PAID]: "bg-amber-100 text-amber-700",
+  [AppointmentStatus.CANCELED]: "bg-red-100 text-red-700",
+  [AppointmentStatus.NO_SHOW]: "bg-slate-100 text-slate-700",
+  [AppointmentStatus.COMPLETED]: "bg-emerald-100 text-emerald-700",
+};

@@ -1,3 +1,39 @@
+// ANALYTICS
+
+export type AnalyticsResponse = {
+  period: "week" | "month";
+  from: string;
+  to: string;
+  summary: {
+    totalAppointments: number;
+    completedAppointments: number;
+    totalRevenue: number;
+    averageTicket: number;
+    cancellationRate: number;
+    noShowRate: number;
+  };
+  revenueByDay: Array<{ date: string; revenue: number }>;
+  appointmentsByDay: Array<{ date: string; count: number }>;
+  topServices: Array<{ name: string; count: number; percentage: number }>;
+  peakHours: Array<{ hour: string; count: number }>;
+  topProfessionals: Array<{ id: string; name: string; color: string | null; count: number }>;
+  revenueByProfessional: Array<{ id: string; name: string; color: string | null; revenue: number }>;
+  revenueByPaymentMethod: Array<{ method: string; label: string; count: number; percentage: number }>;
+  appointmentsByDayOfWeek: Array<{ day: string; count: number }>;
+};
+
+// BUSINESS
+
+export type Business = {
+  id: string;
+  name: string;
+  slug: string;
+  timezone: string;
+  plan: "STARTER" | "PRO";
+  subscriptionStatus: "TRIAL" | "ACTIVE" | "PAST_DUE" | "CANCELED";
+  createdAt: string;
+};
+
 //CLIENT
 export type Client = {
   id: string;
@@ -137,6 +173,7 @@ export type Professional = {
   name: string;
   color?: string | null;
   active: boolean;
+  userId?: string | null;
 };
 
 export type CreateProfessionalResponse = {

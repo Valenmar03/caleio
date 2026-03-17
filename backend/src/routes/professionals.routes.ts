@@ -8,6 +8,7 @@ import {
   getProfessionalServicesHandler,
   replaceProfessionalServicesHandler,
   getProfessionalAvailabilityHandler,
+  createProfessionalAccountHandler,
 } from "../controllers/professionals.controller";
 
 const router = Router();
@@ -23,5 +24,6 @@ router.get("/:id/services", getProfessionalServicesHandler);
 router.put("/:id/services", replaceProfessionalServicesHandler);
 
 router.get("/:id/availability", getProfessionalAvailabilityHandler);
+router.post("/:id/account", createProfessionalAccountHandler);
 
 export default router;

@@ -3,17 +3,17 @@ import { professionalService } from "../services/professionals.service";
 
 export async function getProfessionalsHandler(req: Request, res: Response) {
   try {
-    const professionals = await professionalService.listProfessionals();
+    const { businessId } = req.user!;
+    const professionals = await professionalService.listProfessionals({ businessId });
     return res.json({ professionals });
   } catch (err: any) {
-    return res.status(err?.status ?? 500).json({
-      error: err?.message ?? "Server error",
-    });
+    return res.status(err?.status ?? 500).json({ error: err?.message ?? "Server error" });
   }
 }
 
 export async function createProfessionalHandler(req: Request, res: Response) {
   try {
+    const { businessId } = req.user!;
     const { name, color, active } = req.body;
 
     if (!name) {
@@ -21,25 +21,26 @@ export async function createProfessionalHandler(req: Request, res: Response) {
     }
 
     const professional = await professionalService.createProfessional({
+      businessId,
       name,
       color,
-      active
+      active,
     });
 
     return res.json({ professional });
   } catch (err: any) {
-    return res.status(err?.status ?? 500).json({
-      error: err?.message ?? "Server error",
-    });
+    return res.status(err?.status ?? 500).json({ error: err?.message ?? "Server error" });
   }
 }
 
 export async function updateProfessionalHandler(req: Request, res: Response) {
   try {
+    const { businessId } = req.user!;
     const { id } = req.params;
     const { name, color, active } = req.body;
 
     const professional = await professionalService.updateProfessional({
+      businessId,
       professionalId: String(id),
       name,
       color,
@@ -48,36 +49,29 @@ export async function updateProfessionalHandler(req: Request, res: Response) {
 
     return res.json({ professional });
   } catch (err: any) {
-    return res.status(err?.status ?? 500).json({
-      error: err?.message ?? "Server error",
-    });
+    return res.status(err?.status ?? 500).json({ error: err?.message ?? "Server error" });
   }
 }
 
-export async function getProfessionalSchedulesHandler(
-  req: Request,
-  res: Response
-) {
+export async function getProfessionalSchedulesHandler(req: Request, res: Response) {
   try {
+    const { businessId } = req.user!;
     const { id } = req.params;
 
     const schedules = await professionalService.getSchedules({
+      businessId,
       professionalId: String(id),
     });
 
     return res.json({ schedules });
   } catch (err: any) {
-    return res.status(err?.status ?? 500).json({
-      error: err?.message ?? "Server error",
-    });
+    return res.status(err?.status ?? 500).json({ error: err?.message ?? "Server error" });
   }
 }
 
-export async function replaceProfessionalScheduleForDayHandler(
-  req: Request,
-  res: Response
-) {
+export async function replaceProfessionalScheduleForDayHandler(req: Request, res: Response) {
   try {
+    const { businessId } = req.user!;
     const { id, dayOfWeek } = req.params;
     const { blocks } = req.body;
 
@@ -86,6 +80,7 @@ export async function replaceProfessionalScheduleForDayHandler(
     }
 
     const schedules = await professionalService.replaceScheduleForDay({
+      businessId,
       professionalId: String(id),
       dayOfWeek: Number(dayOfWeek),
       blocks,
@@ -93,36 +88,29 @@ export async function replaceProfessionalScheduleForDayHandler(
 
     return res.json({ schedules });
   } catch (err: any) {
-    return res.status(err?.status ?? 500).json({
-      error: err?.message ?? "Server error",
-    });
+    return res.status(err?.status ?? 500).json({ error: err?.message ?? "Server error" });
   }
 }
 
-export async function getProfessionalServicesHandler(
-  req: Request,
-  res: Response
-) {
+export async function getProfessionalServicesHandler(req: Request, res: Response) {
   try {
+    const { businessId } = req.user!;
     const { id } = req.params;
 
     const services = await professionalService.getProfessionalServices({
+      businessId,
       professionalId: String(id),
     });
 
     return res.json({ services });
   } catch (err: any) {
-    return res.status(err?.status ?? 500).json({
-      error: err?.message ?? "Server error",
-    });
+    return res.status(err?.status ?? 500).json({ error: err?.message ?? "Server error" });
   }
 }
 
-export async function replaceProfessionalServicesHandler(
-  req: Request,
-  res: Response
-) {
+export async function replaceProfessionalServicesHandler(req: Request, res: Response) {
   try {
+    const { businessId } = req.user!;
     const { id } = req.params;
     const { serviceIds } = req.body;
 
@@ -131,33 +119,56 @@ export async function replaceProfessionalServicesHandler(
     }
 
     const services = await professionalService.replaceProfessionalServices({
+      businessId,
       professionalId: String(id),
       serviceIds,
     });
 
     return res.json({ services });
   } catch (err: any) {
-    return res.status(err?.status ?? 500).json({
-      error: err?.message ?? "Server error",
-    });
+    return res.status(err?.status ?? 500).json({ error: err?.message ?? "Server error" });
   }
 }
 
-export async function getProfessionalAvailabilityHandler(
-  req: Request,
-  res: Response
-) {
+export async function createProfessionalAccountHandler(req: Request, res: Response) {
   try {
+    const { businessId, role } = req.user!;
+    if (role !== "OWNER") {
+      return res.status(403).json({ error: "Only owners can create professional accounts" });
+    }
+
+    const professionalId = String(req.params.id);
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({ error: "username and password are required" });
+    }
+
+    const professional = await professionalService.createProfessionalAccount({
+      businessId,
+      professionalId,
+      username,
+      password,
+    });
+
+    return res.status(201).json({ professional });
+  } catch (err: any) {
+    return res.status(err?.statusCode ?? err?.status ?? 500).json({ error: err?.message ?? "Server error" });
+  }
+}
+
+export async function getProfessionalAvailabilityHandler(req: Request, res: Response) {
+  try {
+    const { businessId } = req.user!;
     const { id } = req.params;
     const { date, serviceId, stepMin } = req.query;
 
     if (!date || !serviceId) {
-      return res.status(400).json({
-        error: "Missing query params: date, serviceId",
-      });
+      return res.status(400).json({ error: "Missing query params: date, serviceId" });
     }
 
     const result = await professionalService.getAvailability({
+      businessId,
       professionalId: String(id),
       date: String(date),
       serviceId: String(serviceId),
@@ -166,8 +177,6 @@ export async function getProfessionalAvailabilityHandler(
 
     return res.json(result);
   } catch (err: any) {
-    return res.status(err?.status ?? 500).json({
-      error: err?.message ?? "Server error",
-    });
+    return res.status(err?.status ?? 500).json({ error: err?.message ?? "Server error" });
   }
 }

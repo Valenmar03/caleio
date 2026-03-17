@@ -4,6 +4,7 @@ import { es } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Plus, Search } from "lucide-react";
 
 import { useProfessionals } from "../hooks/useProfessionals";
+import { useAuth } from "../hooks/useAuth";
 import { useAgendaDaily, useAgendaWeekly } from "../hooks/useAgenda";
 import type { AgendaAppointment, Professional } from "../types/entities";
 import NewAppointmentModal from "../components/appointment/NewAppointmentModal.tsx";
@@ -35,11 +36,14 @@ function getAppointmentTopAndHeight(appt: AgendaAppointment) {
 }
 
 export default function AgendaPage() {
+   const { user } = useAuth();
+   const isPro = user?.role === "PRO";
+
    const [currentDate, setCurrentDate] = useState(new Date());
    const [view, setView] = useState<AgendaView>("day");
    const [search, setSearch] = useState("");
    const [selectedProfessionalId, setSelectedProfessionalId] =
-      useState<string>("all");
+      useState<string>(isPro && user.professionalId ? user.professionalId : "all");
    const [showNewAppointmentModal, setShowNewAppointmentModal] =
       useState(false);
    const [prefillSlot, setPrefillSlot] = useState<{
@@ -56,8 +60,9 @@ export default function AgendaPage() {
    );
 
    const currentDateYMD = format(currentDate, "yyyy-MM-dd");
-   const effectiveProfessionalId =
-      selectedProfessionalId === "all" ? undefined : selectedProfessionalId;
+   const effectiveProfessionalId = isPro && user?.professionalId
+      ? user.professionalId
+      : selectedProfessionalId === "all" ? undefined : selectedProfessionalId;
 
    const { data: dailyAgenda, isLoading: dailyLoading } = useAgendaDaily(
       effectiveProfessionalId,
@@ -213,24 +218,26 @@ export default function AgendaPage() {
                      />
                   </div>
 
-                  <div className="min-w-56">
-                     <CustomSelect
-                        value={selectedProfessionalId}
-                        onChange={setSelectedProfessionalId}
-                        placeholder="Todos los profesionales"
-                        options={[
-                        {
-                           value: "all",
-                           label: "Todos los profesionales",
-                        },
-                        ...professionals.map((p: Professional) => ({
-                           value: p.id,
-                           label: p.name,
-                           color: p.color || "#0D9488"
-                        })),
-                        ]}
-                     />
-                  </div>
+                  {!isPro && (
+                     <div className="min-w-56">
+                        <CustomSelect
+                           value={selectedProfessionalId}
+                           onChange={setSelectedProfessionalId}
+                           placeholder="Todos los profesionales"
+                           options={[
+                           {
+                              value: "all",
+                              label: "Todos los profesionales",
+                           },
+                           ...professionals.map((p: Professional) => ({
+                              value: p.id,
+                              label: p.name,
+                              color: p.color || "#0D9488"
+                           })),
+                           ]}
+                        />
+                     </div>
+                  )}
                </div>
             </div>
 
@@ -302,10 +309,13 @@ export default function AgendaPage() {
                setPrefillSlot(null);
             }}
             professionalId={
-               selectedProfessionalId === "all"
+               isPro && user?.professionalId
+                  ? user.professionalId
+                  : selectedProfessionalId === "all"
                   ? undefined
                   : selectedProfessionalId
             }
+            lockProfessional={isPro}
             date={prefillSlot?.date}
             time={prefillSlot?.time}
          />

@@ -13,6 +13,7 @@ import { professionalService } from "../services/professionals.service";
 
 export async function agendaDailyHandler(req: Request, res: Response) {
   try {
+    const { businessId } = req.user!;
     const { professionalId, date, status } = req.query;
 
     if (!date) {
@@ -26,10 +27,10 @@ export async function agendaDailyHandler(req: Request, res: Response) {
 
     const range = dayRange(ymd);
     const dayOfWeek = dayOfWeekFromYMD(ymd);
-
     const profId = professionalId ? String(professionalId) : undefined;
 
     const appointmentsPromise = appointmentService.getByRange({
+      businessId,
       professionalId: profId,
       from: range.from,
       to: range.to,
@@ -40,6 +41,7 @@ export async function agendaDailyHandler(req: Request, res: Response) {
       const [appointments, scheduleBlocks] = await Promise.all([
         appointmentsPromise,
         professionalScheduleService.getScheduleBlocksForDay({
+          businessId,
           professionalId: profId,
           dayOfWeek,
         }),
@@ -50,21 +52,19 @@ export async function agendaDailyHandler(req: Request, res: Response) {
         date: ymd,
         professionalId: profId,
         range,
-        scheduleBlocksByProfessional: {
-          [profId]: scheduleBlocks,
-        },
+        scheduleBlocksByProfessional: { [profId]: scheduleBlocks },
         appointments,
       });
     }
 
-    const professionals = await professionalService.listProfessionals();
+    const professionals = await professionalService.listProfessionals({ businessId });
     const scheduleEntries = await Promise.all(
       professionals.map(async (professional) => {
         const blocks = await professionalScheduleService.getScheduleBlocksForDay({
+          businessId,
           professionalId: professional.id,
           dayOfWeek,
         });
-
         return [professional.id, blocks] as const;
       })
     );
@@ -80,14 +80,13 @@ export async function agendaDailyHandler(req: Request, res: Response) {
       appointments,
     });
   } catch (err: any) {
-    return res.status(err?.status ?? 500).json({
-      error: err?.message ?? "Server error",
-    });
+    return res.status(err?.status ?? 500).json({ error: err?.message ?? "Server error" });
   }
 }
 
 export async function agendaWeeklyHandler(req: Request, res: Response) {
   try {
+    const { businessId } = req.user!;
     const { professionalId, date, status, weekStart } = req.query;
 
     if (!date) {
@@ -104,6 +103,7 @@ export async function agendaWeeklyHandler(req: Request, res: Response) {
     const profId = professionalId ? String(professionalId) : undefined;
 
     const appointments = await appointmentService.getByRange({
+      businessId,
       professionalId: profId,
       from: range.from,
       to: range.to,
@@ -111,10 +111,10 @@ export async function agendaWeeklyHandler(req: Request, res: Response) {
     });
 
     if (profId) {
-      const scheduleBlocksByDay =
-        await professionalScheduleService.getScheduleBlocksForWeek({
-          professionalId: profId,
-        });
+      const scheduleBlocksByDay = await professionalScheduleService.getScheduleBlocksForWeek({
+        businessId,
+        professionalId: profId,
+      });
 
       return res.json({
         kind: "weekly",
@@ -127,22 +127,15 @@ export async function agendaWeeklyHandler(req: Request, res: Response) {
       });
     }
 
-    return res.json({
-      kind: "weekly",
-      date: ymd,
-      weekStart: ws,
-      range,
-      appointments,
-    });
+    return res.json({ kind: "weekly", date: ymd, weekStart: ws, range, appointments });
   } catch (err: any) {
-    return res.status(err?.status ?? 500).json({
-      error: err?.message ?? "Server error",
-    });
+    return res.status(err?.status ?? 500).json({ error: err?.message ?? "Server error" });
   }
 }
 
 export async function agendaMonthlyHandler(req: Request, res: Response) {
   try {
+    const { businessId } = req.user!;
     const { professionalId, month, status } = req.query;
 
     if (!professionalId || !month) {
@@ -157,13 +150,20 @@ export async function agendaMonthlyHandler(req: Request, res: Response) {
     const range = monthRange(ym);
 
     const appointments = await appointmentService.getByRange({
+      businessId,
       professionalId: String(professionalId),
       from: range.from,
       to: range.to,
       status: status ? (String(status) as any) : undefined,
     });
 
-    return res.json({ kind: "monthly", month: ym, professionalId: String(professionalId), range, appointments });
+    return res.json({
+      kind: "monthly",
+      month: ym,
+      professionalId: String(professionalId),
+      range,
+      appointments,
+    });
   } catch (err: any) {
     return res.status(err?.status ?? 500).json({ error: err?.message ?? "Server error" });
   }

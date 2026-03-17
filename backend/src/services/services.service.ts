@@ -1,13 +1,13 @@
 import { prisma } from "../db/prisma";
 
-const BUSINESS_ID = "976dac1d-a819-4f13-8e60-32f6ab65c60a";
-
 type ListServicesParams = {
+  businessId: string;
   activeOnly?: boolean;
   search?: string;
 };
 
 type CreateServiceInput = {
+  businessId: string;
   name: string;
   durationMin: number;
   basePrice: number;
@@ -24,53 +24,40 @@ type UpdateServiceInput = {
 };
 
 export class ServiceService {
-  async listServices(params?: ListServicesParams) {
-    const activeOnly = params?.activeOnly ?? true;
-    const search = params?.search?.trim();
+  async listServices(params: ListServicesParams) {
+    const { businessId, activeOnly = true, search } = params;
+    const q = search?.trim();
 
     return prisma.service.findMany({
       where: {
-        businessId: BUSINESS_ID,
+        businessId,
         ...(activeOnly ? { active: true } : {}),
-        ...(search
-          ? {
-              name: { contains: search, mode: "insensitive" },
-            }
-          : {}),
+        ...(q ? { name: { contains: q, mode: "insensitive" } } : {}),
       },
       orderBy: { name: "asc" },
     });
   }
 
-  async listServicesWithProfessional(params?: { activeOnly?: boolean; search?: string }) {
-    const activeOnly = params?.activeOnly ?? false;
-    const search = params?.search?.trim();
+  async listServicesWithProfessional(params: {
+    businessId: string;
+    activeOnly?: boolean;
+    search?: string;
+  }) {
+    const { businessId, activeOnly = false, search } = params;
+    const q = search?.trim();
 
     return prisma.service.findMany({
       where: {
-        businessId: BUSINESS_ID,
+        businessId,
         ...(activeOnly ? { active: true } : {}),
-        ...(search
-          ? {
-              name: { contains: search, mode: "insensitive" },
-            }
-          : {}),
+        ...(q ? { name: { contains: q, mode: "insensitive" } } : {}),
       },
       include: {
         professionalServices: {
-          where: {
-            professional: {
-              active: true,
-            },
-          },
+          where: { professional: { active: true } },
           include: {
             professional: {
-              select: {
-                id: true,
-                name: true,
-                active: true,
-                color: true
-              },
+              select: { id: true, name: true, active: true, color: true },
             },
           },
         },
@@ -79,12 +66,9 @@ export class ServiceService {
     });
   }
 
-  async getServiceById(id: string) {
+  async getServiceById(id: string, businessId: string) {
     const service = await prisma.service.findFirst({
-      where: {
-        id,
-        businessId: BUSINESS_ID,
-      },
+      where: { id, businessId },
     });
 
     if (!service) {
@@ -97,6 +81,7 @@ export class ServiceService {
   }
 
   async createService(data: CreateServiceInput) {
+    const { businessId } = data;
     const name = data.name?.trim();
 
     if (!name) {
@@ -118,10 +103,7 @@ export class ServiceService {
     }
 
     const existing = await prisma.service.findFirst({
-      where: {
-        businessId: BUSINESS_ID,
-        name: { equals: name, mode: "insensitive" },
-      },
+      where: { businessId, name: { equals: name, mode: "insensitive" } },
     });
 
     if (existing) {
@@ -132,7 +114,7 @@ export class ServiceService {
 
     return prisma.service.create({
       data: {
-        businessId: BUSINESS_ID,
+        businessId,
         name,
         durationMin: data.durationMin,
         basePrice: data.basePrice,
@@ -142,14 +124,13 @@ export class ServiceService {
     });
   }
 
-  async updateService(id: string, data: UpdateServiceInput) {
-    await this.getServiceById(id);
+  async updateService(id: string, businessId: string, data: UpdateServiceInput) {
+    await this.getServiceById(id, businessId);
 
     const updateData: any = {};
 
     if (data.name !== undefined) {
       const name = data.name.trim();
-
       if (!name) {
         const error: any = new Error("Name cannot be empty");
         error.status = 400;
@@ -157,11 +138,7 @@ export class ServiceService {
       }
 
       const existing = await prisma.service.findFirst({
-        where: {
-          businessId: BUSINESS_ID,
-          name: { equals: name, mode: "insensitive" },
-          NOT: { id },
-        },
+        where: { businessId, name: { equals: name, mode: "insensitive" }, NOT: { id } },
       });
 
       if (existing) {
@@ -183,23 +160,15 @@ export class ServiceService {
         error.status = 400;
         throw error;
       }
-
       updateData.durationMin = data.durationMin;
     }
 
     if (data.basePrice !== undefined) {
-      if (
-        typeof data.basePrice !== "number" ||
-        Number.isNaN(data.basePrice) ||
-        data.basePrice < 0
-      ) {
-        const error: any = new Error(
-          "basePrice must be a number greater than or equal to 0"
-        );
+      if (typeof data.basePrice !== "number" || Number.isNaN(data.basePrice) || data.basePrice < 0) {
+        const error: any = new Error("basePrice must be a number greater than or equal to 0");
         error.status = 400;
         throw error;
       }
-
       updateData.basePrice = data.basePrice;
     }
 
@@ -207,28 +176,17 @@ export class ServiceService {
       updateData.active = data.active;
     }
 
-    return prisma.service.update({
-      where: { id },
-      data: updateData,
-    });
+    return prisma.service.update({ where: { id }, data: updateData });
   }
 
-  async deleteService(id: string) {
-    await this.getServiceById(id);
-
-    return prisma.service.update({
-      where: { id },
-      data: { active: false },
-    });
+  async deleteService(id: string, businessId: string) {
+    await this.getServiceById(id, businessId);
+    return prisma.service.update({ where: { id }, data: { active: false } });
   }
 
-  async toggleServiceActive(id: string, active: boolean) {
-    await this.getServiceById(id);
-
-    return prisma.service.update({
-      where: { id },
-      data: { active },
-    });
+  async toggleServiceActive(id: string, businessId: string, active: boolean) {
+    await this.getServiceById(id, businessId);
+    return prisma.service.update({ where: { id }, data: { active } });
   }
 }
 

@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { ChevronDown, Plus, Search } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, FormEvent } from "react";
 
 import ProfessionalCard from "../components/professionals/ProfessionalCard";
 import ProfessionalDetailModal from "../components/professionals/ProfessionalDetailModal";
@@ -10,9 +10,12 @@ import ProfessionalSkeleton from "../components/ui/Skeleton/ProfessionalSkeleton
 import { useProfessionals } from "../hooks/useProfessionals";
 import Button from "../components/ui/Button";
 import type { Professional } from "../types/entities";
+import { createProfessionalAccount } from "../services/professionals.api";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function ProfessionalsPage() {
   const currentDate = new Date();
+  const queryClient = useQueryClient();
 
   const [search, setSearch] = useState("");
   const [selectedProfessional, setSelectedProfessional] =
@@ -20,6 +23,31 @@ export default function ProfessionalsPage() {
   const [showProfessionalModal, setShowProfessionalModal] = useState(false);
   const [showNewProfessionalModal, setShowNewProfessionalModal] = useState(false);
   const [showInactive, setShowInactive] = useState(false);
+
+  // Activate account modal
+  const [accountProfessional, setAccountProfessional] = useState<Professional | null>(null);
+  const [accountUsername, setAccountUsername] = useState("");
+  const [accountPassword, setAccountPassword] = useState("");
+  const [accountError, setAccountError] = useState<string | null>(null);
+  const [accountSubmitting, setAccountSubmitting] = useState(false);
+
+  async function handleActivateAccount(e: FormEvent) {
+    e.preventDefault();
+    if (!accountProfessional) return;
+    setAccountError(null);
+    setAccountSubmitting(true);
+    try {
+      await createProfessionalAccount(accountProfessional.id, accountUsername, accountPassword);
+      queryClient.invalidateQueries({ queryKey: ["professionals"] });
+      setAccountProfessional(null);
+      setAccountUsername("");
+      setAccountPassword("");
+    } catch (err: any) {
+      setAccountError(err?.message ?? "Error al crear la cuenta");
+    } finally {
+      setAccountSubmitting(false);
+    }
+  }
 
   const { data: professionalsData, isLoading: professionalsLoading } =
     useProfessionals();
@@ -171,6 +199,7 @@ export default function ProfessionalsPage() {
                     key={professional.id}
                     professional={professional}
                     onClick={() => handleOpenProfessional(professional)}
+                    onActivateAccount={setAccountProfessional}
                   />
                 ))}
               </div>
@@ -221,6 +250,7 @@ export default function ProfessionalsPage() {
                             key={professional.id}
                             professional={professional}
                             onClick={() => handleOpenProfessional(professional)}
+                            onActivateAccount={setAccountProfessional}
                           />
                         ))}
                       </div>
@@ -247,6 +277,63 @@ export default function ProfessionalsPage() {
         open={showNewProfessionalModal}
         onClose={handleCloseNewProfessionalModal}
       />
+
+      {accountProfessional && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-lg w-full max-w-sm p-6">
+            <h3 className="text-base font-semibold text-slate-800 mb-1">Activar acceso</h3>
+            <p className="text-sm text-slate-500 mb-5">
+              Crear credenciales de acceso para <span className="font-medium text-slate-700">{accountProfessional.name}</span>.
+            </p>
+            <form onSubmit={handleActivateAccount} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-600 mb-1">Usuario</label>
+                <input
+                  type="text"
+                  required
+                  autoFocus
+                  value={accountUsername}
+                  onChange={(e) => setAccountUsername(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                  placeholder="nombre de usuario"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-600 mb-1">Contraseña</label>
+                <input
+                  type="password"
+                  required
+                  value={accountPassword}
+                  onChange={(e) => setAccountPassword(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                  placeholder="••••••••"
+                />
+              </div>
+              {accountError && (
+                <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                  {accountError}
+                </p>
+              )}
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => { setAccountProfessional(null); setAccountError(null); setAccountUsername(""); setAccountPassword(""); }}
+                  className="flex-1 py-2 px-4 rounded-lg border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 transition"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={accountSubmitting}
+                  className="flex-1 py-2 px-4 rounded-lg bg-teal-600 text-white text-sm font-medium hover:bg-teal-700 disabled:opacity-60 disabled:cursor-not-allowed transition"
+                >
+                  {accountSubmitting ? "Guardando..." : "Activar"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }

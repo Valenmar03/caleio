@@ -1,4 +1,4 @@
-import { Clock3 } from "lucide-react";
+import { Clock3, KeyRound } from "lucide-react";
 import { useProfessionalServices } from "../../hooks/useProfessionalServices";
 import type { Professional } from "../../types/entities";
 import { useProfessionalSchedule } from "../../hooks/useProfessionalSchedule";
@@ -6,6 +6,7 @@ import { useProfessionalSchedule } from "../../hooks/useProfessionalSchedule";
 type Props = {
   professional: Professional;
   onClick?: () => void;
+  onActivateAccount?: (professional: Professional) => void;
 };
 
 type ScheduleBlock = {
@@ -28,7 +29,7 @@ const DAY_LABELS: Record<number, string> = {
   6: "Sáb",
 };
 
-export default function ProfessionalCard({ professional, onClick }: Props) {
+export default function ProfessionalCard({ professional, onClick, onActivateAccount }: Props) {
   const {
     data: professionalServices,
     isLoading: loadingProfessionalServices,
@@ -165,6 +166,21 @@ export default function ProfessionalCard({ professional, onClick }: Props) {
         <span className="text-xs text-slate-400 font-medium">
           {loadingProfessionalServices ? "..." : `${servicesCount} servicios`}
         </span>
+        {professional.userId ? (
+          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full">
+            <KeyRound className="w-3 h-3" />
+            Tiene acceso
+          </span>
+        ) : onActivateAccount ? (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onActivateAccount(professional); }}
+            className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-teal-700 hover:bg-teal-50 px-2 py-0.5 rounded-full border border-slate-200 hover:border-teal-200 transition-colors"
+          >
+            <KeyRound className="w-3 h-3" />
+            Activar acceso
+          </button>
+        ) : null}
       </div>
     </div>
   );

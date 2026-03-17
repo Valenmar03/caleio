@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { useAuth } from "../../hooks/useAuth";
+import { useBusiness } from "../../hooks/useBusiness";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -39,15 +41,26 @@ function getPageTitle(pathname: string) {
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const { logout, user } = useAuth();
 
   const currentPageTitle = useMemo(() => {
     return getPageTitle(location.pathname);
   }, [location.pathname]);
 
-  const handleLogout = () => {
-    // TODO: reemplazar cuando implementemos auth real
-    console.log("Logout pendiente de implementación");
-  };
+  const { data: businessData } = useBusiness();
+  const businessName = businessData?.business?.name;
+
+  const isPro = user?.role === "PRO";
+  const visibleNavItems = isPro
+    ? NAV_ITEMS.filter((item) =>
+        [appRoutes.dashboard, appRoutes.agenda, appRoutes.clients].includes(item.to)
+      )
+    : NAV_ITEMS;
+
+  const displayName = user?.username ?? user?.email ?? "?";
+  const initial = displayName[0].toUpperCase();
+
+  const handleLogout = () => logout();
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
@@ -94,7 +107,7 @@ export function Layout() {
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto scrollbar-thin">
-          {NAV_ITEMS.map((item) => {
+          {visibleNavItems.map((item) => {
             const Icon = item.icon;
 
             return (
@@ -163,6 +176,18 @@ export function Layout() {
               <h1 className="text-xl font-semibold text-slate-800">
                 {currentPageTitle}
               </h1>
+              {businessName && (
+                <p className="text-xs text-slate-400 mt-0.5">{businessName}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            <span className="hidden lg:block text-sm text-slate-500 font-medium truncate max-w-40">
+              {displayName}
+            </span>
+            <div className="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-white text-sm font-semibold shrink-0 select-none">
+              {initial}
             </div>
           </div>
         </header>

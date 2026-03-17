@@ -1,7 +1,5 @@
 import { prisma } from "../db/prisma";
 
-const BUSINESS_ID = "976dac1d-a819-4f13-8e60-32f6ab65c60a";
-
 export type CreateClientInput = {
   fullName: string;
   phone: string;
@@ -17,44 +15,26 @@ export type UpdateClientInput = {
 };
 
 class ClientService {
-  async listClients(params?: { search?: string }) {
-    const search = params?.search?.trim();
+  async listClients(params: { businessId: string; search?: string }) {
+    const { businessId, search } = params;
+    const q = search?.trim();
 
     const clients = await prisma.client.findMany({
       where: {
-        businessId: BUSINESS_ID,
-        ...(search
+        businessId,
+        ...(q
           ? {
               OR: [
-                {
-                  fullName: {
-                    contains: search,
-                    mode: "insensitive",
-                  },
-                },
-                {
-                  phone: {
-                    contains: search,
-                    mode: "insensitive",
-                  },
-                },
-                {
-                  email: {
-                    contains: search,
-                    mode: "insensitive",
-                  },
-                },
+                { fullName: { contains: q, mode: "insensitive" } },
+                { phone: { contains: q, mode: "insensitive" } },
+                { email: { contains: q, mode: "insensitive" } },
               ],
             }
           : {}),
       },
       include: {
         appointments: {
-          select: {
-            id: true,
-            totalPrice: true,
-            status: true,
-          },
+          select: { id: true, totalPrice: true, status: true },
         },
       },
       orderBy: [{ fullName: "asc" }, { createdAt: "desc" }],
@@ -64,13 +44,11 @@ class ClientService {
       const validAppointments = client.appointments.filter(
         (appt) => appt.status !== "CANCELED"
       );
-
       const visitsCount = validAppointments.length;
-
-      const totalSpent = validAppointments.reduce((acc, appt) => {
-        return acc + Number(appt.totalPrice ?? 0);
-      }, 0);
-
+      const totalSpent = validAppointments.reduce(
+        (acc, appt) => acc + Number(appt.totalPrice ?? 0),
+        0
+      );
       return {
         id: client.id,
         businessId: client.businessId,
@@ -85,19 +63,12 @@ class ClientService {
     });
   }
 
-  async getClientById(id: string) {
+  async getClientById(id: string, businessId: string) {
     const client = await prisma.client.findFirst({
-      where: {
-        id,
-        businessId: BUSINESS_ID,
-      },
+      where: { id, businessId },
       include: {
         appointments: {
-          select: {
-            id: true,
-            totalPrice: true,
-            status: true,
-          },
+          select: { id: true, totalPrice: true, status: true },
         },
       },
     });
@@ -111,12 +82,11 @@ class ClientService {
     const validAppointments = client.appointments.filter(
       (appt) => appt.status !== "CANCELED"
     );
-
     const visitsCount = validAppointments.length;
-
-    const totalSpent = validAppointments.reduce((acc, appt) => {
-      return acc + Number(appt.totalPrice ?? 0);
-    }, 0);
+    const totalSpent = validAppointments.reduce(
+      (acc, appt) => acc + Number(appt.totalPrice ?? 0),
+      0
+    );
 
     return {
       id: client.id,
@@ -131,7 +101,7 @@ class ClientService {
     };
   }
 
-  async createClient(data: CreateClientInput) {
+  async createClient(data: CreateClientInput, businessId: string) {
     const fullName = data.fullName?.trim();
     const phone = data.phone?.trim();
     const email = data.email?.trim() || null;
@@ -150,10 +120,7 @@ class ClientService {
     }
 
     const existing = await prisma.client.findFirst({
-      where: {
-        businessId: BUSINESS_ID,
-        phone,
-      },
+      where: { businessId, phone },
     });
 
     if (existing) {
@@ -163,36 +130,27 @@ class ClientService {
     }
 
     return prisma.client.create({
-      data: {
-        businessId: BUSINESS_ID,
-        fullName,
-        phone,
-        email,
-        notes,
-      },
+      data: { businessId, fullName, phone, email, notes },
     });
   }
 
-  async updateClient(id: string, data: UpdateClientInput) {
-    await this.getClientById(id);
+  async updateClient(id: string, data: UpdateClientInput, businessId: string) {
+    await this.getClientById(id, businessId);
 
     const updateData: any = {};
 
     if (data.fullName !== undefined) {
       const fullName = data.fullName.trim();
-
       if (!fullName) {
         const error: any = new Error("fullName cannot be empty");
         error.status = 400;
         throw error;
       }
-
       updateData.fullName = fullName;
     }
 
     if (data.phone !== undefined) {
       const phone = data.phone.trim();
-
       if (!phone) {
         const error: any = new Error("phone cannot be empty");
         error.status = 400;
@@ -200,11 +158,7 @@ class ClientService {
       }
 
       const existing = await prisma.client.findFirst({
-        where: {
-          businessId: BUSINESS_ID,
-          phone,
-          NOT: { id },
-        },
+        where: { businessId, phone, NOT: { id } },
       });
 
       if (existing) {
@@ -224,21 +178,16 @@ class ClientService {
       updateData.notes = data.notes?.trim() || null;
     }
 
-    return prisma.client.update({
-      where: { id },
-      data: updateData,
-    });
+    return prisma.client.update({ where: { id }, data: updateData });
   }
 
-  async deleteClient(id: string) {
-    await this.getClientById(id);
-
-    return prisma.client.delete({
-      where: { id },
-    });
+  async deleteClient(id: string, businessId: string) {
+    await this.getClientById(id, businessId);
+    return prisma.client.delete({ where: { id } });
   }
 
-  async searchClients(params: { q: string; limit?: number }) {
+  async searchClients(params: { q: string; limit?: number; businessId: string }) {
+    const { businessId } = params;
     const q = params.q.trim();
     const limit = Math.min(params.limit ?? 8, 20);
 
@@ -246,25 +195,11 @@ class ClientService {
 
     return prisma.client.findMany({
       where: {
-        businessId: BUSINESS_ID,
+        businessId,
         OR: [
-          {
-            fullName: {
-              contains: q,
-              mode: "insensitive",
-            },
-          },
-          {
-            phone: {
-              contains: q,
-            },
-          },
-          {
-            email: {
-              contains: q,
-              mode: "insensitive",
-            },
-          },
+          { fullName: { contains: q, mode: "insensitive" } },
+          { phone: { contains: q } },
+          { email: { contains: q, mode: "insensitive" } },
         ],
       },
       orderBy: [{ fullName: "asc" }, { createdAt: "desc" }],
@@ -272,32 +207,16 @@ class ClientService {
     });
   }
 
-  async getClientAppointments(clientId: string) {
-    await this.getClientById(clientId);
+  async getClientAppointments(clientId: string, businessId: string) {
+    await this.getClientById(clientId, businessId);
 
     return prisma.appointment.findMany({
-      where: {
-        businessId: BUSINESS_ID,
-        clientId,
-      },
+      where: { businessId, clientId },
       include: {
-        service: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        professional: {
-          select: {
-            id: true,
-            name: true,
-            color: true,
-          },
-        },
+        service: { select: { id: true, name: true } },
+        professional: { select: { id: true, name: true, color: true } },
       },
-      orderBy: {
-        startAt: "desc",
-      },
+      orderBy: { startAt: "desc" },
       take: 20,
     });
   }

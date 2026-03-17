@@ -42,6 +42,7 @@ enum PaymentMethod {
 model Business {
   id                 String             @id @default(uuid())
   name               String
+  slug               String             @unique
   timezone           String             @default("America/Argentina/Buenos_Aires")
   plan               PlanType           @default(STARTER)
   subscriptionStatus SubscriptionStatus @default(TRIAL)
@@ -61,14 +62,31 @@ model Business {
 model User {
   id           String   @id @default(uuid())
   businessId   String
-  email        String   @unique
+  email        String?  @unique
+  username     String?
   passwordHash String
   role         UserRole @default(OWNER)
   createdAt    DateTime @default(now())
 
-  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  business      Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  refreshTokens RefreshToken[]
+  professional  Professional?
 
   @@index([businessId])
+  @@unique([businessId, username])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 model Professional {
@@ -78,8 +96,10 @@ model Professional {
   color      String?
   active     Boolean  @default(true)
   createdAt  DateTime @default(now())
+  userId     String?  @unique
 
   business             Business               @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  user                 User?                  @relation(fields: [userId], references: [id], onDelete: SetNull)
   schedules            ProfessionalSchedule[]
   appointments         Appointment[]
   professionalServices ProfessionalService[]

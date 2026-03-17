@@ -105,3 +105,10 @@ export function updateProfessionalServices(params: {
     }
   );
 }
+
+export function createProfessionalAccount(professionalId: string, username: string, password: string) {
+  return apiFetch<{ professional: Professional }>(`/professionals/${professionalId}/account`, {
+    method: "POST",
+    body: JSON.stringify({ username, password }),
+  });
+}

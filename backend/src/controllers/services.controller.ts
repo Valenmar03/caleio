@@ -3,57 +3,58 @@ import { serviceService } from "../services/services.service";
 
 export async function getServicesHandler(req: Request, res: Response) {
   try {
+    const { businessId } = req.user!;
     const { search, activeOnly } = req.query;
 
     const services = await serviceService.listServices({
+      businessId,
       search: search ? String(search) : undefined,
       activeOnly: activeOnly ? String(activeOnly) !== "false" : true,
     });
 
     return res.json({ services });
   } catch (err: any) {
-    return res.status(err?.status ?? 500).json({
-      error: err?.message ?? "Server error",
-    });
+    return res.status(err?.status ?? 500).json({ error: err?.message ?? "Server error" });
   }
 }
 
 export async function getServicesWithProfessionalHandler(req: Request, res: Response) {
   try {
+    const { businessId } = req.user!;
     const { search, activeOnly } = req.query;
 
     const services = await serviceService.listServicesWithProfessional({
+      businessId,
       search: search ? String(search) : undefined,
       activeOnly: activeOnly ? String(activeOnly) !== "true" : false,
     });
 
     return res.json({ services });
   } catch (err: any) {
-    return res.status(err?.status ?? 500).json({
-      error: err?.message ?? "Server error",
-    });
+    return res.status(err?.status ?? 500).json({ error: err?.message ?? "Server error" });
   }
 }
 
 export async function getServiceByIdHandler(req: Request, res: Response) {
   try {
+    const { businessId } = req.user!;
     const { id } = req.params;
 
-    const service = await serviceService.getServiceById(String(id));
+    const service = await serviceService.getServiceById(String(id), businessId);
 
     return res.json({ service });
   } catch (err: any) {
-    return res.status(err?.status ?? 500).json({
-      error: err?.message ?? "Server error",
-    });
+    return res.status(err?.status ?? 500).json({ error: err?.message ?? "Server error" });
   }
 }
 
 export async function createServiceHandler(req: Request, res: Response) {
   try {
+    const { businessId } = req.user!;
     const { name, durationMin, basePrice, active, description } = req.body;
 
     const service = await serviceService.createService({
+      businessId,
       name,
       durationMin: Number(durationMin),
       basePrice: Number(basePrice),
@@ -63,18 +64,17 @@ export async function createServiceHandler(req: Request, res: Response) {
 
     return res.status(201).json({ service });
   } catch (err: any) {
-    return res.status(err?.status ?? 500).json({
-      error: err?.message ?? "Server error",
-    });
+    return res.status(err?.status ?? 500).json({ error: err?.message ?? "Server error" });
   }
 }
 
 export async function updateServiceHandler(req: Request, res: Response) {
   try {
+    const { businessId } = req.user!;
     const { id } = req.params;
     const { name, description, durationMin, basePrice, active } = req.body;
 
-    const service = await serviceService.updateService(String(id), {
+    const service = await serviceService.updateService(String(id), businessId, {
       ...(name !== undefined ? { name } : {}),
       ...(description !== undefined ? { description } : {}),
       ...(durationMin !== undefined ? { durationMin: Number(durationMin) } : {}),
@@ -86,45 +86,37 @@ export async function updateServiceHandler(req: Request, res: Response) {
 
     return res.json({ service });
   } catch (err: any) {
-    return res.status(err?.status ?? 500).json({
-      error: err?.message ?? "Server error",
-    });
+    return res.status(err?.status ?? 500).json({ error: err?.message ?? "Server error" });
   }
 }
+
 export async function deleteServiceHandler(req: Request, res: Response) {
   try {
+    const { businessId } = req.user!;
     const { id } = req.params;
 
-    const service = await serviceService.deleteService(String(id));
+    const service = await serviceService.deleteService(String(id), businessId);
 
-    return res.json({
-      message: "Service deleted successfully",
-      service,
-    });
+    return res.json({ message: "Service deleted successfully", service });
   } catch (err: any) {
-    return res.status(err?.status ?? 500).json({
-      error: err?.message ?? "Server error",
-    });
+    return res.status(err?.status ?? 500).json({ error: err?.message ?? "Server error" });
   }
 }
 
 export async function toggleServiceActiveHandler(req: Request, res: Response) {
   try {
+    const { businessId } = req.user!;
     const { id } = req.params;
     const { active } = req.body;
 
     if (typeof active !== "boolean") {
-      return res.status(400).json({
-        error: "active must be a boolean",
-      });
+      return res.status(400).json({ error: "active must be a boolean" });
     }
 
-    const service = await serviceService.toggleServiceActive(String(id), active);
+    const service = await serviceService.toggleServiceActive(String(id), businessId, active);
 
     return res.json({ service });
   } catch (err: any) {
-    return res.status(err?.status ?? 500).json({
-      error: err?.message ?? "Server error",
-    });
+    return res.status(err?.status ?? 500).json({ error: err?.message ?? "Server error" });
   }
 }

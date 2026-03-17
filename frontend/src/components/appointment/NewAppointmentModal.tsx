@@ -17,6 +17,7 @@ type Props = {
   open: boolean;
   onClose: () => void;
   professionalId?: string;
+  lockProfessional?: boolean;
   date?: string; // yyyy-MM-dd
   time?: string; // HH:mm
 };
@@ -25,6 +26,7 @@ export default function NewAppointmentModal({
   open,
   onClose,
   professionalId,
+  lockProfessional = false,
   date,
   time,
 }: Props) {
@@ -344,16 +346,27 @@ export default function NewAppointmentModal({
           )}
         </div>
 
-        <CustomSelect
-          label="Profesional"
-          placeholder="Seleccionar profesional"
-          value={selectedProfessionalId}
-          onChange={handleProfessionalChange}
-          options={professionalOptions}
-          loading={professionalsLoading}
-          loadingText="Cargando profesionales..."
-          emptyText="No hay profesionales disponibles."
-        />
+        {lockProfessional ? (
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-slate-700">
+              Profesional
+            </label>
+            <div className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+              {selectedProfessional?.name ?? "—"}
+            </div>
+          </div>
+        ) : (
+          <CustomSelect
+            label="Profesional"
+            placeholder="Seleccionar profesional"
+            value={selectedProfessionalId}
+            onChange={handleProfessionalChange}
+            options={professionalOptions}
+            loading={professionalsLoading}
+            loadingText="Cargando profesionales..."
+            emptyText="No hay profesionales disponibles."
+          />
+        )}
 
         <CustomSelect
           label="Servicio"

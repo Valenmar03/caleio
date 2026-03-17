@@ -89,9 +89,7 @@ export function Layout() {
       >
         <div className="h-16 flex items-center px-5 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center">
-              <Calendar className="w-4 h-4 text-white" />
-            </div>
+            <img src="/logo.png" alt="Caleio" className="w-8 h-8 object-contain" />
             <span className="text-lg font-semibold text-slate-800 tracking-tight">
               Caleio
             </span>
@@ -166,9 +164,7 @@ export function Layout() {
             </button>
 
             <div className="flex items-center gap-2 lg:hidden">
-              <div className="w-6 h-6 rounded-md bg-teal-600 flex items-center justify-center">
-                <Calendar className="w-3 h-3 text-white" />
-              </div>
+              <img src="/logo.png" alt="Caleio" className="w-6 h-6 object-contain" />
               <span className="font-semibold text-slate-800 text-sm">Caleio</span>
             </div>
 

@@ -89,7 +89,7 @@ export function Layout() {
       >
         <div className="h-16 flex items-center px-5 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
-            <img src="/logo.png" alt="Caleio" className="w-11 h-11 object-contain" />
+            <img src="/logo.png" alt="Caleio" className="w-16 h-16 object-contain" />
             <span className="text-lg font-semibold text-slate-800 tracking-tight">
               Caleio
             </span>

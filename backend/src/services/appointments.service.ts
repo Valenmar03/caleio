@@ -1,6 +1,6 @@
 import { prisma } from "../db/prisma";
 import { getDayOfWeek, toHHMM, hhmmToMinutes } from "../utils/time";
-import type { AppointmentStatus } from "@prisma/client";
+import type { AppointmentStatus, PaymentMethod } from "@prisma/client";
 
 const SOFT_TOLERANCE_MIN = 15 as const;
 
@@ -9,7 +9,6 @@ type ScheduleWarning =
   | { type: "NO_SCHEDULE"; severity: "HARD" }
   | { type: "OUTSIDE_SCHEDULE_START"; severity: "HARD" }
   | { type: "EXCEEDS_SCHEDULE"; minutesOver: number; severity: "SOFT" | "HARD" };
-
 
 
 const BUSINESS_ID = "976dac1d-a819-4f13-8e60-32f6ab65c60a";
@@ -188,10 +187,12 @@ export class AppointmentService {
 
   async changeStatus(params: {
     appointmentId: string;
-    status: "RESERVED" | "CANCELED" | "NO_SHOW" | "COMPLETED" | "DEPOSIT_PAID";
+    status: AppointmentStatus;
     depositAmount?: number;
+    depositMethod?: PaymentMethod;
+    finalPaymentMethod?: PaymentMethod;
   }) {
-    const { appointmentId, status, depositAmount } = params;
+    const { appointmentId, status, depositAmount, depositMethod, finalPaymentMethod } = params;
 
     const appointment = await prisma.appointment.findFirst({
       where: {
@@ -204,7 +205,6 @@ export class AppointmentService {
       throw badRequest("Appointment not found");
     }
 
-    // Regla: no volver a RESERVED/DEPOSIT_PAID desde COMPLETED
     if (
       appointment.status === "COMPLETED" &&
       (status === "RESERVED" || status === "DEPOSIT_PAID")
@@ -217,48 +217,67 @@ export class AppointmentService {
         throw badRequest("depositAmount is required when status is DEPOSIT_PAID");
       }
 
+      if (!depositMethod) {
+        throw badRequest("depositMethod is required when status is DEPOSIT_PAID");
+      }
+
       const parsedDepositAmount = Number(depositAmount);
 
       if (parsedDepositAmount <= 0) {
         throw badRequest("depositAmount must be greater than 0");
       }
 
-      if (appointment.totalPrice != null && parsedDepositAmount > Number(appointment.totalPrice)) {
+      if (
+        appointment.totalPrice != null &&
+        parsedDepositAmount > Number(appointment.totalPrice)
+      ) {
         throw badRequest("Deposit amount cannot be greater than appointment price");
       }
 
-      const updated = await prisma.appointment.update({
+      return prisma.appointment.update({
         where: { id: appointmentId },
         data: {
           status,
           depositAmount: parsedDepositAmount,
+          depositMethod,
           depositPaidAt: new Date(),
         },
       });
-
-      return updated;
     }
 
-    // Si vuelve a reservado, limpiamos la seña
+    if (status === "COMPLETED") {
+      if (!finalPaymentMethod) {
+        throw badRequest("finalPaymentMethod is required when status is COMPLETED");
+      }
+
+      return prisma.appointment.update({
+        where: { id: appointmentId },
+        data: {
+          status,
+          finalPaymentMethod,
+          finalPaidAt: new Date(),
+        },
+      });
+    }
+
     if (status === "RESERVED") {
-      const updated = await prisma.appointment.update({
+      return prisma.appointment.update({
         where: { id: appointmentId },
         data: {
           status,
           depositAmount: 0,
           depositPaidAt: null,
+          depositMethod: null,
+          finalPaidAt: null,
+          finalPaymentMethod: null,
         },
       });
-
-      return updated;
     }
 
-    const updated = await prisma.appointment.update({
+    return prisma.appointment.update({
       where: { id: appointmentId },
       data: { status },
     });
-
-    return updated;
   }
 
 

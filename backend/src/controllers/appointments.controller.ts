@@ -75,22 +75,23 @@ export async function updateAppointmentHandler(req: Request, res: Response) {
   }
 }
 
-export async function changeAppointmentStatusHandler(
-  req: Request,
-  res: Response,
-) {
+export async function changeAppointmentStatusHandler(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    const { status, depositAmount } = req.body;
+    const { status, depositAmount, depositMethod, finalPaymentMethod } = req.body;
 
     if (!status) {
-      return res.status(400).json({ error: "Missing status" });
+      return res.status(400).json({
+        error: "Missing required field: status",
+      });
     }
 
     const updated = await appointmentService.changeStatus({
       appointmentId: String(id),
       status,
       depositAmount,
+      depositMethod,
+      finalPaymentMethod,
     });
 
     return res.json(updated);

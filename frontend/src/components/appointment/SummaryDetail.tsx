@@ -83,7 +83,7 @@ export default function SummaryDetail({
                 </p>
                 <div>
                     <p className="mt-2 text-sm text-slate-600">
-                        Precio del Servicio: ${Number(appointment.priceFinal).toLocaleString("es-AR")}
+                        Precio del Servicio: ${Number(appointment.totalPrice).toLocaleString("es-AR")}
                     </p>
                     {appointment?.depositAmount != null && Number(appointment.depositAmount) > 0 && (
                         <p className="text-sm text-slate-600">

@@ -241,7 +241,7 @@ export default function ClientDetailSheet({ open, onClose, client }: Props) {
                                           <p className="text-sm font-semibold text-slate-800">
                                              $
                                              {Number(
-                                                appt.priceFinal ?? 0,
+                                                appt.totalPrice ?? 0,
                                              ).toLocaleString()}
                                           </p>
                                        </div>

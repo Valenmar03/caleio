@@ -135,7 +135,7 @@ export class AppointmentService {
         serviceId,
         startAt: startDate,
         endAt: endDate,
-        priceFinal: service.basePrice,
+        totalPrice: service.basePrice,
         status: "RESERVED",
       },
     });
@@ -223,7 +223,7 @@ export class AppointmentService {
         throw badRequest("depositAmount must be greater than 0");
       }
 
-      if (appointment.priceFinal != null && parsedDepositAmount > Number(appointment.priceFinal)) {
+      if (appointment.totalPrice != null && parsedDepositAmount > Number(appointment.totalPrice)) {
         throw badRequest("Deposit amount cannot be greater than appointment price");
       }
 
@@ -379,7 +379,7 @@ export class AppointmentService {
         serviceId,
         startAt: startDate,
         endAt: endDate,
-        priceFinal: service.basePrice,
+        totalPrice: service.basePrice,
       },
       include: {
         client: true,

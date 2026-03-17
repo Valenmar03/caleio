@@ -52,7 +52,7 @@ class ClientService {
         appointments: {
           select: {
             id: true,
-            priceFinal: true,
+            totalPrice: true,
             status: true,
           },
         },
@@ -68,7 +68,7 @@ class ClientService {
       const visitsCount = validAppointments.length;
 
       const totalSpent = validAppointments.reduce((acc, appt) => {
-        return acc + Number(appt.priceFinal ?? 0);
+        return acc + Number(appt.totalPrice ?? 0);
       }, 0);
 
       return {
@@ -95,7 +95,7 @@ class ClientService {
         appointments: {
           select: {
             id: true,
-            priceFinal: true,
+            totalPrice: true,
             status: true,
           },
         },
@@ -115,7 +115,7 @@ class ClientService {
     const visitsCount = validAppointments.length;
 
     const totalSpent = validAppointments.reduce((acc, appt) => {
-      return acc + Number(appt.priceFinal ?? 0);
+      return acc + Number(appt.totalPrice ?? 0);
     }, 0);
 
     return {

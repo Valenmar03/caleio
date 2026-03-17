@@ -213,7 +213,7 @@ export default function AppointmentDetailModal({
   const isFormDisabled = isBusy || isLocked;
 
   const parsedDepositAmount = Number(depositAmount);
-  const servicePrice = Number(appointment?.priceFinal ?? 0);
+  const servicePrice = Number(appointment?.totalPrice ?? 0);
 
   const hasDepositValue =
     depositAmount.trim() !== "" && !Number.isNaN(parsedDepositAmount);

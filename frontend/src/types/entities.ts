@@ -29,7 +29,7 @@ export type ClientAppointments = {
   id: string;
   startAt: string;
   status: string;
-  priceFinal?: number;
+  totalPrice?: number;
   service?: {
     id: string;
     name: string;
@@ -186,7 +186,7 @@ export type UpdateProfessionalSchedulesPayload = {
 export type AgendaAppointment = {
   id: string;
   professionalId: string;
-  priceFinal?: number
+  totalPrice?: number
   professional?: {
     id: string;
     name: string;

@@ -75,7 +75,7 @@ export default function DashboardPage() {
     const normalizedAppointments = appointments.map((appt) => {
       const startDate = parseISO(appt.startAt);
       const endDate = parseISO(appt.endAt);
-      const price = Number(appt.priceFinal ?? 0);
+      const price = Number(appt.totalPrice ?? 0);
 
       return {
         ...appt,
@@ -155,13 +155,13 @@ export default function DashboardPage() {
     );
 
     const cashToday = completedAppointments.reduce((acc, appt) => {
-      const price = Number(appt.priceFinal ?? 0);
+      const price = Number(appt.totalPrice ?? 0);
       const deposit = Number(appt.depositAmount ?? 0);
       return acc + Math.max(price - deposit, 0);
     }, 0);
 
     const totalToday = completedAppointments.reduce(
-      (acc, appt) => acc + Number(appt.priceFinal ?? 0),
+      (acc, appt) => acc + Number(appt.totalPrice ?? 0),
       0
 );
 

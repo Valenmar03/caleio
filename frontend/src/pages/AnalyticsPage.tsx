@@ -145,7 +145,7 @@ export default function AnalyticsPage() {
                   />
                   <Tooltip
                     formatter={(value) => [formatCurrency(Number(value)), "Ingresos"]}
-                    labelFormatter={formatDateLabel}
+                    labelFormatter={(value) => formatDateLabel(String(value))}
                     contentStyle={{
                       fontSize: 12,
                       border: "1px solid #E2E8F0",
@@ -180,7 +180,7 @@ export default function AnalyticsPage() {
                   />
                   <Tooltip
                     formatter={(value) => [value, "Turnos"]}
-                    labelFormatter={formatDateLabel}
+                    labelFormatter={(value) => formatDateLabel(String(value))}
                     contentStyle={{
                       fontSize: 12,
                       border: "1px solid #E2E8F0",

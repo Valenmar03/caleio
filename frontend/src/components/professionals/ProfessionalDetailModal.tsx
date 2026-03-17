@@ -137,9 +137,9 @@ export default function ProfessionalDetailModal({
     [assignedServices]
   );
 
-  const scheduleBlocks: ScheduleBlock[] = Object.values(
+  const scheduleBlocks: ScheduleBlock[] = (Object.values(
     professionalScheduleData?.schedules ?? {}
-  ).flat();
+  ).flat() as ScheduleBlock[]);
 
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState<string | null>(null);

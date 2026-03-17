@@ -66,7 +66,7 @@ export default function CustomDatePicker({
   color = "teal",
 }: Props) {
   const [open, setOpen] = useState(false);
-  const [openUpwards, setOpenUpwards] = useState(false);
+  const [_openUpwards, setOpenUpwards] = useState(false);
   const [popoverPosition, setPopoverPosition] = useState({
     top: 0,
     left: 0,

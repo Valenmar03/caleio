@@ -1,4 +1,5 @@
-import { createContext, useCallback, useEffect, useState, ReactNode } from "react";
+import { createContext, useCallback, useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import { setAccessToken } from "../services/api";
 
 export type AuthUser = {

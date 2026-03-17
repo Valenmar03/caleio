@@ -1,7 +1,8 @@
-import { FormEvent, useState } from "react";
+import { useState } from "react";
+import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = "http://localhost:3000";
+const API_URL = "/api";
 
 function normalizeSlug(raw: string): string {
   return raw

@@ -1,7 +1,8 @@
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { ChevronDown, Plus, Search } from "lucide-react";
-import { useMemo, useState, FormEvent } from "react";
+import { useMemo, useState } from "react";
+import type { FormEvent } from "react";
 
 import ProfessionalCard from "../components/professionals/ProfessionalCard";
 import ProfessionalDetailModal from "../components/professionals/ProfessionalDetailModal";

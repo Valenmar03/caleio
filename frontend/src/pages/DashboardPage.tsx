@@ -69,8 +69,6 @@ export default function DashboardPage() {
 
   const appointments = dailyAgenda?.appointments ?? [];
 
-  console.log(appointments)
-
   const dashboardData = useMemo(() => {
     const now = new Date();
 
@@ -106,6 +104,7 @@ export default function DashboardPage() {
         clientName: appt.client?.fullName ?? "Cliente sin nombre",
         serviceName: appt.service?.name ?? "Servicio",
         professionalName: appt.professional?.name ?? "Profesional",
+        color: appt.professional?.color ?? "#6CCC83" 
       }));
 
     const revenueToday = completedAppointments.reduce(
@@ -294,9 +293,10 @@ export default function DashboardPage() {
                   {dashboardData.upcomingAppointments.map((appointment) => (
                     <div
                       key={appointment.id}
-                      className="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3"
+                      className={`flex items-center justify-between rounded-md border-l-4  px-4 py-3`}
+                      style={{ borderLeftColor: appointment.color }}
                     >
-                      <div className="flex items-start gap-3">
+                      <div className="flex items-center gap-3">
                         <div className="rounded-lg bg-teal-50 px-3 py-2 text-sm font-semibold text-teal-700">
                           {appointment.time}
                         </div>

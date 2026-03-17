@@ -53,7 +53,7 @@ export function Layout() {
   const isPro = user?.role === "PRO";
   const visibleNavItems = isPro
     ? NAV_ITEMS.filter((item) =>
-        [appRoutes.dashboard, appRoutes.agenda, appRoutes.clients].includes(item.to)
+        ([appRoutes.dashboard, appRoutes.agenda, appRoutes.clients] as string[]).includes(item.to)
       )
     : NAV_ITEMS;
 

@@ -3,8 +3,9 @@ import {
   getProfessionalSchedules,
   updateProfessionalScheduleForDay,
 } from "../services/professionals.api";
+import type { ProfessionalScheduleBlock } from "../types/entities";
 
-const EMPTY_SCHEDULES = {
+const EMPTY_SCHEDULES: Record<number, ProfessionalScheduleBlock[]> = {
   0: [],
   1: [],
   2: [],

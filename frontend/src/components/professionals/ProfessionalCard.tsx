@@ -46,9 +46,9 @@ export default function ProfessionalCard({ professional, onClick, onActivateAcco
   const extraServices = serviceNames.length - visibleServices.length;
   const servicesCount = services.length;
 
-  const scheduleBlocks: ScheduleBlock[] = Object.values(
+  const scheduleBlocks = (Object.values(
     professionalSchedule?.schedules ?? {}
-  ).flat();
+  ).flat() as ScheduleBlock[]);
 
   const groupedByDay = scheduleBlocks.reduce<Record<number, ScheduleBlock[]>>(
     (acc, block) => {

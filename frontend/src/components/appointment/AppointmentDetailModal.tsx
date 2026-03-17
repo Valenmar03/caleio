@@ -515,6 +515,13 @@ export default function AppointmentDetailModal({
                 shouldShowDepositError ? "border-red-300" : "border-slate-200"
               }`}
             />
+            {shouldShowDepositError && (
+              <p className="text-xs text-red-600">
+                {isDepositGreaterThanService
+                  ? "La seña no puede ser mayor al valor del servicio."
+                  : "Tenés que ingresar una seña válida mayor a 0."}
+              </p>
+            )}
 
             <CustomSelect
               label="Método de pago de la seña"
@@ -533,52 +540,45 @@ export default function AppointmentDetailModal({
                 Tenés que seleccionar un método de pago para la seña.
               </p>
             )}
-
-            <div className="space-y-1">
-              <p className="text-xs text-slate-500">
-                Ingresá cuánto abonó el cliente para marcar el turno como señado.
-                {servicePrice > 0 && (
-                  <>
-                    {" "}El valor del servicio es{" "}
-                    <span className="font-medium text-slate-700">
-                      ${servicePrice.toLocaleString("es-AR")}
-                    </span>.
-                  </>
-                )}
-              </p>
-
-              {shouldShowDepositError && (
-                <p className="text-xs text-red-600">
-                  {isDepositGreaterThanService
-                    ? "La seña no puede ser mayor al valor del servicio."
-                    : "Tenés que ingresar una seña válida mayor a 0."}
+            <div className="flex gap-4 justify-between">
+              <div className="space-y-1">
+                <p className="text-xs text-slate-500">
+                  Ingresá cuánto abonó el cliente para marcar el turno como señado.
+                  {servicePrice > 0 && (
+                    <>
+                      {" "}El valor del servicio es{" "}
+                      <span className="font-medium text-slate-700">
+                        ${servicePrice.toLocaleString("es-AR")}
+                      </span>.
+                    </>
+                  )}
                 </p>
-              )}
-            </div>
+              </div>
 
-            {/* BOTON CONFIRMAR SEÑA */}
-            <div className="flex justify-end pt-1">
-              <button
-                type="button"
-                disabled={!hasValidDepositAmount || !hasValidDepositMethod || isBusy}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && hasValidDepositAmount) {
-                    handleChangeStatus(AppointmentStatus.DEPOSIT_PAID);
+              {/* BOTON CONFIRMAR SEÑA */}
+              <div className="flex justify-end pt-1">
+                <button
+                  type="button"
+                  disabled={!hasValidDepositAmount || !hasValidDepositMethod || isBusy}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && hasValidDepositAmount) {
+                      handleChangeStatus(AppointmentStatus.DEPOSIT_PAID);
+                    }
+                  }}
+                  onClick={() =>
+                    handleChangeStatus(AppointmentStatus.DEPOSIT_PAID)
                   }
-                }}
-                onClick={() =>
-                  handleChangeStatus(AppointmentStatus.DEPOSIT_PAID)
-                }
-                className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors
-                  ${
-                    hasValidDepositAmount && hasValidDepositMethod && !isBusy
+                  className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap
+                    ${
+                      hasValidDepositAmount && hasValidDepositMethod && !isBusy
                       ? "bg-teal-600 text-white hover:bg-teal-700"
                       : "bg-slate-200 text-slate-400 cursor-not-allowed"
-                  }
-                `}
-              >
-                Confirmar seña
-              </button>
+                    }
+                    `}
+                >
+                  Confirmar seña
+                </button>
+              </div>
             </div>
 
           </div>
@@ -600,32 +600,33 @@ export default function AppointmentDetailModal({
               options={paymentMethodOptions}
               disabled={isBusy}
             />
-
-            <div className="space-y-1">
-              <p className="text-xs text-slate-500">
-                Seleccioná cómo abonó el cliente el saldo restante para marcar el turno como realizado.
-              </p>
-
-              {shouldShowFinalPaymentMethodError && (
-                <p className="text-xs text-red-600">
-                  Tenés que seleccionar un método de pago final.
+            <div className="flex justify-between">
+              <div className="space-y-1">
+                <p className="text-xs text-slate-500">
+                  Seleccioná cómo abonó el cliente el saldo restante para marcar el turno como realizado.
                 </p>
-              )}
-            </div>
 
-            <div className="flex justify-end pt-1">
-              <button
-                type="button"
-                disabled={!hasValidFinalPaymentMethod || isBusy}
-                onClick={() => handleChangeStatus(AppointmentStatus.COMPLETED)}
-                className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                  hasValidFinalPaymentMethod && !isBusy
+                {shouldShowFinalPaymentMethodError && (
+                  <p className="text-xs text-red-600">
+                    Tenés que seleccionar un método de pago final.
+                  </p>
+                )}
+              </div>
+
+              <div className="flex justify-end pt-1">
+                <button
+                  type="button"
+                  disabled={!hasValidFinalPaymentMethod || isBusy}
+                  onClick={() => handleChangeStatus(AppointmentStatus.COMPLETED)}
+                  className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap ${
+                    hasValidFinalPaymentMethod && !isBusy
                     ? "bg-emerald-600 text-white hover:bg-emerald-700"
                     : "bg-slate-200 text-slate-400 cursor-not-allowed"
-                }`}
-              >
-                Confirmar realización
-              </button>
+                  }`}
+                >
+                  Confirmar Pago
+                </button>
+              </div>
             </div>
           </div>
         )}

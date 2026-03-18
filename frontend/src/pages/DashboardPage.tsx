@@ -68,7 +68,6 @@ export default function DashboardPage() {
 
   const appointments = dailyAgenda?.appointments ?? [];
 
-  console.log(appointments)
 
   const dashboardData = useMemo(() => {
     const now = new Date();

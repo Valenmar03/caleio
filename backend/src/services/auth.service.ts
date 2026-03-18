@@ -87,7 +87,7 @@ export async function register(
     throw Object.assign(new Error("Business URL already taken"), { statusCode: 409 });
   }
 
-  const passwordHash = await bcrypt.hash(password, 12);
+  const passwordHash = await bcrypt.hash(password.trim(), 12);
 
   const business = await prisma.business.create({
     data: { name: businessName, slug: normalizedSlug },
@@ -134,7 +134,7 @@ export async function login(
     throw Object.assign(new Error("Invalid credentials"), { statusCode: 401 });
   }
 
-  const valid = await bcrypt.compare(password, user.passwordHash);
+  const valid = await bcrypt.compare(password.trim(), user.passwordHash);
   if (!valid) {
     throw Object.assign(new Error("Invalid credentials"), { statusCode: 401 });
   }

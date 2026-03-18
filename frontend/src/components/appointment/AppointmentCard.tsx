@@ -150,9 +150,11 @@ export default function AppointmentCard({
     );
   }
 
+  const isShort = height <= 44;
+
   return (
     <div
-      className={`absolute left-1 right-1 z-10 overflow-hidden rounded-md border-l-[3px] px-2 py-1.5 text-xs cursor-pointer transition-all hover:shadow-md ${statusUi.cardClass}`}
+      className={`absolute left-1 right-1 z-10 overflow-hidden rounded-md border-l-[3px] text-xs cursor-pointer transition-all hover:shadow-md ${statusUi.cardClass}`}
       style={{
         top: `${top}px`,
         height: `${height}px`,
@@ -165,43 +167,63 @@ export default function AppointmentCard({
         onClick(appt);
       }}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <span
-              className={`h-2.5 w-2.5 shrink-0 rounded-full ${statusUi.dot}`}
-              aria-hidden="true"
-            />
-            <p className={`truncate font-medium leading-tight ${statusUi.titleClass}`}>
-              {appt.client.fullName}
-            </p>
-          </div>
-
-          <p className={`truncate leading-tight ${statusUi.metaClass}`}>
-            {format(parseISO(appt.startAt), "HH:mm")} -{" "}
-            {format(parseISO(appt.endAt), "HH:mm")}
+      {isShort ? (
+        <div className="flex h-full items-center gap-1.5 px-2">
+          <span
+            className={`h-2 w-2 shrink-0 rounded-full ${statusUi.dot}`}
+            aria-hidden="true"
+          />
+          <p className={`truncate font-medium leading-none flex-1 ${statusUi.titleClass}`}>
+            {appt.client.fullName}
           </p>
-        </div>
-
-        {height > 44 && (
+          <span className={`shrink-0 text-[10px] ${statusUi.metaClass}`}>
+            {format(parseISO(appt.startAt), "HH:mm")}–{format(parseISO(appt.endAt), "HH:mm")}
+          </span>
           <span
             className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[10px] font-medium ${statusUi.badge}`}
           >
             {statusUi.label}
           </span>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="px-2 py-1.5">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <span
+                  className={`h-2.5 w-2.5 shrink-0 rounded-full ${statusUi.dot}`}
+                  aria-hidden="true"
+                />
+                <p className={`truncate font-medium leading-tight ${statusUi.titleClass}`}>
+                  {appt.client.fullName}
+                </p>
+              </div>
 
-      {height > 52 && (
-        <p className="mt-1 truncate leading-tight text-slate-500">
-          {appt.service.name}
-        </p>
-      )}
+              <p className={`truncate leading-tight ${statusUi.metaClass}`}>
+                {format(parseISO(appt.startAt), "HH:mm")} -{" "}
+                {format(parseISO(appt.endAt), "HH:mm")}
+              </p>
+            </div>
 
-      {showProfessionalName && height > 68 && (
-        <p className="truncate leading-tight text-slate-400">
-          {appt.professional?.name}
-        </p>
+            <span
+              className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[10px] font-medium ${statusUi.badge}`}
+            >
+              {statusUi.label}
+            </span>
+          </div>
+
+          {height > 52 && (
+            <p className="mt-1 truncate leading-tight text-slate-500">
+              {appt.service.name}
+            </p>
+          )}
+
+          {showProfessionalName && height > 68 && (
+            <p className="truncate leading-tight text-slate-400">
+              {appt.professional?.name}
+            </p>
+          )}
+        </div>
       )}
     </div>
   );

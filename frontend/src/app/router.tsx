@@ -9,7 +9,6 @@ import LoginPage from "../pages/LoginPage.tsx";
 import BusinessSettingsPage from "../pages/BusinessSettingsPage.tsx";
 import AnalyticsPage from "../pages/AnalyticsPage.tsx";
 import { useAuth } from "../hooks/useAuth.ts";
-import RegisterPage from "../pages/RegisterPage.tsx";
 
 function ProtectedRoute() {
   const { user, isLoading } = useAuth();
@@ -47,11 +46,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/register",
-    element: <RegisterPage />,
-  },
-  {
-    path: "/register",
-    element: <Navigate to="/register" replace />,
+    element: <Navigate to="/login" replace />,
   },
   {
     path: "/",

@@ -92,7 +92,14 @@ export default function DashboardPage() {
 
     const pendingAppointments = normalizedAppointments.filter(
       (appt) =>
-        appt.status === "RESERVED" || appt.status === "DEPOSIT_PAID"
+        (appt.status === "RESERVED" || appt.status === "DEPOSIT_PAID") &&
+        appt.endDate < now
+    );
+
+    const remainingAppointments = normalizedAppointments.filter(
+      (appt) =>
+        (appt.status === "RESERVED" || appt.status === "DEPOSIT_PAID") &&
+        appt.endDate >= now
     );
 
     const upcomingAppointments = normalizedAppointments
@@ -204,6 +211,7 @@ export default function DashboardPage() {
       stats: {
         appointmentsToday: normalizedAppointments.length,
         pendingToday: pendingAppointments.length,
+        remainingToday: remainingAppointments.length,
         depositToday,
         cashToday,
         totalToday,
@@ -258,7 +266,16 @@ export default function DashboardPage() {
               subtitle={
                 isLoading
                   ? "Cargando..."
-                  : `${dashboardData.stats.pendingToday} pendientes`
+                  : [
+                      dashboardData.stats.remainingToday > 0
+                        ? `${dashboardData.stats.remainingToday} restantes`
+                        : null,
+                      dashboardData.stats.pendingToday > 0
+                        ? `${dashboardData.stats.pendingToday} pend. resolución`
+                        : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ") || "Sin turnos activos"
               }
               icon={<CalendarDays className="h-5 w-5" />}
               iconBg="bg-teal-50"

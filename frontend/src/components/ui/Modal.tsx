@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { X } from "lucide-react";
 
 type ModalSize = "sm" | "md" | "lg" | "xl";
@@ -21,6 +21,8 @@ const sizeClasses: Record<ModalSize, string> = {
   xl: "max-w-4xl",
 };
 
+const ANIMATION_DURATION = 200;
+
 export default function Modal({
   open,
   onClose,
@@ -31,6 +33,21 @@ export default function Modal({
   size = "md",
   closeOnBackdrop = true,
 }: ModalProps) {
+  const [mounted, setMounted] = useState(open);
+  const [visible, setVisible] = useState(open);
+
+  useEffect(() => {
+    if (open) {
+      setMounted(true);
+      const raf = requestAnimationFrame(() => setVisible(true));
+      return () => cancelAnimationFrame(raf);
+    } else {
+      setVisible(false);
+      const timer = setTimeout(() => setMounted(false), ANIMATION_DURATION);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
 
@@ -47,12 +64,14 @@ export default function Modal({
     };
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!mounted) return null;
 
   return (
     <div className="fixed inset-0 z-100">
       <div
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-[1px]"
+        className={`absolute inset-0 bg-slate-900/40 backdrop-blur-[1px] transition-opacity duration-200 ${
+          visible ? "opacity-100" : "opacity-0"
+        }`}
         onClick={() => {
           if (closeOnBackdrop) onClose();
         }}
@@ -61,7 +80,11 @@ export default function Modal({
       <div className="absolute inset-0 overflow-y-auto">
         <div className="flex min-h-full items-start justify-center p-3 sm:p-4 md:items-center">
           <div
-            className={`relative z-101 flex w-full ${sizeClasses[size]} max-h-[calc(100dvh-1.5rem)] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl sm:max-h-[calc(100dvh-2rem)]`}
+            className={`relative z-101 flex w-full ${sizeClasses[size]} max-h-[calc(100dvh-1.5rem)] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl sm:max-h-[calc(100dvh-2rem)] transition-all duration-200 ease-out ${
+              visible
+                ? "opacity-100 scale-100 translate-y-0"
+                : "opacity-0 scale-95 translate-y-2"
+            }`}
           >
             {(title || description) && (
               <div className="flex shrink-0 items-start justify-between gap-4 border-b border-slate-100 px-4 py-4 sm:px-6">

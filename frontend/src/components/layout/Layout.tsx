@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import type { NavItem } from "../../types/navigation";
 import { appRoutes, routeTitles } from "../../app/routes.ts";
+import ConfirmModal from "../ui/ConfirmModal";
 
 const NAV_ITEMS: NavItem[] = [
   { name: "Dashboard", to: appRoutes.dashboard, icon: LayoutDashboard },
@@ -61,7 +62,7 @@ export function Layout() {
   const displayName = user?.username ?? user?.email ?? "?";
   const initial = displayName[0].toUpperCase();
 
-  const handleLogout = () => logout();
+  const [confirmLogout, setConfirmLogout] = useState(false);
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
@@ -151,7 +152,7 @@ export function Layout() {
         {/* Logout */}
         <div className="px-2 py-3 border-t border-slate-100 shrink-0">
           <button
-            onClick={handleLogout}
+            onClick={() => setConfirmLogout(true)}
             type="button"
             title={desktopCollapsed ? "Cerrar sesión" : undefined}
             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-500 hover:bg-red-50 hover:text-red-700 w-full transition-colors cursor-pointer ${desktopCollapsed ? "lg:justify-center lg:px-0" : ""}`}
@@ -215,6 +216,15 @@ export function Layout() {
           <Outlet />
         </main>
       </div>
+
+      <ConfirmModal
+        open={confirmLogout}
+        onClose={() => setConfirmLogout(false)}
+        onConfirm={() => logout()}
+        title="Cerrar sesión"
+        description="¿Estás seguro de que querés cerrar sesión?"
+        confirmLabel="Cerrar sesión"
+      />
     </div>
   );
 }

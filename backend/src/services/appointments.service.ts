@@ -59,6 +59,15 @@ function badRequest(message: string) {
 }
 
 export class AppointmentService {
+  async delete({ businessId, appointmentId }: { businessId: string; appointmentId: string }) {
+    const appointment = await prisma.appointment.findFirst({
+      where: { id: appointmentId, businessId },
+    });
+    if (!appointment) throw badRequest("Appointment not found");
+
+    await prisma.appointment.delete({ where: { id: appointmentId } });
+  }
+
   async create(input: CreateAppointmentInput) {
     const { businessId, professionalId, clientId, serviceId, startAt } = input;
 

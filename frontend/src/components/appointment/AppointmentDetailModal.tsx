@@ -15,12 +15,14 @@ import { AppointmentStatus, paymentMethodOptions, type AgendaAppointment, type A
 import {
   updateAppointment,
   changeAppointmentStatus,
+  deleteAppointment,
 } from "../../services/appointments.api";
 import FooterDetail from "./FooterDetail";
 import SummaryDetail from "./SummaryDetail";
 import Client from "./DetailForm.tsx/Client";
 import Button from "../ui/Button";
 import Status from "./DetailForm.tsx/Status";
+import ConfirmModal from "../ui/ConfirmModal";
 
 type Props = {
   open: boolean;
@@ -66,6 +68,7 @@ export default function AppointmentDetailModal({
   const [depositTouched, setDepositTouched] = useState(false);
 
   const [view, setView] = useState<DetailView>("summary");
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const clientBoxRef = useRef<HTMLDivElement | null>(null);
 
@@ -224,7 +227,18 @@ export default function AppointmentDetailModal({
     },
   });
 
-  const isBusy = updateMutation.isPending || statusMutation.isPending;
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteAppointment(id),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["agenda"] }),
+        queryClient.invalidateQueries({ queryKey: ["availability"] }),
+      ]);
+      onClose();
+    },
+  });
+
+  const isBusy = updateMutation.isPending || statusMutation.isPending || deleteMutation.isPending;
   const isFormDisabled = isBusy || isLocked;
 
   const parsedDepositAmount = Number(depositAmount);
@@ -396,20 +410,20 @@ export default function AppointmentDetailModal({
       title="Detalle del turno"
       description="Visualizá, editá y gestioná el estado del turno."
       size="lg"
-      footer={ 
-        view !== "status" && (
-
-          <FooterDetail 
-            canSubmit={canSubmit}
-            showDepositInput={showDepositInput}
-            hasValidDepositAmount={hasValidDepositAmount}
-            isBusy={isBusy}
-            handleSubmit={handleSubmit}
-            updateMutation={updateMutation}
-            onClose={onClose}
-          />
-        )
-      }
+      footer={appointment && (
+        <FooterDetail
+          canSubmit={canSubmit}
+          showDepositInput={showDepositInput}
+          hasValidDepositAmount={hasValidDepositAmount}
+          isBusy={isBusy}
+          handleSubmit={handleSubmit}
+          updateMutation={updateMutation}
+          onClose={onClose}
+          showSave={view !== "status"}
+          onDelete={() => setConfirmDelete(true)}
+          deletePending={deleteMutation.isPending}
+        />
+      )}
     >
       <div className="space-y-5">
         {appointment && (
@@ -771,8 +785,21 @@ export default function AppointmentDetailModal({
             </>
           ))}
 
-        
       </div>
+
+      <ConfirmModal
+        open={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        onConfirm={() => {
+          if (!appointment) return;
+          deleteMutation.mutate(appointment.id);
+          setConfirmDelete(false);
+        }}
+        title="Eliminar turno"
+        description="¿Estás seguro de que querés eliminar este turno? Esta acción no se puede deshacer."
+        confirmLabel="Eliminar"
+        loading={deleteMutation.isPending}
+      />
     </Modal>
   );
 }

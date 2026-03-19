@@ -99,6 +99,19 @@ export async function changeAppointmentStatusHandler(req: Request, res: Response
   }
 }
 
+export async function deleteAppointmentHandler(req: Request, res: Response) {
+  try {
+    const { businessId } = req.user!;
+    const { id } = req.params;
+
+    await appointmentService.delete({ businessId, appointmentId: String(id) });
+
+    return res.status(204).send();
+  } catch (err: any) {
+    return res.status(err?.status ?? 500).json({ error: err?.message ?? "Server error" });
+  }
+}
+
 export async function rescheduleAppointmentHandler(req: Request, res: Response) {
   try {
     const { businessId } = req.user!;

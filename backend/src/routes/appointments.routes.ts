@@ -5,6 +5,7 @@ import {
     changeAppointmentStatusHandler,
     rescheduleAppointmentHandler,
     updateAppointmentHandler,
+    deleteAppointmentHandler,
 } from "../controllers/appointments.controller";
 
 
@@ -15,5 +16,6 @@ router.get("/", getAppointmentsHandler);
 router.patch("/:id", updateAppointmentHandler);
 router.patch("/:id/status", changeAppointmentStatusHandler);
 router.patch("/:id/reschedule", rescheduleAppointmentHandler);
+router.delete("/:id", deleteAppointmentHandler);
 
 export default router;

@@ -29,6 +29,10 @@ export function updateAppointment(data: {
   });
 }
 
+export function deleteAppointment(id: string) {
+  return apiFetch(`/appointments/${id}`, { method: "DELETE" });
+}
+
 export function changeAppointmentStatus(data: {
   id: string;
   status: AppointmentStatus;

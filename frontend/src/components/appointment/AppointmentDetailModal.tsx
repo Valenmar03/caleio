@@ -477,19 +477,6 @@ export default function AppointmentDetailModal({
                   Seleccioná el nuevo estado del turno desde las acciones inferiores.
                 </p>
               </div>
-              <Status 
-                handleChangeStatus={handleChangeStatus}
-                isCanceled={isCanceled}
-                statusMutation={statusMutation}
-                isCompleted={isCompleted}
-                currentStatus={currentStatus}
-                effectiveStatus={effectiveStatus}
-                appointment={appointment}
-                showDepositInput={showDepositInput}
-                hasValidDepositAmount={hasValidDepositAmount}
-                isBusy={isBusy}
-              />
-
             </>
           )}
         {view === "status" && showDepositInput && !isCompleted && !isCanceled && (
@@ -629,6 +616,21 @@ export default function AppointmentDetailModal({
               </div>
             </div>
           </div>
+        )}
+
+        {view === "status" && !isCompleted && !isCanceled && (
+          <Status
+            handleChangeStatus={handleChangeStatus}
+            isCanceled={isCanceled}
+            statusMutation={statusMutation}
+            isCompleted={isCompleted}
+            currentStatus={currentStatus}
+            effectiveStatus={effectiveStatus}
+            appointment={appointment}
+            showDepositInput={showDepositInput}
+            hasValidDepositAmount={hasValidDepositAmount}
+            isBusy={isBusy}
+          />
         )}
 
         {view === "edit" && (

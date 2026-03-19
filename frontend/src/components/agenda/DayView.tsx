@@ -120,7 +120,7 @@ function getSecondaryBadge(appt: AgendaAppointment) {
       return {
         label: "•",
         className:
-          "bg-sky-100 text-sky-700 border border-sky-200 hover:bg-sky-200",
+          "bg-cyan-100 text-cyan-700 border border-cyan-200 hover:bg-cyan-200",
         titlePrefix: "Reservado",
       };
 

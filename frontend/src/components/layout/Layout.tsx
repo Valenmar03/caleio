@@ -40,6 +40,7 @@ function getPageTitle(pathname: string) {
 
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [desktopCollapsed, setDesktopCollapsed] = useState(false);
   const location = useLocation();
   const { logout, user } = useAuth();
 
@@ -75,6 +76,7 @@ export function Layout() {
         .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
       `}</style>
 
+      {/* Mobile overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/30 z-40 lg:hidden"
@@ -82,15 +84,17 @@ export function Layout() {
         />
       )}
 
+      {/* Sidebar */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 z-50 h-dvh w-64 bg-white border-r border-slate-200 flex flex-col transition-transform duration-300 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        }`}
+        className={`fixed top-0 left-0 z-50 h-dvh bg-white border-r border-slate-200 flex flex-col transition-all duration-300 overflow-hidden
+          ${sidebarOpen ? "translate-x-0 w-64" : "-translate-x-full w-64"}
+          ${desktopCollapsed ? "lg:translate-x-0 lg:w-16" : "lg:translate-x-0 lg:w-64"}`}
       >
-        <div className="h-16 flex items-center px-5 border-b border-slate-100">
-          <div className="flex items-center gap-2.5">
-            <img src="/logo.png" alt="Caleio" className="w-10 h-10 object-contain" />
-            <span className="text-lg font-semibold text-slate-800 tracking-tight">
+        {/* Logo */}
+        <div className={`h-16 flex items-center border-b border-slate-100 shrink-0 transition-all duration-300 ${desktopCollapsed ? "lg:justify-center lg:px-0 px-5" : "px-5"}`}>
+          <div className={`flex items-center gap-2.5 min-w-0`}>
+            <img src="/logo.png" alt="Caleio" className="w-10 h-10 object-contain shrink-0" />
+            <span className={`text-lg font-semibold text-slate-800 tracking-tight whitespace-nowrap transition-all duration-300 ${desktopCollapsed ? "lg:hidden" : ""}`}>
               Caleio
             </span>
           </div>
@@ -104,7 +108,8 @@ export function Layout() {
           </button>
         </div>
 
-        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto scrollbar-thin">
+        {/* Nav */}
+        <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto scrollbar-thin">
           {visibleNavItems.map((item) => {
             const Icon = item.icon;
 
@@ -114,8 +119,11 @@ export function Layout() {
                 to={item.to}
                 end={item.to === appRoutes.dashboard}
                 onClick={() => setSidebarOpen(false)}
+                title={desktopCollapsed ? item.name : undefined}
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
+                    desktopCollapsed ? "lg:justify-center lg:px-0" : ""
+                  } ${
                     isActive
                       ? "bg-teal-50 text-teal-700"
                       : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
@@ -125,13 +133,13 @@ export function Layout() {
                 {({ isActive }) => (
                   <>
                     <Icon
-                      className={`w-4.5 h-4.5 ${
-                        isActive ? "text-teal-600" : "text-slate-400"
-                      }`}
+                      className={`w-4.5 h-4.5 shrink-0 ${isActive ? "text-teal-600" : "text-slate-400"}`}
                     />
-                    {item.name}
-                    {isActive && (
-                      <ChevronRight className="w-4 h-4 ml-auto text-teal-400" />
+                    <span className={`whitespace-nowrap transition-all duration-300 ${desktopCollapsed ? "lg:hidden" : ""}`}>
+                      {item.name}
+                    </span>
+                    {isActive && !desktopCollapsed && (
+                      <ChevronRight className="w-4 h-4 ml-auto text-teal-400 lg:block hidden" />
                     )}
                   </>
                 )}
@@ -140,24 +148,39 @@ export function Layout() {
           })}
         </nav>
 
-        <div className="px-3 py-3 border-t border-slate-100">
+        {/* Logout */}
+        <div className="px-2 py-3 border-t border-slate-100 shrink-0">
           <button
             onClick={handleLogout}
             type="button"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-700 w-full transition-colors"
+            title={desktopCollapsed ? "Cerrar sesión" : undefined}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-500 hover:bg-red-50 hover:text-red-700 w-full transition-colors cursor-pointer ${desktopCollapsed ? "lg:justify-center lg:px-0" : ""}`}
           >
-            <LogOut className="w-4.5 h-4.5" />
-            Cerrar sesión
+            <LogOut className="w-4.5 h-4.5 shrink-0" />
+            <span className={`whitespace-nowrap ${desktopCollapsed ? "lg:hidden" : ""}`}>
+              Cerrar sesión
+            </span>
           </button>
         </div>
       </aside>
 
-      <div className="flex-1 min-w-0 flex flex-col min-h-screen overflow-x-hidden">
+      {/* Main */}
+      <div className={`flex-1 min-w-0 flex flex-col min-h-screen overflow-x-hidden transition-all duration-300 ${desktopCollapsed ? "lg:ml-16" : "lg:ml-64"}`}>
         <header className="h-14 lg:h-16 flex items-center justify-between px-4 lg:px-6 bg-white border-b border-slate-200 sticky top-0 z-30">
           <div className="flex items-center gap-3">
+            {/* Mobile open */}
             <button
               onClick={() => setSidebarOpen(true)}
               className="p-2 -ml-2 rounded-lg hover:bg-slate-100 lg:hidden"
+              type="button"
+            >
+              <Menu className="w-5 h-5 text-slate-600" />
+            </button>
+
+            {/* Desktop toggle */}
+            <button
+              onClick={() => setDesktopCollapsed((v) => !v)}
+              className="hidden lg:flex p-2 -ml-2 rounded-lg hover:bg-slate-100 cursor-pointer"
               type="button"
             >
               <Menu className="w-5 h-5 text-slate-600" />

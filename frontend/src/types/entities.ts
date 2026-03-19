@@ -217,6 +217,24 @@ export type UpdateProfessionalSchedulesPayload = {
   }>;
 };
 
+export type ProfessionalUnavailability = {
+  id: string;
+  businessId: string;
+  professionalId: string;
+  startAt: string;
+  endAt: string;
+  reason?: string | null;
+  createdAt: string;
+};
+
+export type ConflictingAppointment = {
+  id: string;
+  startAt: string;
+  endAt: string;
+  client: { fullName: string };
+  service: { name: string };
+};
+
 
 // AGENDA
 
@@ -247,6 +265,13 @@ export type AgendaAppointment = {
   finalPaymentMethod?: PaymentMethod;
 };
 
+export type DailyUnavailability = {
+  id: string;
+  startAt: string;
+  endAt: string;
+  reason?: string | null;
+};
+
 export type DailyAgendaResponse = {
   kind: "daily";
   date: string;
@@ -257,6 +282,7 @@ export type DailyAgendaResponse = {
   };
   scheduleBlocks?: ScheduleBlock[];
   scheduleBlocksByProfessional?: Record<string, ScheduleBlock[]>;
+  unavailabilitiesByProfessional?: Record<string, DailyUnavailability[]>;
   appointments: AgendaAppointment[];
 };
 

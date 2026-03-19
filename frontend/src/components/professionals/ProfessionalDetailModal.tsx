@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
-import { Clock3, Plus, User2, X } from "lucide-react";
+import { Clock3, Plus, Slash, Trash2, User2, X } from "lucide-react";
+import { format, parseISO } from "date-fns";
 
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
+import CustomDatePicker from "../ui/CustomDatePicker";
+import CustomTimePicker from "../ui/CustomTimePicker";
 import { useProfessionalServices, useUpdateProfessionalServices } from "../../hooks/useProfessionalServices";
 import { useProfessionalSchedule } from "../../hooks/useProfessionalSchedule";
 import { useServices } from "../../hooks/useServices";
-import type { Professional } from "../../types/entities";
-import { useUpdateProfessional } from "../../hooks/useProfessionals";
+import type { Professional, ConflictingAppointment } from "../../types/entities";
+import { useUpdateProfessional, useProfessionalUnavailabilities, useCreateUnavailability, useDeleteUnavailability } from "../../hooks/useProfessionals";
 
 type Props = {
   open: boolean;
@@ -111,15 +114,21 @@ export default function ProfessionalDetailModal({
   onClose,
   professional,
 }: Props) {
-  const professionalId = professional?.id;
+  const professionalId = professional?.id ?? "";
 
   const { data: professionalServicesData, isLoading: professionalServicesLoading } =
-    useProfessionalServices(professionalId);
+    useProfessionalServices(professional?.id);
 
   const { data: professionalScheduleData, isLoading: professionalScheduleLoading } =
-    useProfessionalSchedule(professionalId);
+    useProfessionalSchedule(professional?.id);
 
   const { data: servicesData, isLoading: servicesLoading } = useServices();
+
+  const { data: unavailabilitiesData } = useProfessionalUnavailabilities(professionalId);
+  const createUnavailabilityMutation = useCreateUnavailability(professionalId);
+  const deleteUnavailabilityMutation = useDeleteUnavailability(professionalId);
+
+  const unavailabilities = unavailabilitiesData?.unavailabilities ?? [];
 
   const updateProfessionalMutation = useUpdateProfessional();
   const updateProfessionalServicesMutation = useUpdateProfessionalServices();
@@ -150,6 +159,20 @@ export default function ProfessionalDetailModal({
     buildEmptyScheduleState()
   );
 
+  const [unavailStart, setUnavailStart] = useState("");
+  const [unavailStartTime, setUnavailStartTime] = useState("09:00");
+  const [unavailEnd, setUnavailEnd] = useState("");
+  const [unavailEndTime, setUnavailEndTime] = useState("18:00");
+  const [unavailReason, setUnavailReason] = useState("");
+  const [unavailError, setUnavailError] = useState<string | null>(null);
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<Set<string>>(new Set());
+  const [pendingConflicts, setPendingConflicts] = useState<{
+    conflicts: ConflictingAppointment[];
+    startAt: string;
+    endAt: string;
+    reason?: string;
+  } | null>(null);
+
   useEffect(() => {
     if (!open || !professional) return;
 
@@ -157,6 +180,7 @@ export default function ProfessionalDetailModal({
     setColor(professional.color || "#0D9488");
     setActive(Boolean(professional.active));
     setSelectedServiceIds(assignedServiceIds);
+    setPendingDeleteIds(new Set());
 
     const next = buildEmptyScheduleState();
 
@@ -281,9 +305,10 @@ export default function ProfessionalDetailModal({
   const hasScheduleErrors = Object.keys(scheduleValidation).length > 0;
 
   const isSaving =
-  updateProfessionalMutation.isPending ||
-  updateProfessionalServicesMutation.isPending ||
-  isUpdatingSchedule;
+    updateProfessionalMutation.isPending ||
+    updateProfessionalServicesMutation.isPending ||
+    deleteUnavailabilityMutation.isPending ||
+    isUpdatingSchedule;
 
   const handleSave = async () => {
     if (!professional) return;
@@ -338,6 +363,11 @@ export default function ProfessionalDetailModal({
           })
         )
       );
+
+      for (const id of pendingDeleteIds) {
+        await deleteUnavailabilityMutation.mutateAsync(id);
+      }
+      setPendingDeleteIds(new Set());
 
       onClose();
     } catch (error) {
@@ -614,6 +644,226 @@ export default function ProfessionalDetailModal({
                   </div>
                 );
               })}
+            </div>
+          </div>
+
+        {/* Bloqueos de horario */}
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Slash className="w-4 h-4 text-slate-500" />
+            <h4 className="text-sm font-medium text-slate-800">Bloqueos de horario</h4>
+          </div>
+
+          <div className="space-y-2 mb-4">
+            {unavailabilities.length === 0 ? (
+              <p className="text-sm text-slate-400">Sin bloqueos de horario</p>
+            ) : (
+              unavailabilities.map((u) => {
+                const markedForDelete = pendingDeleteIds.has(u.id);
+                return (
+                  <div
+                    key={u.id}
+                    className={`flex items-center justify-between gap-3 rounded-lg border px-3 py-2 transition-colors ${
+                      markedForDelete
+                        ? "border-red-200 bg-red-50"
+                        : "border-slate-200 bg-white"
+                    }`}
+                  >
+                    <div>
+                      <p className={`text-sm font-medium ${markedForDelete ? "text-red-600 line-through" : "text-slate-700"}`}>
+                        {format(parseISO(u.startAt), "dd/MM/yyyy HH:mm")}
+                        {" – "}
+                        {format(parseISO(u.endAt), "dd/MM/yyyy HH:mm")}
+                      </p>
+                      {u.reason && (
+                        <p className={`text-xs ${markedForDelete ? "text-red-400" : "text-slate-400"}`}>{u.reason}</p>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPendingDeleteIds((prev) => {
+                          const next = new Set(prev);
+                          if (next.has(u.id)) next.delete(u.id);
+                          else next.add(u.id);
+                          return next;
+                        })
+                      }
+                      className={`transition-colors ${
+                        markedForDelete ? "text-red-500" : "text-slate-400 hover:text-red-500"
+                      }`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <CustomDatePicker
+                label="Desde"
+                value={unavailStart}
+                onChange={(v) => { setUnavailStart(v); setUnavailError(null); }}
+              />
+              <CustomTimePicker
+                label="Hora inicio"
+                value={unavailStartTime}
+                onChange={setUnavailStartTime}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <CustomDatePicker
+                label="Hasta"
+                value={unavailEnd}
+                onChange={(v) => { setUnavailEnd(v); setUnavailError(null); }}
+              />
+              <CustomTimePicker
+                label="Hora fin"
+                value={unavailEndTime}
+                onChange={setUnavailEndTime}
+              />
+            </div>
+            <input
+              type="text"
+              placeholder="Motivo (opcional)"
+              value={unavailReason}
+              onChange={(e) => setUnavailReason(e.target.value)}
+              className="w-full h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-teal-500"
+            />
+            {unavailError && (
+              <p className="text-xs text-red-600">{unavailError}</p>
+            )}
+            <button
+              type="button"
+              disabled={createUnavailabilityMutation.isPending}
+              onClick={() => {
+                if (!unavailStart) {
+                  setUnavailError("Completá la fecha de inicio");
+                  return;
+                }
+                if (!unavailEnd) {
+                  setUnavailError("Completá la fecha de fin");
+                  return;
+                }
+                const start = new Date(`${unavailStart}T${unavailStartTime}:00`);
+                const end = new Date(`${unavailEnd}T${unavailEndTime}:00`);
+                if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+                  setUnavailError("Fecha u hora inválida");
+                  return;
+                }
+                if (start >= end) {
+                  setUnavailError("El inicio debe ser anterior al fin");
+                  return;
+                }
+                const startAt = start.toISOString();
+                const endAt = end.toISOString();
+                const reason = unavailReason.trim() || undefined;
+                createUnavailabilityMutation.mutate(
+                  { startAt, endAt, reason },
+                  {
+                    onSuccess: () => {
+                      setUnavailStart("");
+                      setUnavailStartTime("09:00");
+                      setUnavailEnd("");
+                      setUnavailEndTime("18:00");
+                      setUnavailReason("");
+                      setUnavailError(null);
+                    },
+                    onError: (err: unknown) => {
+                      const apiErr = err as { status?: number; body?: { conflicts?: ConflictingAppointment[] } };
+                      if (apiErr?.status === 409 && apiErr?.body?.conflicts?.length) {
+                        setPendingConflicts({ conflicts: apiErr.body.conflicts, startAt, endAt, reason });
+                      } else {
+                        setUnavailError("No se pudo crear el bloqueo");
+                      }
+                    },
+                  }
+                );
+              }}
+              className="h-10 w-full rounded-lg border border-teal-200 bg-teal-50 text-sm font-medium text-teal-700 hover:bg-teal-100 disabled:opacity-50 transition-colors flex items-center justify-center gap-1.5"
+            >
+              <Plus className="w-4 h-4" />
+              {createUnavailabilityMutation.isPending ? "Guardando..." : "Agregar bloqueo"}
+            </button>
+          </div>
+        </div>
+        </div>
+      )}
+
+      {/* Dialog de conflictos */}
+      {pendingConflicts && (
+        <div className="fixed inset-0 z-300 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/50" onClick={() => setPendingConflicts(null)} />
+          <div className="relative z-10 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl">
+            <h3 className="text-base font-semibold text-slate-900 mb-1">
+              Turnos en el período bloqueado
+            </h3>
+            <p className="text-sm text-slate-500 mb-4">
+              Hay {pendingConflicts.conflicts.length} turno{pendingConflicts.conflicts.length > 1 ? "s" : ""} activo{pendingConflicts.conflicts.length > 1 ? "s" : ""} en ese rango. ¿Qué querés hacer con ellos?
+            </p>
+
+            <div className="space-y-2 mb-5 max-h-48 overflow-y-auto">
+              {pendingConflicts.conflicts.map((appt) => (
+                <div key={appt.id} className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                  <div>
+                    <p className="text-sm font-medium text-slate-700">{appt.client.fullName}</p>
+                    <p className="text-xs text-slate-400">{appt.service.name} · {format(new Date(appt.startAt), "dd/MM HH:mm")} – {format(new Date(appt.endAt), "HH:mm")}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                disabled={createUnavailabilityMutation.isPending}
+                onClick={() => {
+                  createUnavailabilityMutation.mutate(
+                    { ...pendingConflicts, cancelConflicting: true },
+                    {
+                      onSuccess: () => {
+                        setPendingConflicts(null);
+                        setUnavailStart(""); setUnavailStartTime("09:00");
+                        setUnavailEnd(""); setUnavailEndTime("18:00");
+                        setUnavailReason(""); setUnavailError(null);
+                      },
+                    }
+                  );
+                }}
+                className="w-full rounded-xl bg-red-50 px-4 py-2.5 text-sm font-medium text-red-700 hover:bg-red-100 disabled:opacity-50 transition-colors"
+              >
+                Cancelar los {pendingConflicts.conflicts.length} turno{pendingConflicts.conflicts.length > 1 ? "s" : ""} y crear bloqueo
+              </button>
+              <button
+                type="button"
+                disabled={createUnavailabilityMutation.isPending}
+                onClick={() => {
+                  createUnavailabilityMutation.mutate(
+                    { ...pendingConflicts, cancelConflicting: false },
+                    {
+                      onSuccess: () => {
+                        setPendingConflicts(null);
+                        setUnavailStart(""); setUnavailStartTime("09:00");
+                        setUnavailEnd(""); setUnavailEndTime("18:00");
+                        setUnavailReason(""); setUnavailError(null);
+                      },
+                    }
+                  );
+                }}
+                className="w-full rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-200 disabled:opacity-50 transition-colors"
+              >
+                Crear bloqueo sin tocar los turnos
+              </button>
+              <button
+                type="button"
+                onClick={() => setPendingConflicts(null)}
+                className="w-full rounded-xl px-4 py-2 text-sm text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                Cancelar
+              </button>
             </div>
           </div>
         </div>

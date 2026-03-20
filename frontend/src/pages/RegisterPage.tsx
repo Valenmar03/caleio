@@ -16,7 +16,6 @@ function normalizeSlug(raw: string): string {
 }
 
 export default function RegisterPage() {
-  const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

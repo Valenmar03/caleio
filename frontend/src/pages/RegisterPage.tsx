@@ -1,6 +1,5 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
 import PasswordInput from "../components/ui/PasswordInput";
 
 const API_URL = "/api";

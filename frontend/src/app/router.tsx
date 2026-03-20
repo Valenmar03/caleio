@@ -6,6 +6,10 @@ import ProfessionalsPage from "../pages/ProfessionalsPage.tsx";
 import ServicesPage from "../pages/ServicesPage.tsx";
 import ClientsPage from "../pages/ClientsPage.tsx";
 import LoginPage from "../pages/LoginPage.tsx";
+import RegisterPage from "../pages/RegisterPage.tsx";
+import VerifyEmailPage from "../pages/VerifyEmailPage.tsx";
+import ForgotPasswordPage from "../pages/ForgotPasswordPage.tsx";
+import ResetPasswordPage from "../pages/ResetPasswordPage.tsx";
 import BusinessSettingsPage from "../pages/BusinessSettingsPage.tsx";
 import AnalyticsPage from "../pages/AnalyticsPage.tsx";
 import { useAuth } from "../hooks/useAuth.ts";
@@ -46,7 +50,19 @@ export const router = createBrowserRouter([
   },
   {
     path: "/register",
-    element: <Navigate to="/login" replace />,
+    element: <RegisterPage />,
+  },
+  {
+    path: "/verificar-email",
+    element: <VerifyEmailPage />,
+  },
+  {
+    path: "/olvide-password",
+    element: <ForgotPasswordPage />,
+  },
+  {
+    path: "/resetear-password",
+    element: <ResetPasswordPage />,
   },
   {
     path: "/",

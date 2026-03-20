@@ -61,20 +61,47 @@ model Business {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  businessId   String
-  email        String?  @unique
-  username     String?
-  passwordHash String
-  role         UserRole @default(OWNER)
-  createdAt    DateTime @default(now())
+  id            String   @id @default(uuid())
+  businessId    String
+  email         String?  @unique
+  username      String?
+  passwordHash  String
+  role          UserRole @default(OWNER)
+  emailVerified Boolean  @default(false)
+  createdAt     DateTime @default(now())
 
-  business      Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  refreshTokens RefreshToken[]
-  professional  Professional?
+  business           Business            @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  refreshTokens      RefreshToken[]
+  professional       Professional?
+  emailVerifications EmailVerification[]
+  passwordResets     PasswordReset[]
 
   @@index([businessId])
   @@unique([businessId, username])
+}
+
+model EmailVerification {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model PasswordReset {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model RefreshToken {

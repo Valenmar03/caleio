@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import PasswordInput from "../components/ui/PasswordInput";
 
 const API_URL = "/api";
 
@@ -54,7 +55,11 @@ export default function LoginPage() {
       await login(slug!, identifier.trim(), password);
       navigate("/", { replace: true });
     } catch (err: any) {
-      setError(err?.message ?? "Error al iniciar sesión");
+      if (err?.message === "Email not verified") {
+        setError("Necesitás confirmar tu email antes de ingresar. Revisá tu bandeja de entrada.");
+      } else {
+        setError(err?.message ?? "Error al iniciar sesión");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -79,7 +84,7 @@ export default function LoginPage() {
                   </label>
                   <div className="flex items-center rounded-lg border border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-teal-500">
                     <span className="px-3 py-2 text-sm text-slate-400 bg-slate-50 border-r border-slate-200 whitespace-nowrap">
-                      caleio.app/
+                      app.caleio.app/
                     </span>
                     <input
                       id="slug"
@@ -136,9 +141,8 @@ export default function LoginPage() {
                   <label htmlFor="password" className="block text-sm font-medium text-slate-600 mb-1">
                     Contraseña
                   </label>
-                  <input
+                  <PasswordInput
                     id="password"
-                    type="password"
                     autoComplete="current-password"
                     required
                     value={password}
@@ -161,13 +165,18 @@ export default function LoginPage() {
                 >
                   {isSubmitting ? "Ingresando..." : "Ingresar"}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => navigate("/login")}
-                  className="w-full text-center text-sm text-slate-400 hover:text-slate-600 transition"
-                >
-                  ← Cambiar negocio
-                </button>
+                <div className="flex justify-between">
+                  <button
+                    type="button"
+                    onClick={() => navigate("/login")}
+                    className="text-sm text-slate-400 hover:text-slate-600 transition"
+                  >
+                    ← Cambiar negocio
+                  </button>
+                  <a href="/olvide-password" className="text-sm text-teal-600 hover:underline">
+                    Olvidé mi contraseña
+                  </a>
+                </div>
               </form>
             </>
           )}

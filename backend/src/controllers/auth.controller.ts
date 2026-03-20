@@ -17,8 +17,44 @@ export async function registerHandler(req: Request, res: Response) {
     }
 
     const result = await authService.register(email, password, businessName, slug);
-    res.cookie(COOKIE_NAME, result.refreshToken, COOKIE_OPTIONS);
-    return res.status(201).json({ accessToken: result.accessToken, user: result.user });
+    return res.status(201).json({ user: result.user });
+  } catch (err: any) {
+    return res.status(err.statusCode ?? 500).json({ error: err.message });
+  }
+}
+
+export async function verifyEmailHandler(req: Request, res: Response) {
+  try {
+    const { token } = req.body;
+    if (!token) return res.status(400).json({ error: "token is required" });
+
+    await authService.verifyEmail(token);
+    return res.json({ message: "Email verified successfully" });
+  } catch (err: any) {
+    return res.status(err.statusCode ?? 500).json({ error: err.message });
+  }
+}
+
+export async function forgotPasswordHandler(req: Request, res: Response) {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: "email is required" });
+
+    await authService.forgotPassword(email);
+    return res.json({ message: "If that email exists, a reset link was sent" });
+  } catch (err: any) {
+    return res.status(err.statusCode ?? 500).json({ error: err.message });
+  }
+}
+
+export async function resetPasswordHandler(req: Request, res: Response) {
+  try {
+    const { token, password } = req.body;
+    if (!token || !password) return res.status(400).json({ error: "token and password are required" });
+    if (password.length < 8) return res.status(400).json({ error: "Password must be at least 8 characters" });
+
+    await authService.resetPassword(token, password);
+    return res.json({ message: "Password updated successfully" });
   } catch (err: any) {
     return res.status(err.statusCode ?? 500).json({ error: err.message });
   }
@@ -49,6 +85,24 @@ export async function refreshHandler(req: Request, res: Response) {
     const result = await authService.refresh(rawToken);
     res.cookie(COOKIE_NAME, result.refreshToken, COOKIE_OPTIONS);
     return res.json({ accessToken: result.accessToken, user: result.user });
+  } catch (err: any) {
+    return res.status(err.statusCode ?? 500).json({ error: err.message });
+  }
+}
+
+export async function changePasswordHandler(req: Request, res: Response) {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: "currentPassword and newPassword are required" });
+    }
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: "La nueva contraseña debe tener al menos 8 caracteres" });
+    }
+
+    const userId = (req as any).user?.userId;
+    await authService.changePassword(userId, currentPassword, newPassword);
+    return res.json({ message: "Contraseña actualizada" });
   } catch (err: any) {
     return res.status(err.statusCode ?? 500).json({ error: err.message });
   }

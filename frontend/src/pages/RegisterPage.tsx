@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import PasswordInput from "../components/ui/PasswordInput";
 
 const API_URL = "/api";
 
@@ -23,6 +24,7 @@ export default function RegisterPage() {
   const [slug, setSlug] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [registered, setRegistered] = useState(false);
 
   function handleBusinessNameChange(value: string) {
     setBusinessName(value);
@@ -51,7 +53,7 @@ export default function RegisterPage() {
         throw new Error(data.error ?? "Error al registrar");
       }
 
-      navigate(`/login/${slug}`);
+      setRegistered(true);
     } catch (err: any) {
       setError(err?.message ?? "Error al registrar");
     } finally {
@@ -68,6 +70,22 @@ export default function RegisterPage() {
         </div>
 
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+          {registered ? (
+            <div className="text-center py-4">
+              <div className="text-3xl mb-3">📬</div>
+              <h2 className="text-base font-semibold text-slate-800 mb-2">Revisá tu email</h2>
+              <p className="text-sm text-slate-500">
+                Te enviamos un link a <span className="font-medium text-slate-700">{email}</span> para confirmar tu cuenta.
+              </p>
+              <p className="text-xs text-slate-400 mt-3">
+                Una vez confirmado, podés{" "}
+                <a href={`/login/${slug}`} className="text-teal-600 hover:underline">
+                  iniciar sesión
+                </a>.
+              </p>
+            </div>
+          ) : (
+          <>
           <h2 className="text-base font-medium text-slate-700 mb-5">Registrar negocio</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -92,7 +110,7 @@ export default function RegisterPage() {
               </label>
               <div className="flex items-center rounded-lg border border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-teal-500">
                 <span className="px-3 py-2 text-sm text-slate-400 bg-slate-50 border-r border-slate-200 whitespace-nowrap">
-                  caleio.app/
+                  app.caleio.app/
                 </span>
                 <input
                   id="slug"
@@ -106,7 +124,7 @@ export default function RegisterPage() {
               </div>
               {slug && (
                 <p className="mt-1 text-xs text-slate-400">
-                  Tus profesionales ingresarán en: <span className="text-teal-600 font-medium">caleio.app/login/{slug}</span>
+                  Tus profesionales ingresarán en: <span className="text-teal-600 font-medium">app.caleio.app/login/{slug}</span>
                 </p>
               )}
             </div>
@@ -131,9 +149,8 @@ export default function RegisterPage() {
               <label htmlFor="password" className="block text-sm font-medium text-slate-600 mb-1">
                 Contraseña
               </label>
-              <input
+              <PasswordInput
                 id="password"
-                type="password"
                 autoComplete="new-password"
                 required
                 value={password}
@@ -163,6 +180,8 @@ export default function RegisterPage() {
               </a>
             </p>
           </form>
+          </>
+          )}
         </div>
       </div>
     </div>

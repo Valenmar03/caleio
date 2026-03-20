@@ -7,10 +7,13 @@ import servicesRoutes from "./services.routes";
 import businessRoutes from "./business.routes";
 import analyticsRoutes from "./analytics.routes";
 import { authenticate } from "../middleware/authenticate";
+import { changePasswordHandler } from "../controllers/auth.controller";
 
 const router = Router();
 
 router.use(authenticate);
+
+router.post("/auth/change-password", changePasswordHandler);
 
 router.use("/appointments", appointmentsRoutes);
 router.use("/agenda", agendaRoutes);

@@ -13,7 +13,11 @@ import {
   Check,
   X,
   AlertCircle,
+  Copy,
+  KeyRound,
 } from "lucide-react";
+import { apiFetch } from "../services/api";
+import PasswordInput from "../components/ui/PasswordInput";
 import { useBusiness, useUpdateBusiness } from "../hooks/useBusiness";
 import { useProfessionals } from "../hooks/useProfessionals";
 import { useServices } from "../hooks/useServices";
@@ -120,7 +124,7 @@ function EditableField({
               <p className="text-xs text-slate-400">
                 URL de login:{" "}
                 <span className="font-mono text-slate-600">
-                  caleio.app/login/{displayDraft}
+                  app.caleio.app/login/{displayDraft}
                 </span>
               </p>
             )}
@@ -139,7 +143,7 @@ function EditableField({
             <p className="text-sm font-medium text-slate-800">{value}</p>
             {preview && (
               <p className="mt-0.5 text-xs text-slate-400 font-mono">
-                caleio.app/login/{value}
+                app.caleio.app/login/{value}
               </p>
             )}
             {hint && !preview && (
@@ -314,10 +318,12 @@ export default function BusinessSettingsPage() {
                 </div>
               </div>
             </div>
+            {/* Cambiar contraseña */}
+            <ChangePasswordForm />
           </div>
 
           {/* Right column — stats */}
-          <div className="space-y-4">
+          <div className="space-y-4 order-first lg:order-0">
             <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
               <div className="flex items-center gap-2.5 px-5 py-4 border-b border-slate-100">
                 <Globe className="w-4 h-4 text-slate-400" />
@@ -356,11 +362,7 @@ export default function BusinessSettingsPage() {
                 Compartí esta URL con tus profesionales para que puedan
                 iniciar sesión.
               </p>
-              <div className="bg-white border border-teal-200 rounded-lg px-3 py-2">
-                <p className="text-xs font-mono text-slate-700 break-all">
-                  caleio.app/login/{business.slug}
-                </p>
-              </div>
+              <CopyUrlRow slug={business.slug} />
             </div>
           </div>
         </div>
@@ -385,6 +387,133 @@ function StatRow({
         <span className="text-sm text-slate-600">{label}</span>
       </div>
       <span className="text-sm font-semibold text-slate-800">{value}</span>
+    </div>
+  );
+}
+
+function CopyUrlRow({ slug }: { slug: string }) {
+  const [copied, setCopied] = useState(false);
+  const url = `app.caleio.app/login/${slug}`;
+
+  function handleCopy() {
+    navigator.clipboard.writeText(`https://${url}`).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  return (
+    <div className="flex items-center gap-2 bg-white border border-teal-200 rounded-lg px-3 py-2">
+      <p className="text-xs font-mono text-slate-700 break-all flex-1">{url}</p>
+      <button
+        onClick={handleCopy}
+        title="Copiar URL"
+        className="shrink-0 text-teal-500 hover:text-teal-700 transition-colors"
+      >
+        {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+      </button>
+    </div>
+  );
+}
+
+function ChangePasswordForm() {
+  const [current, setCurrent] = useState("");
+  const [next, setNext] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setSuccess(false);
+
+    if (next !== confirm) {
+      setError("Las contraseñas nuevas no coinciden");
+      return;
+    }
+    if (next.length < 8) {
+      setError("La nueva contraseña debe tener al menos 8 caracteres");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await apiFetch("/auth/change-password", {
+        method: "POST",
+        body: JSON.stringify({ currentPassword: current, newPassword: next }),
+      });
+      setSuccess(true);
+      setCurrent("");
+      setNext("");
+      setConfirm("");
+    } catch (err: any) {
+      setError(err?.message ?? "Error al cambiar la contraseña");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+      <div className="flex items-center gap-2.5 px-6 py-4 border-b border-slate-100">
+        <KeyRound className="w-4 h-4 text-slate-400" />
+        <h2 className="text-sm font-semibold text-slate-700">Cambiar contraseña</h2>
+      </div>
+      <form onSubmit={handleSubmit} className="px-6 py-4 space-y-3">
+        <div>
+          <label className="block text-xs font-medium text-slate-500 mb-1">Contraseña actual</label>
+          <PasswordInput
+            required
+            value={current}
+            onChange={(e) => setCurrent(e.target.value)}
+            className="w-full max-w-sm rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-teal-500"
+            placeholder="••••••••"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-slate-500 mb-1">Nueva contraseña</label>
+          <PasswordInput
+            required
+            value={next}
+            onChange={(e) => setNext(e.target.value)}
+            className="w-full max-w-sm rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-teal-500"
+            placeholder="••••••••"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-slate-500 mb-1">Confirmar nueva contraseña</label>
+          <PasswordInput
+            required
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            className="w-full max-w-sm rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-teal-500"
+            placeholder="••••••••"
+          />
+        </div>
+
+        {error && (
+          <p className="flex items-center gap-1.5 text-xs text-red-600">
+            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+            {error}
+          </p>
+        )}
+        {success && (
+          <p className="flex items-center gap-1.5 text-xs text-emerald-600">
+            <Check className="w-3.5 h-3.5 shrink-0" />
+            Contraseña actualizada correctamente
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={saving}
+          className="mt-1 py-1.5 px-4 rounded-lg bg-slate-800 text-white text-sm font-medium hover:bg-slate-700 disabled:opacity-60 disabled:cursor-not-allowed transition"
+        >
+          {saving ? "Guardando..." : "Guardar contraseña"}
+        </button>
+      </form>
     </div>
   );
 }

@@ -12,6 +12,7 @@ import ForgotPasswordPage from "../pages/ForgotPasswordPage.tsx";
 import ResetPasswordPage from "../pages/ResetPasswordPage.tsx";
 import BusinessSettingsPage from "../pages/BusinessSettingsPage.tsx";
 import AnalyticsPage from "../pages/AnalyticsPage.tsx";
+import BookingPage from "../pages/BookingPage.tsx";
 import { useAuth } from "../hooks/useAuth.ts";
 
 function ProtectedRoute() {
@@ -63,6 +64,10 @@ export const router = createBrowserRouter([
   {
     path: "/resetear-password",
     element: <ResetPasswordPage />,
+  },
+  {
+    path: "/reservar/:slug",
+    element: <BookingPage />,
   },
   {
     path: "/",

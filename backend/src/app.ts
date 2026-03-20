@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { prisma } from "./db/prisma";
 import authRoutes from "./routes/auth.routes";
+import publicRoutes from "./routes/public.routes";
 import routes from "./routes";
 
 const app = express();
@@ -27,6 +28,7 @@ app.get("/health/db", async (_req, res) => {
 });
 
 app.use("/auth", authRoutes);
+app.use("/booking", publicRoutes);
 app.use(routes);
 
 export default app;

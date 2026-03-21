@@ -74,7 +74,8 @@ export async function register(
   email: string,
   password: string,
   businessName: string,
-  slug: string
+  slug: string,
+  timezone?: string
 ): Promise<{ user: AuthUser }> {
   const normalizedSlug = normalizeSlug(slug);
   const normalizedEmail = email.trim().toLowerCase();
@@ -92,7 +93,9 @@ export async function register(
   if (existingSlug) throw Object.assign(new Error("Business URL already taken"), { statusCode: 409 });
 
   const passwordHash = await bcrypt.hash(password.trim(), 12);
-  const business = await prisma.business.create({ data: { name: businessName, slug: normalizedSlug } });
+  const business = await prisma.business.create({
+    data: { name: businessName, slug: normalizedSlug, ...(timezone ? { timezone } : {}) },
+  });
   const user = await prisma.user.create({
     data: { email: normalizedEmail, passwordHash, role: "OWNER", businessId: business.id, emailVerified: false },
   });

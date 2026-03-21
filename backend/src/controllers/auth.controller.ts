@@ -11,12 +11,12 @@ const COOKIE_OPTIONS = {
 
 export async function registerHandler(req: Request, res: Response) {
   try {
-    const { email, password, businessName, slug } = req.body;
+    const { email, password, businessName, slug, timezone } = req.body;
     if (!email || !password || !businessName || !slug) {
       return res.status(400).json({ error: "email, password, businessName and slug are required" });
     }
 
-    const result = await authService.register(email, password, businessName, slug);
+    const result = await authService.register(email, password, businessName, slug, timezone);
     return res.status(201).json({ user: result.user });
   } catch (err: any) {
     return res.status(err.statusCode ?? 500).json({ error: err.message });

@@ -1,8 +1,13 @@
-const RESEND_API_KEY = process.env.RESEND_API_KEY!;
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM = process.env.SMTP_FROM ?? "Caleio <noreply@caleio.app>";
 const APP_URL = process.env.APP_URL ?? "http://localhost:5173";
 
 async function sendEmail(to: string, subject: string, html: string): Promise<void> {
+  if (!RESEND_API_KEY) {
+    console.log(`[email:dev] To: ${to} | Subject: ${subject}`);
+    return;
+  }
+
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {

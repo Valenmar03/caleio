@@ -362,7 +362,21 @@ export default function BusinessSettingsPage() {
                 Compartí esta URL con tus profesionales para que puedan
                 iniciar sesión.
               </p>
-              <CopyUrlRow slug={business.slug} />
+              <CopyUrlRow url={`app.caleio.app/login/${business.slug}`} />
+            </div>
+
+            {/* Booking URL card */}
+            <div className="bg-violet-50 border border-violet-100 rounded-xl p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <Globe className="w-4 h-4 text-violet-600" />
+                <p className="text-sm font-semibold text-violet-700">
+                  Link de reservas
+                </p>
+              </div>
+              <p className="text-xs text-violet-600 mb-2">
+                Compartí este link con tus clientes para que puedan reservar su turno online.
+              </p>
+              <CopyUrlRow url={`app.caleio.app/reservar/${business.slug}`} accent="violet" />
             </div>
           </div>
         </div>
@@ -391,9 +405,13 @@ function StatRow({
   );
 }
 
-function CopyUrlRow({ slug }: { slug: string }) {
+function CopyUrlRow({ url, accent = "teal" }: { url: string; accent?: "teal" | "violet" }) {
   const [copied, setCopied] = useState(false);
-  const url = `app.caleio.app/login/${slug}`;
+
+  const colors = {
+    teal: "border-teal-200 text-teal-500 hover:text-teal-700",
+    violet: "border-violet-200 text-violet-500 hover:text-violet-700",
+  };
 
   function handleCopy() {
     navigator.clipboard.writeText(`https://${url}`).then(() => {
@@ -403,12 +421,12 @@ function CopyUrlRow({ slug }: { slug: string }) {
   }
 
   return (
-    <div className="flex items-center gap-2 bg-white border border-teal-200 rounded-lg px-3 py-2">
+    <div className={`flex items-center gap-2 bg-white border rounded-lg px-3 py-2 ${colors[accent].split(" ")[0]}`}>
       <p className="text-xs font-mono text-slate-700 break-all flex-1">{url}</p>
       <button
         onClick={handleCopy}
         title="Copiar URL"
-        className="shrink-0 text-teal-500 hover:text-teal-700 transition-colors"
+        className={`shrink-0 transition-colors ${colors[accent].split(" ").slice(1).join(" ")}`}
       >
         {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
       </button>

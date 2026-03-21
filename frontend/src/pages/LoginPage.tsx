@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import PasswordInput from "../components/ui/PasswordInput";
 
@@ -21,6 +21,9 @@ export default function LoginPage() {
   const { slug } = useParams<{ slug?: string }>();
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const justRegistered = (location.state as any)?.justRegistered === true;
+  const registeredEmail = (location.state as any)?.email as string | undefined;
 
   const [businessName, setBusinessName] = useState<string | null>(null);
   const [slugInput, setSlugInput] = useState("");
@@ -69,9 +72,18 @@ export default function LoginPage() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold text-slate-800 tracking-tight">Caleio</h1>
-          <p className="text-sm text-slate-500 mt-1">Gestión de turnos</p>
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <img src="/logo.png" alt="Caleio" className="w-8 h-8 object-contain" />
+            <h1 className="text-2xl font-semibold text-slate-800 tracking-tight">Caleio</h1>
+          </div>
+          <p className="text-sm text-slate-500">Gestión de turnos</p>
         </div>
+
+        {justRegistered && (
+          <div className="mb-4 bg-teal-50 border border-teal-200 rounded-xl px-4 py-3 text-sm text-teal-800">
+            📬 Revisá tu email{registeredEmail ? ` (${registeredEmail})` : ""} para confirmar tu cuenta antes de iniciar sesión.
+          </div>
+        )}
 
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
           {!slug ? (

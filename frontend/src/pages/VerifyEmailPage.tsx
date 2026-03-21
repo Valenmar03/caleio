@@ -34,8 +34,11 @@ export default function VerifyEmailPage() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold text-slate-800 tracking-tight">Caleio</h1>
-          <p className="text-sm text-slate-500 mt-1">Gestión de turnos</p>
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <img src="/logo.png" alt="Caleio" className="w-8 h-8 object-contain" />
+            <h1 className="text-2xl font-semibold text-slate-800 tracking-tight">Caleio</h1>
+          </div>
+          <p className="text-sm text-slate-500">Gestión de turnos</p>
         </div>
 
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 text-center">

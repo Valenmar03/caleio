@@ -572,8 +572,9 @@ export default function BookingPage() {
         )}
       </div>
 
-      <footer className="text-center text-xs text-slate-300 py-6">
-        Powered by Caleio
+      <footer className="flex items-center justify-center gap-1.5 py-6">
+        <img src="/logo.png" alt="Caleio" className="w-4 h-4 object-contain opacity-40" />
+        <span className="text-xs text-slate-300">Powered by Caleio</span>
       </footer>
     </div>
   );

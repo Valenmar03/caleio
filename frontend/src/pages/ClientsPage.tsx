@@ -1,10 +1,11 @@
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Eye, Plus, Search, Phone } from "lucide-react";
+import { Eye, Plus, Search, Phone, Link2, Check, Copy } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import Button from "../components/ui/Button";
 import { useClients } from "../hooks/useClients";
+import { useBusiness } from "../hooks/useBusiness";
 import type { Client } from "../types/entities";
 import ClientDetailModal from "../components/clients/ClientDetailModal";
 import NewClientFormModal from "../components/clients/NewClientFormModal";
@@ -20,6 +21,17 @@ export default function ClientsPage() {
   const [clientSheetOpen, setClientSheetOpen] = useState(false);
 
   const { data: clientsData, isLoading: clientsLoading } = useClients(search);
+  const { data: businessData } = useBusiness();
+  const [copiedBooking, setCopiedBooking] = useState(false);
+
+  function handleCopyBookingLink() {
+    if (!businessData?.business?.slug) return;
+    const url = `https://app.caleio.app/reservar/${businessData.business.slug}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopiedBooking(true);
+      setTimeout(() => setCopiedBooking(false), 2000);
+    });
+  }
   const clients = clientsData?.clients ?? [];
 
   const normalize = (str: string) =>
@@ -93,13 +105,23 @@ const handleCloseNewClientModal = () => {
             </p>
           </div>
 
-          <button
-            onClick={handleNewClient}
-            className="hidden md:inline-flex items-center justify-center rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700 transition-colors"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Nuevo cliente
-          </button>
+          <div className="hidden md:flex items-center gap-2">
+            <button
+              onClick={handleCopyBookingLink}
+              title="Copiar link de reservas"
+              className="inline-flex items-center gap-2 rounded-lg border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-medium text-violet-700 hover:bg-violet-100 transition-colors"
+            >
+              {copiedBooking ? <Check className="w-4 h-4" /> : <Link2 className="w-4 h-4" />}
+              {copiedBooking ? "Copiado" : "Link de reservas"}
+            </button>
+            <button
+              onClick={handleNewClient}
+              className="inline-flex items-center justify-center rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700 transition-colors"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nuevo cliente
+            </button>
+          </div>
         </div>
 
         <div className="hidden md:flex flex-col xl:flex-row gap-3 items-start xl:items-center xl:justify-between">

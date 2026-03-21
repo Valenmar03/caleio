@@ -10,6 +10,7 @@ import SectionCard from "../components/dashboard/SectionCard";
 import StatCard from "../components/dashboard/StatCard";
 import { useProfessionals } from "../hooks/useProfessionals";
 import { useAgendaDaily } from "../hooks/useAgenda";
+import { useAuth } from "../hooks/useAuth";
 import DashboardSideSkeleton from "../components/dashboard/skeleton/DashboardSideSkeleton";
 import DashboardStatSkeleton from "../components/dashboard/skeleton/DashboardStatSkeleton";
 import UpcomingAppointmentsSkeleton from "../components/dashboard/skeleton/UpcomingAppointmentSkeleton";
@@ -49,6 +50,9 @@ function formatCurrency(value: number) {
 }
 
 export default function DashboardPage() {
+  const { user } = useAuth();
+  const isPro = user?.role === "PRO";
+
   const [selectedDate, setSelectedDate] = useState(() =>
     format(new Date(), "yyyy-MM-dd")
   );
@@ -92,7 +96,8 @@ export default function DashboardPage() {
     const pendingAppointments = normalizedAppointments.filter(
       (appt) =>
         (appt.status === "RESERVED" || appt.status === "DEPOSIT_PAID") &&
-        appt.endDate < now
+        appt.endDate < now &&
+        (!isPro || appt.professional?.id === user?.professionalId)
     );
 
     const remainingAppointments = normalizedAppointments.filter(
@@ -102,7 +107,11 @@ export default function DashboardPage() {
     );
 
     const upcomingAppointments = normalizedAppointments
-      .filter((appt) => isAfter(appt.startDate, now))
+      .filter(
+        (appt) =>
+          isAfter(appt.startDate, now) &&
+          (!isPro || appt.professional?.id === user?.professionalId)
+      )
       .sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
       .slice(0, 5)
       .map((appt) => ({
@@ -224,7 +233,7 @@ export default function DashboardPage() {
       popularServices,
       activeTeam,
     };
-  }, [appointments, professionals]);
+  }, [appointments, professionals, isPro, user]);
 
   const isLoading = professionalsLoading || dailyLoading;
 

@@ -1,8 +1,72 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
+import { ChevronDown, Check } from "lucide-react";
 import PasswordInput from "../components/ui/PasswordInput";
+import AR from "country-flag-icons/react/3x2/AR";
+import MX from "country-flag-icons/react/3x2/MX";
+import CO from "country-flag-icons/react/3x2/CO";
+import CL from "country-flag-icons/react/3x2/CL";
+import UY from "country-flag-icons/react/3x2/UY";
+import PE from "country-flag-icons/react/3x2/PE";
+import VE from "country-flag-icons/react/3x2/VE";
 
 const API_URL = "/api";
+
+const TIMEZONES = [
+  { Flag: AR, label: "Argentina", value: "America/Argentina/Buenos_Aires" },
+  { Flag: MX, label: "México", value: "America/Mexico_City" },
+  { Flag: CO, label: "Colombia", value: "America/Bogota" },
+  { Flag: CL, label: "Chile", value: "America/Santiago" },
+  { Flag: UY, label: "Uruguay", value: "America/Montevideo" },
+  { Flag: PE, label: "Perú", value: "America/Lima" },
+  { Flag: VE, label: "Venezuela", value: "America/Caracas" },
+];
+
+function TimezoneSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const selected = TIMEZONES.find((tz) => tz.value === value) ?? TIMEZONES[0];
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition text-left"
+      >
+        <selected.Flag className="w-5 h-auto rounded-sm shrink-0" />
+        <span className="flex-1">{selected.label}</span>
+        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div className="absolute z-50 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden">
+          {TIMEZONES.map((tz) => (
+            <button
+              key={tz.value}
+              type="button"
+              onClick={() => { onChange(tz.value); setOpen(false); }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left"
+            >
+              <tz.Flag className="w-5 h-auto rounded-sm shrink-0" />
+              <span className="flex-1">{tz.label}</span>
+              {tz.value === value && <Check className="w-3.5 h-3.5 text-teal-600" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function normalizeSlug(raw: string): string {
   return raw
@@ -15,14 +79,15 @@ function normalizeSlug(raw: string): string {
 }
 
 export default function RegisterPage() {
+  const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [slug, setSlug] = useState("");
+  const [timezone, setTimezone] = useState("America/Argentina/Buenos_Aires");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [registered, setRegistered] = useState(false);
 
   function handleBusinessNameChange(value: string) {
     setBusinessName(value);
@@ -43,7 +108,7 @@ export default function RegisterPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ email, password, businessName, slug }),
+        body: JSON.stringify({ email, password, businessName, slug, timezone }),
       });
 
       if (!res.ok) {
@@ -51,7 +116,7 @@ export default function RegisterPage() {
         throw new Error(data.error ?? "Error al registrar");
       }
 
-      setRegistered(true);
+      navigate(`/login/${slug}`, { state: { justRegistered: true, email } });
     } catch (err: any) {
       setError(err?.message ?? "Error al registrar");
     } finally {
@@ -63,26 +128,14 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold text-slate-800 tracking-tight">Caleio</h1>
-          <p className="text-sm text-slate-500 mt-1">Gestión de turnos</p>
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <img src="/logo.png" alt="Caleio" className="w-8 h-8 object-contain" />
+            <h1 className="text-2xl font-semibold text-slate-800 tracking-tight">Caleio</h1>
+          </div>
+          <p className="text-sm text-slate-500">Gestión de turnos</p>
         </div>
 
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-          {registered ? (
-            <div className="text-center py-4">
-              <div className="text-3xl mb-3">📬</div>
-              <h2 className="text-base font-semibold text-slate-800 mb-2">Revisá tu email</h2>
-              <p className="text-sm text-slate-500">
-                Te enviamos un link a <span className="font-medium text-slate-700">{email}</span> para confirmar tu cuenta.
-              </p>
-              <p className="text-xs text-slate-400 mt-3">
-                Una vez confirmado, podés{" "}
-                <a href={`/login/${slug}`} className="text-teal-600 hover:underline">
-                  iniciar sesión
-                </a>.
-              </p>
-            </div>
-          ) : (
           <>
           <h2 className="text-base font-medium text-slate-700 mb-5">Registrar negocio</h2>
 
@@ -125,6 +178,13 @@ export default function RegisterPage() {
                   Tus profesionales ingresarán en: <span className="text-teal-600 font-medium">app.caleio.app/login/{slug}</span>
                 </p>
               )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-600 mb-1">
+                País / Zona horaria
+              </label>
+              <TimezoneSelect value={timezone} onChange={setTimezone} />
             </div>
 
             <div>
@@ -179,7 +239,6 @@ export default function RegisterPage() {
             </p>
           </form>
           </>
-          )}
         </div>
       </div>
     </div>

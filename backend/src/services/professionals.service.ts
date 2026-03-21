@@ -193,11 +193,12 @@ export class ProfessionalService {
     stepMin?: number;
   }) {
     const { businessId, professionalId, date, serviceId, stepMin = 15 } = params;
-    const TZ = "America/Argentina/Buenos_Aires";
 
-    const professional = await prisma.professional.findFirst({
-      where: { id: professionalId, businessId, active: true },
-    });
+    const [business, professional] = await Promise.all([
+      prisma.business.findUnique({ where: { id: businessId }, select: { timezone: true } }),
+      prisma.professional.findFirst({ where: { id: professionalId, businessId, active: true } }),
+    ]);
+    const TZ = business?.timezone ?? "America/Argentina/Buenos_Aires";
     if (!professional) throw badRequest("Professional not found");
 
     const service = await prisma.service.findFirst({
@@ -392,7 +393,7 @@ export class ProfessionalService {
     const passwordHash = await bcrypt.hash(password, 12);
 
     const user = await prisma.user.create({
-      data: { businessId, username, passwordHash, role: "PRO" },
+      data: { businessId, username, passwordHash, role: "PRO", emailVerified: true },
     });
 
     return prisma.professional.update({

@@ -5,6 +5,7 @@ import { prisma } from "./db/prisma";
 import authRoutes from "./routes/auth.routes";
 import publicRoutes from "./routes/public.routes";
 import routes from "./routes";
+import { authLimiter, publicLimiter, apiLimiter } from "./middleware/rateLimiter";
 
 const app = express();
 
@@ -27,8 +28,8 @@ app.get("/health/db", async (_req, res) => {
   }
 });
 
-app.use("/auth", authRoutes);
-app.use("/booking", publicRoutes);
-app.use(routes);
+app.use("/auth", authLimiter, authRoutes);
+app.use("/booking", publicLimiter, publicRoutes);
+app.use(apiLimiter, routes);
 
 export default app;

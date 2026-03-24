@@ -182,9 +182,10 @@ model Service {
   durationMin Int
   description String?
   basePrice       Decimal
-  requiresDeposit Boolean  @default(false)
-  depositPercent  Int?
-  active          Boolean  @default(true)
+  requiresDeposit  Boolean  @default(false)
+  depositPercent   Int?
+  bookableOnline   Boolean  @default(true)
+  active           Boolean  @default(true)
   createdAt   DateTime @default(now())
 
   business     Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)

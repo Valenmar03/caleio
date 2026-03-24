@@ -41,6 +41,7 @@ export default function ServiceDetailModal({
     const [basePrice, setBasePrice] = useState(0);
     const [requiresDeposit, setRequiresDeposit] = useState(false);
     const [depositPercent, setDepositPercent] = useState<number>(20);
+    const [bookableOnline, setBookableOnline] = useState(true);
     const [basePriceError, setBasePriceError] = useState<string | null>(null);
     const [nameError, setNameError] = useState<string | null>(null);
     const [durationError, setDurationError] = useState<string | null>(null);
@@ -55,6 +56,7 @@ export default function ServiceDetailModal({
         setActive(Boolean(service.active));
         setRequiresDeposit(Boolean(service.requiresDeposit));
         setDepositPercent(service.depositPercent ?? 20);
+        setBookableOnline(service.bookableOnline ?? true);
         setNameError(null);
         setDurationError(null);
         setBasePriceError(null);
@@ -101,6 +103,7 @@ export default function ServiceDetailModal({
         active,
         requiresDeposit,
         depositPercent: requiresDeposit ? Number(depositPercent) : null,
+        bookableOnline,
       });
 
       onClose();
@@ -272,6 +275,22 @@ export default function ServiceDetailModal({
                         <p className="mt-1 text-xs text-red-600">{basePriceError}</p>
                     )}
                 </div>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-slate-800">Agendable online</p>
+                <p className="text-xs text-slate-400">Los clientes pueden reservar este servicio desde el link de reservas</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setBookableOnline((prev) => !prev)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${bookableOnline ? "bg-teal-600" : "bg-slate-200"}`}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${bookableOnline ? "translate-x-6" : "translate-x-1"}`} />
+              </button>
             </div>
           </div>
 

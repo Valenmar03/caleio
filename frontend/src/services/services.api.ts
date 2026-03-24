@@ -24,6 +24,7 @@ export async function updateService(payload: UpdateServicePayload) {
         ...(payload.active !== undefined && { active: payload.active }),
         ...(payload.requiresDeposit !== undefined && { requiresDeposit: payload.requiresDeposit }),
         ...(payload.depositPercent !== undefined && { depositPercent: payload.depositPercent }),
+        ...(payload.bookableOnline !== undefined && { bookableOnline: payload.bookableOnline }),
       })
     }
   );
@@ -42,6 +43,7 @@ export async function createService(payload: CreateServicePayload) {
         active: payload.active ?? true,
         requiresDeposit: payload.requiresDeposit ?? false,
         depositPercent: payload.depositPercent ?? null,
+        bookableOnline: payload.bookableOnline ?? true,
       }),
     }
   );

@@ -83,6 +83,7 @@ export const createServiceBody = z.object({
   active: z.boolean().optional(),
   requiresDeposit: z.boolean().optional(),
   depositPercent: z.number().int().min(1).max(100).optional().nullable(),
+  bookableOnline: z.boolean().optional(),
 });
 
 export const updateServiceBody = createServiceBody.partial();

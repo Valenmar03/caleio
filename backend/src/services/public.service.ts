@@ -28,7 +28,7 @@ export async function getPublicBusinessInfo(slug: string) {
 export async function getPublicServices(slug: string) {
   const business = await getBusinessBySlug(slug);
   return prisma.service.findMany({
-    where: { businessId: business.id, active: true },
+    where: { businessId: business.id, active: true, bookableOnline: true },
     select: {
       id: true,
       name: true,

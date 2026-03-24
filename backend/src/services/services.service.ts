@@ -15,6 +15,7 @@ type CreateServiceInput = {
   description?: string;
   requiresDeposit?: boolean;
   depositPercent?: number | null;
+  bookableOnline?: boolean;
 };
 
 type UpdateServiceInput = {
@@ -25,6 +26,7 @@ type UpdateServiceInput = {
   description?: string;
   requiresDeposit?: boolean;
   depositPercent?: number | null;
+  bookableOnline?: boolean;
 };
 
 export class ServiceService {
@@ -126,6 +128,7 @@ export class ServiceService {
         active: data.active ?? true,
         requiresDeposit: data.requiresDeposit ?? false,
         depositPercent: data.depositPercent ?? null,
+        bookableOnline: data.bookableOnline ?? true,
       },
     });
   }
@@ -188,6 +191,10 @@ export class ServiceService {
 
     if (data.depositPercent !== undefined) {
       updateData.depositPercent = data.depositPercent;
+    }
+
+    if (data.bookableOnline !== undefined) {
+      updateData.bookableOnline = data.bookableOnline;
     }
 
     return prisma.service.update({ where: { id }, data: updateData });

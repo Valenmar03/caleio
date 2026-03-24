@@ -1,4 +1,4 @@
-import { Clock, DollarSign, Banknote } from "lucide-react";
+import { Clock, DollarSign, Banknote, EyeOff } from "lucide-react";
 import type { ServiceWithProfessional } from "../../types/entities";
 type Props = {
     service: ServiceWithProfessional;
@@ -42,6 +42,12 @@ export default function ServiceCard({service, onClick}: Props) {
                {Number(service.basePrice).toLocaleString("es-AR")}
             </span>
          </div>
+         {service.bookableOnline === false && (
+            <div className="flex items-center gap-1.5 mt-2">
+               <EyeOff className="w-3 h-3 text-slate-400" />
+               <span className="text-[11px] text-slate-500 font-medium">No agendable online</span>
+            </div>
+         )}
          {service.requiresDeposit && service.depositPercent && (
             <div className="flex items-center gap-1.5 mt-2">
                <Banknote className="w-3 h-3 text-amber-600" />

@@ -45,6 +45,7 @@ export default function ServiceDetailModal({
     const [basePriceError, setBasePriceError] = useState<string | null>(null);
     const [nameError, setNameError] = useState<string | null>(null);
     const [durationError, setDurationError] = useState<string | null>(null);
+    const [saveError, setSaveError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!open || !service) return;
@@ -109,6 +110,7 @@ export default function ServiceDetailModal({
       onClose();
     } catch (error) {
       console.error(error);
+      setSaveError("No se pudo guardar. Intentá de nuevo.");
     }
   };
 
@@ -120,7 +122,9 @@ export default function ServiceDetailModal({
       description="Modificá nombre, descripción, duración, estado y profesionales asignados."
       size="xl"
       footer={
-        <div className="flex justify-end gap-2">
+        <div className="flex flex-col gap-2">
+          {saveError && <p className="text-xs text-red-600 text-right">{saveError}</p>}
+          <div className="flex justify-end gap-2">
           <Button variant="secondary" onClick={onClose}>
             Cancelar
           </Button>
@@ -137,6 +141,7 @@ export default function ServiceDetailModal({
           >
             {isSaving ? "Guardando..." : "Guardar cambios"}
           </Button>
+          </div>
         </div>
       }
     >

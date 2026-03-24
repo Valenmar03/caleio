@@ -55,7 +55,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/register",
-    element: <RegisterPage />,
+    element: <Navigate to="/login" replace />,
   },
   {
     path: "/verificar-email",

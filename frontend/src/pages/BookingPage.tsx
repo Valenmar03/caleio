@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { format, addDays, startOfToday, isToday } from "date-fns";
 import { es } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Clock, Check, Loader2, CreditCard } from "lucide-react";
+import PhoneInput from "../components/ui/PhoneInput";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -345,7 +346,7 @@ export default function BookingPage() {
     service: !!selectedService,
     professional: !!selectedProfessional,
     datetime: !!selectedSlot,
-    client: clientName.trim().length >= 2 && clientPhone.trim().length >= 6,
+    client: clientName.trim().length >= 2 && clientPhone.replace(/\D/g, "").length >= 6,
     confirm: true,
     redirecting: false,
     done: false,
@@ -517,13 +518,10 @@ export default function BookingPage() {
                 onChange={setClientName}
                 placeholder="Ej: María García"
               />
-              <Field
-                label="Teléfono"
-                required
+              <PhoneInput
                 value={clientPhone}
                 onChange={setClientPhone}
-                placeholder="Ej: 11 1234-5678"
-                type="tel"
+                required
               />
               <Field
                 label="Email"

@@ -10,16 +10,16 @@ export default function BookingPaymentSuccessPage() {
 
   useEffect(() => {
     const paymentId = searchParams.get("payment_id");
-    const appointmentId = searchParams.get("external_reference");
+    const pendingId = searchParams.get("external_reference");
     const paymentStatus = searchParams.get("status");
 
-    if (!paymentId || !appointmentId || paymentStatus !== "approved") {
+    if (!paymentId || !pendingId || paymentStatus !== "approved") {
       setStatus("error");
       setErrorMsg("El pago no fue aprobado o faltan datos.");
       return;
     }
 
-    fetch(`/booking/${slug}/appointments/${appointmentId}/confirm-payment`, {
+    fetch(`/booking/${slug}/appointments/${pendingId}/confirm-payment`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ paymentId }),

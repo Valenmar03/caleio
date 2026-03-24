@@ -33,6 +33,7 @@ type CreateAppointmentInput = {
   clientId: string;
   serviceId: string;
   startAt: string; // ISO
+  status?: AppointmentStatus;
 };
 
 type UpdateAppointmentInput = {
@@ -69,7 +70,7 @@ export class AppointmentService {
   }
 
   async create(input: CreateAppointmentInput) {
-    const { businessId, professionalId, clientId, serviceId, startAt } = input;
+    const { businessId, professionalId, clientId, serviceId, startAt, status: inputStatus } = input;
 
     const startDate = new Date(startAt);
     if (Number.isNaN(startDate.getTime())) throw badRequest("Invalid startAt");
@@ -98,7 +99,7 @@ export class AppointmentService {
       where: {
         businessId,
         professionalId,
-        status: { in: ["RESERVED", "DEPOSIT_PAID"] },
+        status: { in: ["PENDING_PAYMENT", "RESERVED", "DEPOSIT_PAID"] },
         startAt: { lt: endDate },
         endAt: { gt: startDate },
       },
@@ -147,7 +148,7 @@ export class AppointmentService {
         startAt: startDate,
         endAt: endDate,
         totalPrice: service.basePrice,
-        status: "RESERVED",
+        status: inputStatus ?? "RESERVED",
       },
     });
 
@@ -289,7 +290,7 @@ export class AppointmentService {
       where: {
         businessId,
         professionalId,
-        status: { in: ["RESERVED", "DEPOSIT_PAID"] },
+        status: { in: ["PENDING_PAYMENT", "RESERVED", "DEPOSIT_PAID"] },
         id: { not: appointmentId },
         startAt: { lt: endDate },
         endAt: { gt: startDate },
@@ -372,7 +373,7 @@ export class AppointmentService {
       where: {
         businessId,
         professionalId: appointment.professionalId,
-        status: { in: ["RESERVED", "DEPOSIT_PAID"] },
+        status: { in: ["PENDING_PAYMENT", "RESERVED", "DEPOSIT_PAID"] },
         id: { not: appointmentId },
         startAt: { lt: newEnd },
         endAt: { gt: newStart },

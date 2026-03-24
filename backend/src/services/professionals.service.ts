@@ -232,7 +232,7 @@ export class ProfessionalService {
       where: {
         businessId,
         professionalId,
-        status: { in: ["RESERVED", "DEPOSIT_PAID"] },
+        status: { in: ["PENDING_PAYMENT", "RESERVED", "DEPOSIT_PAID"] },
         startAt: { gte: from.toJSDate(), lt: to.toJSDate() },
       },
       orderBy: { startAt: "asc" },
@@ -317,7 +317,7 @@ export class ProfessionalService {
       where: {
         businessId,
         professionalId,
-        status: { in: ["RESERVED", "DEPOSIT_PAID"] },
+        status: { in: ["PENDING_PAYMENT", "RESERVED", "DEPOSIT_PAID"] },
         startAt: { lt: endAt },
         endAt: { gt: startAt },
       },

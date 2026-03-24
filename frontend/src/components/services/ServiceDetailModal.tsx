@@ -298,15 +298,22 @@ export default function ServiceDetailModal({
                 <label className="mb-1.5 block text-sm font-medium text-slate-700">
                   Porcentaje de seña (1–100)
                 </label>
-                <input
-                  type="number"
-                  min={1}
-                  max={100}
-                  step={1}
-                  value={depositPercent}
-                  onChange={(e) => setDepositPercent(Number(e.target.value))}
-                  className="h-10 w-32 rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-teal-500"
-                />
+                <div className="flex items-center gap-3">
+                  <input
+                    type="number"
+                    min={1}
+                    max={100}
+                    step={1}
+                    value={depositPercent}
+                    onChange={(e) => setDepositPercent(Number(e.target.value))}
+                    className="h-10 w-32 rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-teal-500"
+                  />
+                  {basePrice > 0 && depositPercent > 0 && (
+                    <span className="text-sm text-slate-500">
+                      = ${Math.round(basePrice * depositPercent / 100).toLocaleString("es-AR")}
+                    </span>
+                  )}
+                </div>
               </div>
             )}
           </div>

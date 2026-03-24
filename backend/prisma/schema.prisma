@@ -25,6 +25,7 @@ enum PlanType {
 }
 
 enum AppointmentStatus {
+  PENDING_PAYMENT
   RESERVED
   DEPOSIT_PAID
   CANCELED
@@ -253,4 +254,18 @@ model Appointment {
   @@index([professionalId, startAt])
   @@index([clientId])
   @@index([serviceId])
+}
+
+model PendingBooking {
+  id             String   @id @default(cuid())
+  businessId     String
+  professionalId String
+  clientId       String
+  serviceId      String
+  startAt        DateTime
+  depositAmount  Int
+  createdAt      DateTime @default(now())
+
+  @@index([businessId])
+  @@index([professionalId, startAt])
 }

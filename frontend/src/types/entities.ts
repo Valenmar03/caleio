@@ -313,6 +313,7 @@ export type WeeklyAgendaResponse = {
 // APPOINTMENTS
 
 export const AppointmentStatus = {
+  PENDING_PAYMENT: "PENDING_PAYMENT",
   RESERVED: "RESERVED",
   DEPOSIT_PAID: "DEPOSIT_PAID",
   CANCELED: "CANCELED",
@@ -328,6 +329,7 @@ export type AppointmentUiStatus =
   | "PENDING_RESOLUTION";
 
 export const appointmentStatusLabels: Record<AppointmentUiStatus, string> = {
+  [AppointmentStatus.PENDING_PAYMENT]: "Pago pendiente",
   [AppointmentStatus.RESERVED]: "Reservado",
   [AppointmentStatus.DEPOSIT_PAID]: "Señado",
   [AppointmentStatus.CANCELED]: "Cancelado",
@@ -337,6 +339,7 @@ export const appointmentStatusLabels: Record<AppointmentUiStatus, string> = {
 };
 
 export const appointmentStatusColors: Record<AppointmentUiStatus, string> = {
+  [AppointmentStatus.PENDING_PAYMENT]: "bg-amber-100 text-amber-700",
   [AppointmentStatus.RESERVED]: "bg-cyan-100 text-cyan-700",
   [AppointmentStatus.DEPOSIT_PAID]: "bg-teal-100 text-teal-700",
   [AppointmentStatus.CANCELED]: "bg-red-100 text-red-700",

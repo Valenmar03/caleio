@@ -18,7 +18,6 @@ export async function createMPPreference(params: {
         failure: `${APP_URL}/reservar/${slug}/pago-fallido`,
         pending: `${APP_URL}/reservar/${slug}/pago-pendiente`,
       },
-      auto_return: "approved",
       external_reference: appointmentId,
     }),
   });

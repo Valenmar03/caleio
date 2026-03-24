@@ -137,6 +137,48 @@ export async function createPublicAppointment(
     });
   }
 
+  const needsDeposit = !!(business.mpAccessToken && service.requiresDeposit && service.depositPercent);
+
+  if (needsDeposit) {
+    const depositAmount = Math.round(Number(service.basePrice) * service.depositPercent! / 100);
+
+    // Check slot availability before creating pending booking
+    const availability = await professionalService.getAvailability({
+      businessId: business.id,
+      professionalId,
+      date: startAt.slice(0, 10),
+      serviceId,
+    });
+    const slotAvailable = availability.slots.some((s) => s.startAt === startAt || s.startAt.startsWith(startAt));
+    if (!slotAvailable) {
+      const err = new Error("El horario seleccionado ya no está disponible") as Error & { status?: number };
+      err.status = 409;
+      throw err;
+    }
+
+    // Save temp booking — appointment is NOT created yet
+    const pending = await prisma.pendingBooking.create({
+      data: {
+        businessId: business.id,
+        professionalId,
+        clientId: client.id,
+        serviceId,
+        startAt: new Date(startAt),
+        depositAmount,
+      },
+    });
+
+    const { checkoutUrl } = await createMPPreference({
+      accessToken: business.mpAccessToken!,
+      appointmentId: pending.id,
+      serviceName: service.name,
+      depositAmount,
+      slug,
+    });
+
+    return { pendingBookingId: pending.id, checkoutUrl, depositAmount };
+  }
+
   const { appointment } = await appointmentService.create({
     businessId: business.id,
     professionalId,
@@ -145,30 +187,44 @@ export async function createPublicAppointment(
     startAt,
   });
 
-  if (business.mpAccessToken && service.requiresDeposit && service.depositPercent) {
-    const depositAmount = Math.round(Number(service.basePrice) * service.depositPercent / 100);
-    const { checkoutUrl } = await createMPPreference({
-      accessToken: business.mpAccessToken,
-      appointmentId: appointment.id,
-      serviceName: service.name,
-      depositAmount,
-      slug,
-    });
-    return { appointment, checkoutUrl, depositAmount };
-  }
-
   return { appointment };
 }
 
-export async function confirmPublicPayment(slug: string, appointmentId: string, paymentId: string) {
+export async function confirmPublicPayment(slug: string, pendingBookingId: string, paymentId: string) {
   const business = await getBusinessBySlug(slug);
   if (!business.mpAccessToken) throw Object.assign(new Error("Pagos no configurados"), { status: 400 });
+
   const payment = await getMPPayment(business.mpAccessToken, paymentId);
   if (payment.status !== "approved") throw Object.assign(new Error("El pago no fue aprobado"), { status: 400 });
-  if (payment.external_reference !== appointmentId) throw Object.assign(new Error("Referencia de pago inválida"), { status: 400 });
-  await prisma.appointment.update({
-    where: { id: appointmentId },
-    data: { status: "DEPOSIT_PAID", depositAmount: payment.transaction_amount, depositPaidAt: new Date(), depositMethod: "MERCADOPAGO" },
+  if (payment.external_reference !== pendingBookingId) throw Object.assign(new Error("Referencia de pago inválida"), { status: 400 });
+
+  const pending = await prisma.pendingBooking.findFirst({
+    where: { id: pendingBookingId, businessId: business.id },
   });
-  return { ok: true };
+  if (!pending) throw Object.assign(new Error("Reserva pendiente no encontrada"), { status: 404 });
+
+  // Create the real appointment now that payment is confirmed
+  const { appointment } = await appointmentService.create({
+    businessId: business.id,
+    professionalId: pending.professionalId,
+    clientId: pending.clientId,
+    serviceId: pending.serviceId,
+    startAt: pending.startAt.toISOString(),
+    status: "DEPOSIT_PAID",
+  });
+
+  // Store deposit info
+  await prisma.appointment.update({
+    where: { id: appointment.id },
+    data: {
+      depositAmount: payment.transaction_amount,
+      depositPaidAt: new Date(),
+      depositMethod: "MERCADOPAGO",
+    },
+  });
+
+  // Clean up pending booking
+  await prisma.pendingBooking.delete({ where: { id: pendingBookingId } });
+
+  return { ok: true, appointmentId: appointment.id };
 }

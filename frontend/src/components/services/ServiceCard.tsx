@@ -1,4 +1,4 @@
-import { Clock, DollarSign } from "lucide-react";
+import { Clock, DollarSign, Banknote } from "lucide-react";
 import type { ServiceWithProfessional } from "../../types/entities";
 type Props = {
     service: ServiceWithProfessional;
@@ -39,9 +39,17 @@ export default function ServiceCard({service, onClick}: Props) {
             </span>
             <span className="flex items-center gap-1">
                <DollarSign className="w-3 h-3" />{" "}
-               {service.basePrice}
+               {Number(service.basePrice).toLocaleString("es-AR")}
             </span>
          </div>
+         {service.requiresDeposit && service.depositPercent && (
+            <div className="flex items-center gap-1.5 mt-2">
+               <Banknote className="w-3 h-3 text-amber-600" />
+               <span className="text-[11px] text-amber-700 font-medium">
+                  Seña {service.depositPercent}% · ${Math.round(Number(service.basePrice) * service.depositPercent / 100).toLocaleString("es-AR")}
+               </span>
+            </div>
+         )}
          {assignedProfs.length > 0 && (
             <div className="flex -space-x-1.5 mt-3 pt-3 border-t border-slate-200">
                {assignedProfs.slice(0, 4).map((p) => (

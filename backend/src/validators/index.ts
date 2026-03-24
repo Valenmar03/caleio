@@ -111,8 +111,8 @@ export const createClientBody = z.object({
     .min(1, "El teléfono es requerido")
     .max(30)
     .regex(/^[\d\s+\-().]+$/, "Teléfono inválido"),
-  email: z.string().trim().email("Email inválido").max(254).optional().nullable(),
-  notes: z.string().trim().max(1000).optional().nullable(),
+  email: z.preprocess(v => (v === "" ? undefined : v), z.string().trim().email("Email inválido").max(254).optional().nullable()),
+  notes: z.preprocess(v => (v === "" ? undefined : v), z.string().trim().max(1000).optional().nullable()),
 });
 
 export const updateClientBody = createClientBody.partial();
@@ -311,7 +311,7 @@ export const publicCreateAppointmentBody = z.object({
     .min(1, "El teléfono es requerido")
     .max(30)
     .regex(/^[\d\s+\-().]+$/, "Teléfono inválido"),
-  clientEmail: z.string().trim().email("Email inválido").max(254).optional().nullable(),
+  clientEmail: z.preprocess(v => (v === "" ? undefined : v), z.string().trim().email("Email inválido").max(254).optional().nullable()),
 });
 
 export const confirmPaymentBody = z.object({

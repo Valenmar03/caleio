@@ -5,6 +5,10 @@
       "destination": "https://lumina-production-472a.up.railway.app/:path*"
     },
     {
+      "source": "/booking/:path*",
+      "destination": "https://lumina-production-472a.up.railway.app/booking/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

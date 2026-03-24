@@ -40,7 +40,11 @@ export function useUpdateService() {
         ["services-professionals"],
         (old) => {
           if (!old) return old;
-          return { services: old.services.map((s) => (s.id === updated.id ? updated : s)) };
+          return {
+            services: old.services.map((s) =>
+              s.id === updated.id ? { ...s, ...updated, professionalServices: s.professionalServices } : s
+            ),
+          };
         }
       );
       queryClient.invalidateQueries({ queryKey: ["services"] });

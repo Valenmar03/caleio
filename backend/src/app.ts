@@ -9,6 +9,8 @@ import { authLimiter, publicLimiter, apiLimiter } from "./middleware/rateLimiter
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 const allowedOrigin = process.env.ALLOWED_ORIGIN ?? "http://localhost:5173";
 app.use(cors({ origin: allowedOrigin, credentials: true }));
 app.use(express.json());

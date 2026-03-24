@@ -74,7 +74,7 @@ export async function updateServiceHandler(req: Request, res: Response) {
   try {
     const { businessId } = req.user!;
     const { id } = req.params;
-    const { name, description, durationMin, basePrice, active, requiresDeposit, depositPercent } = req.body;
+    const { name, description, durationMin, basePrice, active, requiresDeposit, depositPercent, bookableOnline } = req.body;
 
     const service = await serviceService.updateService(String(id), businessId, {
       ...(name !== undefined ? { name } : {}),
@@ -86,6 +86,7 @@ export async function updateServiceHandler(req: Request, res: Response) {
         : {}),
       ...(requiresDeposit !== undefined ? { requiresDeposit: Boolean(requiresDeposit) } : {}),
       ...(depositPercent !== undefined ? { depositPercent: depositPercent !== null ? Number(depositPercent) : null } : {}),
+      ...(bookableOnline !== undefined ? { bookableOnline: Boolean(bookableOnline) } : {}),
     });
 
     return res.json({ service });

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FileText, Mail, Phone, User2 } from "lucide-react";
+import { FileText, Mail, User2 } from "lucide-react";
 
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";

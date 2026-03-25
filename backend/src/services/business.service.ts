@@ -11,9 +11,17 @@ export const businessService = {
 
   async updateBusiness(
     businessId: string,
-    data: { name?: string; slug?: string; timezone?: string; mpAccessToken?: string | null }
+    data: {
+      name?: string;
+      slug?: string;
+      timezone?: string;
+      mpAccessToken?: string | null;
+      waPhoneNumberId?: string | null;
+      waAccessToken?: string | null;
+      waReminderHours?: number | null;
+    }
   ) {
-    const update: { name?: string; slug?: string; timezone?: string; mpAccessToken?: string | null } = {};
+    const update: Record<string, unknown> = {};
 
     if (data.name !== undefined) {
       const trimmed = data.name.trim();
@@ -33,13 +41,11 @@ export const businessService = {
       update.slug = normalized;
     }
 
-    if (data.timezone !== undefined) {
-      update.timezone = data.timezone;
-    }
-
-    if (data.mpAccessToken !== undefined) {
-      update.mpAccessToken = data.mpAccessToken ?? null;
-    }
+    if (data.timezone !== undefined) update.timezone = data.timezone;
+    if (data.mpAccessToken !== undefined) update.mpAccessToken = data.mpAccessToken ?? null;
+    if (data.waPhoneNumberId !== undefined) update.waPhoneNumberId = data.waPhoneNumberId ?? null;
+    if (data.waAccessToken !== undefined) update.waAccessToken = data.waAccessToken ?? null;
+    if (data.waReminderHours !== undefined) update.waReminderHours = data.waReminderHours ?? null;
 
     return prisma.business.update({ where: { id: businessId }, data: update });
   },

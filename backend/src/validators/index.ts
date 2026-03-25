@@ -51,6 +51,10 @@ export const changePasswordBody = z.object({
     .max(128),
 });
 
+export const updateUserBody = z.object({
+  phone: z.string().trim().max(30).optional().nullable(),
+});
+
 export const slugParams = z.object({
   slug: z.string().trim().min(1).max(60),
 });
@@ -62,6 +66,9 @@ export const updateBusinessBody = z.object({
   slug: z.string().trim().min(1).max(60).optional(),
   timezone: z.string().trim().max(60).optional(),
   mpAccessToken: z.string().trim().max(200).optional().nullable(),
+  waPhoneNumberId: z.string().trim().max(50).optional().nullable(),
+  waAccessToken: z.string().trim().max(500).optional().nullable(),
+  waReminderHours: z.number().int().min(1).max(168).optional().nullable(),
 });
 
 // ─── Services ─────────────────────────────────────────────────────────────────

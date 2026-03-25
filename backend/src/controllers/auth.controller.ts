@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import * as authService from "../services/auth.service";
+import { prisma } from "../db/prisma";
 
 const COOKIE_NAME = "refreshToken";
 const COOKIE_OPTIONS = {
@@ -131,5 +132,22 @@ export async function getBusinessBySlugHandler(req: Request, res: Response) {
     return res.json(business);
   } catch (err: any) {
     return res.status(err.statusCode ?? 500).json({ error: err.message });
+  }
+}
+
+export async function updateUserHandler(req: Request, res: Response) {
+  try {
+    const { userId } = req.user!;
+    const { phone } = req.body;
+
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: { phone: phone ?? null },
+      select: { id: true, username: true, email: true, role: true, phone: true, emailVerified: true },
+    });
+
+    return res.json({ user: updated });
+  } catch (err: any) {
+    return res.status(err?.status ?? 500).json({ error: err?.message ?? "Server error" });
   }
 }

@@ -33,6 +33,9 @@ export type Business = {
   subscriptionStatus: "TRIAL" | "ACTIVE" | "PAST_DUE" | "CANCELED";
   createdAt: string;
   mpAccessToken?: string | null;
+  waPhoneNumberId?: string | null;
+  waAccessToken?: string | null;
+  waReminderHours?: number | null;
 };
 
 //CLIENT

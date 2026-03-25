@@ -9,6 +9,7 @@ export type AuthUser = {
   role: "OWNER" | "PRO";
   businessId: string;
   professionalId?: string;
+  phone?: string | null;
 };
 
 export type AuthContextValue = {

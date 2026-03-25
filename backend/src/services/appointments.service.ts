@@ -1,6 +1,7 @@
 import { prisma } from "../db/prisma";
 import { getDayOfWeek, toHHMM, hhmmToMinutes } from "../utils/time";
 import type { AppointmentStatus, PaymentMethod } from "@prisma/client";
+import { sendTemplate, formatWaDate, formatWaTime } from "./whatsapp.service";
 
 const SOFT_TOLERANCE_MIN = 15 as const;
 
@@ -19,6 +20,13 @@ async function checkUnavailabilityBlock(
     },
   });
   if (blocked) throw badRequest("Professional is unavailable at this time");
+}
+
+async function getBusinessWaConfig(businessId: string) {
+  return prisma.business.findUnique({
+    where: { id: businessId },
+    select: { waPhoneNumberId: true, waAccessToken: true, name: true, timezone: true },
+  });
 }
 
 type ScheduleWarning =
@@ -152,6 +160,25 @@ export class AppointmentService {
       },
     });
 
+    // Notificación WA: turno confirmado
+    getBusinessWaConfig(businessId).then((biz) => {
+      if (!biz?.waAccessToken || !biz?.waPhoneNumberId || !client.phone) return;
+      sendTemplate({
+        accessToken: biz.waAccessToken,
+        phoneNumberId: biz.waPhoneNumberId,
+        to: client.phone,
+        templateName: "turno_confirmado",
+        variables: [
+          client.fullName,
+          service.name,
+          professional.name,
+          formatWaDate(appointment.startAt, biz.timezone),
+          formatWaTime(appointment.startAt, biz.timezone),
+          biz.name,
+        ],
+      });
+    }).catch(() => {});
+
     return { appointment, warning };
   }
 
@@ -250,7 +277,33 @@ export class AppointmentService {
       });
     }
 
-    return prisma.appointment.update({ where: { id: appointmentId }, data: { status } });
+    const updated = await prisma.appointment.update({ where: { id: appointmentId }, data: { status } });
+
+    if (status === "CANCELED") {
+      Promise.all([
+        prisma.client.findUnique({ where: { id: appointment.clientId } }),
+        prisma.service.findUnique({ where: { id: appointment.serviceId }, select: { name: true } }),
+        prisma.professional.findUnique({ where: { id: appointment.professionalId }, select: { name: true } }),
+        getBusinessWaConfig(businessId),
+      ]).then(([client, service, professional, biz]) => {
+        if (!biz?.waAccessToken || !biz?.waPhoneNumberId || !client?.phone) return;
+        sendTemplate({
+          accessToken: biz.waAccessToken,
+          phoneNumberId: biz.waPhoneNumberId,
+          to: client.phone,
+          templateName: "turno_cancelado",
+          variables: [
+            client.fullName,
+            service?.name ?? "",
+            professional?.name ?? "",
+            formatWaDate(appointment.startAt, biz.timezone),
+            formatWaTime(appointment.startAt, biz.timezone),
+          ],
+        });
+      }).catch(() => {});
+    }
+
+    return updated;
   }
 
   async update(input: UpdateAppointmentInput) {
@@ -339,6 +392,25 @@ export class AppointmentService {
         professional: { select: { id: true, name: true, color: true } },
       },
     });
+
+    // Notificación WA: turno modificado
+    getBusinessWaConfig(businessId).then((biz) => {
+      if (!biz?.waAccessToken || !biz?.waPhoneNumberId || !updated.client?.phone) return;
+      sendTemplate({
+        accessToken: biz.waAccessToken,
+        phoneNumberId: biz.waPhoneNumberId,
+        to: updated.client.phone,
+        templateName: "turno_modificado",
+        variables: [
+          updated.client.fullName,
+          updated.service.name,
+          updated.professional?.name ?? "",
+          formatWaDate(updated.startAt, biz.timezone),
+          formatWaTime(updated.startAt, biz.timezone),
+          biz.name,
+        ],
+      });
+    }).catch(() => {});
 
     return {
       appointment: {

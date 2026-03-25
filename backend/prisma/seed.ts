@@ -43,6 +43,7 @@ async function main() {
       passwordHash,
       role: "OWNER",
       emailVerified: true,
+      phone: "+54 11 3885-3213",
     },
   });
   console.log("✓ Usuario admin (user: admin / pass: admin123)");

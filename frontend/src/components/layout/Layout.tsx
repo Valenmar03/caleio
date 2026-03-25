@@ -14,6 +14,7 @@ import {
   X,
   ChevronRight,
   LogOut,
+  MessageCircle,
 } from "lucide-react";
 import type { NavItem } from "../../types/navigation";
 import { appRoutes, routeTitles } from "../../app/routes.ts";
@@ -148,6 +149,22 @@ export function Layout() {
             );
           })}
         </nav>
+
+        {/* Soporte */}
+        <div className={`px-2 py-2 shrink-0 ${desktopCollapsed ? "" : ""}`}>
+          <a
+            href="https://wa.me/541138853213?text=Hola%2C%20necesito%20ayuda%20con%20Caleio"
+            target="_blank"
+            rel="noopener noreferrer"
+            title={desktopCollapsed ? "Soporte por WhatsApp" : undefined}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-500 hover:bg-emerald-50 hover:text-emerald-700 transition-colors ${desktopCollapsed ? "lg:justify-center lg:px-0" : ""}`}
+          >
+            <MessageCircle className="w-4.5 h-4.5 shrink-0" />
+            <span className={`whitespace-nowrap ${desktopCollapsed ? "lg:hidden" : ""}`}>
+              ¿Necesitás ayuda?
+            </span>
+          </a>
+        </div>
 
         {/* Logout */}
         <div className="px-2 py-3 border-t border-slate-100 shrink-0">

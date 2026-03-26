@@ -298,7 +298,7 @@ export default function BusinessSettingsPage() {
               </div>
               <div className="px-6 py-4">
                 <p className="text-xs text-slate-500">
-                  Estamos trabajando en la integración con WhatsApp Business. Próximamente podrás enviar notificaciones automáticas desde tu propio número.
+                  Pronto podrás enviar notificaciones automáticas a tus clientes por WhatsApp.
                 </p>
               </div>
             </div>

@@ -523,13 +523,18 @@ export default function BookingPage() {
                 onChange={setClientPhone}
                 required
               />
-              <Field
-                label="Email"
-                value={clientEmail}
-                onChange={setClientEmail}
-                placeholder="Ej: maria@email.com"
-                type="email"
-              />
+              <div>
+                <Field
+                  label="Email"
+                  value={clientEmail}
+                  onChange={setClientEmail}
+                  placeholder="Ej: maria@email.com"
+                  type="email"
+                />
+                <p className="text-xs text-slate-400 mt-1">
+                  Sin email no recibirás confirmaciones ni recordatorios del turno.
+                </p>
+              </div>
             </div>
           </StepWrapper>
         )}

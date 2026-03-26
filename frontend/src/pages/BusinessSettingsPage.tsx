@@ -27,7 +27,6 @@ import { useBusiness, useUpdateBusiness } from "../hooks/useBusiness";
 import { useProfessionals } from "../hooks/useProfessionals";
 import { useServices } from "../hooks/useServices";
 import { useClients } from "../hooks/useClients";
-import { useAuth } from "../hooks/useAuth";
 
 const PLAN_LABELS: Record<string, string> = {
   STARTER: "Starter",
@@ -614,15 +613,15 @@ function MercadoPagoSection({
   );
 }
 
-const WA_REMINDER_OPTIONS = [
-  { value: "", label: "Desactivado" },
-  { value: "1", label: "1 hora antes" },
-  { value: "2", label: "2 horas antes" },
-  { value: "6", label: "6 horas antes" },
-  { value: "12", label: "12 horas antes" },
-  { value: "24", label: "24 horas antes" },
-  { value: "48", label: "48 horas antes" },
-];
+// const WA_REMINDER_OPTIONS = [
+//   { value: "", label: "Desactivado" },
+//   { value: "1", label: "1 hora antes" },
+//   { value: "2", label: "2 horas antes" },
+//   { value: "6", label: "6 horas antes" },
+//   { value: "12", label: "12 horas antes" },
+//   { value: "24", label: "24 horas antes" },
+//   { value: "48", label: "48 horas antes" },
+// ];
 
 const EMAIL_REMINDER_OPTIONS = [
   { value: "2", label: "2 horas antes" },
@@ -634,317 +633,317 @@ const EMAIL_REMINDER_OPTIONS = [
 ];
 
 // WhatsAppSection removed — coming soon placeholder used in JSX instead
-function _WhatsAppSection({
-  currentPhoneNumberId,
-  currentAccessToken,
-  currentReminderHours,
-  onSave,
-}: {
-  currentPhoneNumberId: string | null;
-  currentAccessToken: string | null;
-  currentReminderHours: number | null;
-  onSave: (data: {
-    waPhoneNumberId: string | null;
-    waAccessToken: string | null;
-    waReminderHours: number | null;
-  }) => Promise<void>;
-}) {
-  const [editing, setEditing] = useState(false);
-  const [phoneNumberId, setPhoneNumberId] = useState(currentPhoneNumberId ?? "");
-  const [accessToken, setAccessToken] = useState(currentAccessToken ?? "");
-  const [reminderHours, setReminderHours] = useState(
-    currentReminderHours ? String(currentReminderHours) : ""
-  );
-  const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+// function _WhatsAppSection({
+//   currentPhoneNumberId,
+//   currentAccessToken,
+//   currentReminderHours,
+//   onSave,
+// }: {
+//   currentPhoneNumberId: string | null;
+//   currentAccessToken: string | null;
+//   currentReminderHours: number | null;
+//   onSave: (data: {
+//     waPhoneNumberId: string | null;
+//     waAccessToken: string | null;
+//     waReminderHours: number | null;
+//   }) => Promise<void>;
+// }) {
+//   const [editing, setEditing] = useState(false);
+//   const [phoneNumberId, setPhoneNumberId] = useState(currentPhoneNumberId ?? "");
+//   const [accessToken, setAccessToken] = useState(currentAccessToken ?? "");
+//   const [reminderHours, setReminderHours] = useState(
+//     currentReminderHours ? String(currentReminderHours) : ""
+//   );
+//   const [saving, setSaving] = useState(false);
+//   const [success, setSuccess] = useState(false);
+//   const [error, setError] = useState<string | null>(null);
 
-  const handleSave = async () => {
-    setSaving(true);
-    setError(null);
-    try {
-      await onSave({
-        waPhoneNumberId: phoneNumberId.trim() || null,
-        waAccessToken: accessToken.trim() || null,
-        waReminderHours: reminderHours ? Number(reminderHours) : null,
-      });
-      setEditing(false);
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
-    } catch {
-      setError("No se pudo guardar la configuración.");
-    } finally {
-      setSaving(false);
-    }
-  };
+//   const handleSave = async () => {
+//     setSaving(true);
+//     setError(null);
+//     try {
+//       await onSave({
+//         waPhoneNumberId: phoneNumberId.trim() || null,
+//         waAccessToken: accessToken.trim() || null,
+//         waReminderHours: reminderHours ? Number(reminderHours) : null,
+//       });
+//       setEditing(false);
+//       setSuccess(true);
+//       setTimeout(() => setSuccess(false), 3000);
+//     } catch {
+//       setError("No se pudo guardar la configuración.");
+//     } finally {
+//       setSaving(false);
+//     }
+//   };
 
-  const handleCancel = () => {
-    setPhoneNumberId(currentPhoneNumberId ?? "");
-    setAccessToken(currentAccessToken ?? "");
-    setReminderHours(currentReminderHours ? String(currentReminderHours) : "");
-    setEditing(false);
-    setError(null);
-  };
+//   const handleCancel = () => {
+//     setPhoneNumberId(currentPhoneNumberId ?? "");
+//     setAccessToken(currentAccessToken ?? "");
+//     setReminderHours(currentReminderHours ? String(currentReminderHours) : "");
+//     setEditing(false);
+//     setError(null);
+//   };
 
-  const isConnected = !!(currentPhoneNumberId && currentAccessToken);
+//   const isConnected = !!(currentPhoneNumberId && currentAccessToken);
 
-  return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-      <div className="flex items-center gap-2.5 px-6 py-4 border-b border-slate-100">
-        <MessageCircle className="w-4 h-4 text-slate-400" />
-        <h2 className="text-sm font-semibold text-slate-700">WhatsApp Business</h2>
-        {isConnected && (
-          <span className="ml-auto text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-            Conectado
-          </span>
-        )}
-      </div>
-      <div className="px-6 py-4 space-y-4">
-        <p className="text-xs text-slate-500">
-          Conectá tu cuenta de WhatsApp Business para enviar notificaciones automáticas a tus clientes.
-        </p>
+//   return (
+//     <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+//       <div className="flex items-center gap-2.5 px-6 py-4 border-b border-slate-100">
+//         <MessageCircle className="w-4 h-4 text-slate-400" />
+//         <h2 className="text-sm font-semibold text-slate-700">WhatsApp Business</h2>
+//         {isConnected && (
+//           <span className="ml-auto text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+//             Conectado
+//           </span>
+//         )}
+//       </div>
+//       <div className="px-6 py-4 space-y-4">
+//         <p className="text-xs text-slate-500">
+//           Conectá tu cuenta de WhatsApp Business para enviar notificaciones automáticas a tus clientes.
+//         </p>
 
-        <div className="rounded-lg border border-teal-100 bg-teal-50 px-4 py-3 space-y-2">
-          <div className="flex items-center gap-1.5">
-            <Info className="w-3.5 h-3.5 text-teal-600 shrink-0" />
-            <p className="text-xs font-medium text-teal-700">¿Cómo obtener las credenciales?</p>
-          </div>
-          <ol className="text-xs text-teal-700 space-y-1 pl-5 list-decimal">
-            <li>Creá una app en <strong>Meta for Developers</strong> del tipo "Business"</li>
-            <li>Agregá el producto <strong>WhatsApp</strong> a tu app</li>
-            <li>En <strong>WhatsApp → Configuración de la API</strong>, copiá el <strong>Phone Number ID</strong> y el <strong>Token de acceso permanente</strong></li>
-            <li>
-              Creá los templates:{" "}
-              <code className="bg-teal-100 px-1 rounded">turno_confirmado</code>,{" "}
-              <code className="bg-teal-100 px-1 rounded">turno_recordatorio</code>,{" "}
-              <code className="bg-teal-100 px-1 rounded">turno_cancelado</code>,{" "}
-              <code className="bg-teal-100 px-1 rounded">turno_modificado</code>,{" "}
-              <code className="bg-teal-100 px-1 rounded">nuevo_turno_negocio</code>
-            </li>
-          </ol>
-          <a
-            href="https://developers.facebook.com/apps"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-xs text-teal-700 font-medium hover:text-teal-900 underline underline-offset-2 mt-1"
-          >
-            <ExternalLink className="w-3 h-3" />
-            Ir al panel de Meta for Developers
-          </a>
-        </div>
+//         <div className="rounded-lg border border-teal-100 bg-teal-50 px-4 py-3 space-y-2">
+//           <div className="flex items-center gap-1.5">
+//             <Info className="w-3.5 h-3.5 text-teal-600 shrink-0" />
+//             <p className="text-xs font-medium text-teal-700">¿Cómo obtener las credenciales?</p>
+//           </div>
+//           <ol className="text-xs text-teal-700 space-y-1 pl-5 list-decimal">
+//             <li>Creá una app en <strong>Meta for Developers</strong> del tipo "Business"</li>
+//             <li>Agregá el producto <strong>WhatsApp</strong> a tu app</li>
+//             <li>En <strong>WhatsApp → Configuración de la API</strong>, copiá el <strong>Phone Number ID</strong> y el <strong>Token de acceso permanente</strong></li>
+//             <li>
+//               Creá los templates:{" "}
+//               <code className="bg-teal-100 px-1 rounded">turno_confirmado</code>,{" "}
+//               <code className="bg-teal-100 px-1 rounded">turno_recordatorio</code>,{" "}
+//               <code className="bg-teal-100 px-1 rounded">turno_cancelado</code>,{" "}
+//               <code className="bg-teal-100 px-1 rounded">turno_modificado</code>,{" "}
+//               <code className="bg-teal-100 px-1 rounded">nuevo_turno_negocio</code>
+//             </li>
+//           </ol>
+//           <a
+//             href="https://developers.facebook.com/apps"
+//             target="_blank"
+//             rel="noopener noreferrer"
+//             className="inline-flex items-center gap-1 text-xs text-teal-700 font-medium hover:text-teal-900 underline underline-offset-2 mt-1"
+//           >
+//             <ExternalLink className="w-3 h-3" />
+//             Ir al panel de Meta for Developers
+//           </a>
+//         </div>
 
-        {editing ? (
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">
-                Phone Number ID
-              </label>
-              <input
-                type="text"
-                value={phoneNumberId}
-                onChange={(e) => setPhoneNumberId(e.target.value)}
-                placeholder="123456789012345"
-                className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-teal-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">
-                Access Token
-              </label>
-              <PasswordInput
-                value={accessToken}
-                onChange={(e) => setAccessToken(e.target.value)}
-                placeholder="EAAxxxxxx..."
-                className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-teal-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">
-                Recordatorio automático
-              </label>
-              <CustomSelect
-                placeholder="Desactivado"
-                value={reminderHours}
-                onChange={(v) => setReminderHours(v)}
-                options={WA_REMINDER_OPTIONS}
-              />
-            </div>
-            {error && (
-              <p className="flex items-center gap-1 text-xs text-red-600">
-                <AlertCircle className="w-3.5 h-3.5" />
-                {error}
-              </p>
-            )}
-            <div className="flex gap-2 justify-end pt-1">
-              <button
-                type="button"
-                onClick={handleCancel}
-                disabled={saving}
-                className="px-3 py-1.5 rounded-lg text-sm text-slate-600 hover:bg-slate-100 transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={saving}
-                className="px-3 py-1.5 rounded-lg text-sm font-medium bg-teal-600 text-white hover:bg-teal-700 transition-colors"
-              >
-                {saving ? "Guardando..." : "Guardar"}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-xs text-slate-400 uppercase tracking-wide font-medium">
-                  Phone Number ID
-                </p>
-                <p className="text-sm text-slate-800 font-medium">
-                  {currentPhoneNumberId ? (
-                    "••••••••••••"
-                  ) : (
-                    <span className="text-slate-400 italic">No configurado</span>
-                  )}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setEditing(true)}
-                className="p-1.5 rounded-md text-slate-300 hover:bg-slate-100 hover:text-slate-500 transition-colors"
-              >
-                <Pencil className="w-3.5 h-3.5" />
-              </button>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400 uppercase tracking-wide font-medium">
-                Recordatorio
-              </p>
-              <p className="text-sm text-slate-800">
-                {currentReminderHours ? (
-                  WA_REMINDER_OPTIONS.find((o) => o.value === String(currentReminderHours))
-                    ?.label ?? `${currentReminderHours}h antes`
-                ) : (
-                  <span className="text-slate-400 italic">Desactivado</span>
-                )}
-              </p>
-            </div>
-          </div>
-        )}
+//         {editing ? (
+//           <div className="space-y-3">
+//             <div>
+//               <label className="block text-xs font-medium text-slate-600 mb-1">
+//                 Phone Number ID
+//               </label>
+//               <input
+//                 type="text"
+//                 value={phoneNumberId}
+//                 onChange={(e) => setPhoneNumberId(e.target.value)}
+//                 placeholder="123456789012345"
+//                 className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-teal-500"
+//               />
+//             </div>
+//             <div>
+//               <label className="block text-xs font-medium text-slate-600 mb-1">
+//                 Access Token
+//               </label>
+//               <PasswordInput
+//                 value={accessToken}
+//                 onChange={(e) => setAccessToken(e.target.value)}
+//                 placeholder="EAAxxxxxx..."
+//                 className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-teal-500"
+//               />
+//             </div>
+//             <div>
+//               <label className="block text-xs font-medium text-slate-600 mb-1">
+//                 Recordatorio automático
+//               </label>
+//               <CustomSelect
+//                 placeholder="Desactivado"
+//                 value={reminderHours}
+//                 onChange={(v) => setReminderHours(v)}
+//                 options={WA_REMINDER_OPTIONS}
+//               />
+//             </div>
+//             {error && (
+//               <p className="flex items-center gap-1 text-xs text-red-600">
+//                 <AlertCircle className="w-3.5 h-3.5" />
+//                 {error}
+//               </p>
+//             )}
+//             <div className="flex gap-2 justify-end pt-1">
+//               <button
+//                 type="button"
+//                 onClick={handleCancel}
+//                 disabled={saving}
+//                 className="px-3 py-1.5 rounded-lg text-sm text-slate-600 hover:bg-slate-100 transition-colors"
+//               >
+//                 Cancelar
+//               </button>
+//               <button
+//                 type="button"
+//                 onClick={handleSave}
+//                 disabled={saving}
+//                 className="px-3 py-1.5 rounded-lg text-sm font-medium bg-teal-600 text-white hover:bg-teal-700 transition-colors"
+//               >
+//                 {saving ? "Guardando..." : "Guardar"}
+//               </button>
+//             </div>
+//           </div>
+//         ) : (
+//           <div className="space-y-2">
+//             <div className="flex items-center justify-between">
+//               <div className="space-y-1">
+//                 <p className="text-xs text-slate-400 uppercase tracking-wide font-medium">
+//                   Phone Number ID
+//                 </p>
+//                 <p className="text-sm text-slate-800 font-medium">
+//                   {currentPhoneNumberId ? (
+//                     "••••••••••••"
+//                   ) : (
+//                     <span className="text-slate-400 italic">No configurado</span>
+//                   )}
+//                 </p>
+//               </div>
+//               <button
+//                 type="button"
+//                 onClick={() => setEditing(true)}
+//                 className="p-1.5 rounded-md text-slate-300 hover:bg-slate-100 hover:text-slate-500 transition-colors"
+//               >
+//                 <Pencil className="w-3.5 h-3.5" />
+//               </button>
+//             </div>
+//             <div>
+//               <p className="text-xs text-slate-400 uppercase tracking-wide font-medium">
+//                 Recordatorio
+//               </p>
+//               <p className="text-sm text-slate-800">
+//                 {currentReminderHours ? (
+//                   WA_REMINDER_OPTIONS.find((o) => o.value === String(currentReminderHours))
+//                     ?.label ?? `${currentReminderHours}h antes`
+//                 ) : (
+//                   <span className="text-slate-400 italic">Desactivado</span>
+//                 )}
+//               </p>
+//             </div>
+//           </div>
+//         )}
 
-        {success && (
-          <p className="flex items-center gap-1.5 text-xs text-emerald-600">
-            <Check className="w-3.5 h-3.5 shrink-0" />
-            Configuración guardada correctamente
-          </p>
-        )}
-      </div>
-    </div>
-  );
-}
+//         {success && (
+//           <p className="flex items-center gap-1.5 text-xs text-emerald-600">
+//             <Check className="w-3.5 h-3.5 shrink-0" />
+//             Configuración guardada correctamente
+//           </p>
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
 
-function _OwnerPhoneSection({
-  currentPhone,
-  onSave,
-}: {
-  currentPhone: string | null;
-  onSave: (phone: string | null) => Promise<void>;
-}) {
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(currentPhone ?? "");
-  const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState(false);
+// function _OwnerPhoneSection({
+//   currentPhone,
+//   onSave,
+// }: {
+//   currentPhone: string | null;
+//   onSave: (phone: string | null) => Promise<void>;
+// }) {
+//   const [editing, setEditing] = useState(false);
+//   const [draft, setDraft] = useState(currentPhone ?? "");
+//   const [saving, setSaving] = useState(false);
+//   const [success, setSuccess] = useState(false);
 
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      await onSave(draft.trim() || null);
-      setEditing(false);
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
-    } finally {
-      setSaving(false);
-    }
-  };
+//   const handleSave = async () => {
+//     setSaving(true);
+//     try {
+//       await onSave(draft.trim() || null);
+//       setEditing(false);
+//       setSuccess(true);
+//       setTimeout(() => setSuccess(false), 3000);
+//     } finally {
+//       setSaving(false);
+//     }
+//   };
 
-  return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-      <div className="flex items-center gap-2.5 px-6 py-4 border-b border-slate-100">
-        <UserCircle className="w-4 h-4 text-slate-400" />
-        <h2 className="text-sm font-semibold text-slate-700">Tu número de WhatsApp</h2>
-      </div>
-      <div className="px-6 py-4">
-        <p className="text-xs text-slate-500 mb-3">
-          Usamos este número para avisarte cuando entra un turno nuevo desde la página de reservas.
-        </p>
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            {editing ? (
-              <input
-                autoFocus
-                type="tel"
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                placeholder="+54 11 1234-5678"
-                className="w-full max-w-sm rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-teal-500"
-              />
-            ) : (
-              <p className="text-sm font-medium text-slate-800">
-                {currentPhone || (
-                  <span className="text-slate-400 italic">No configurado</span>
-                )}
-              </p>
-            )}
-          </div>
-          <div className="flex items-center gap-1 shrink-0">
-            {editing ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDraft(currentPhone ?? "");
-                    setEditing(false);
-                  }}
-                  disabled={saving}
-                  className="p-1.5 rounded-md text-slate-400 hover:bg-slate-100 transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="p-1.5 rounded-md text-teal-600 hover:bg-teal-50 transition-colors"
-                >
-                  {saving ? (
-                    <div className="w-4 h-4 border-2 border-teal-600 border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <Check className="w-4 h-4" />
-                  )}
-                </button>
-              </>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setEditing(true)}
-                className="p-1.5 rounded-md text-slate-300 hover:bg-slate-100 hover:text-slate-500 transition-colors"
-              >
-                <Pencil className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-        </div>
-        {success && (
-          <p className="flex items-center gap-1.5 text-xs text-emerald-600 mt-2">
-            <Check className="w-3.5 h-3.5 shrink-0" />
-            Número guardado correctamente
-          </p>
-        )}
-      </div>
-    </div>
-  );
-}
+//   return (
+//     <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+//       <div className="flex items-center gap-2.5 px-6 py-4 border-b border-slate-100">
+//         <UserCircle className="w-4 h-4 text-slate-400" />
+//         <h2 className="text-sm font-semibold text-slate-700">Tu número de WhatsApp</h2>
+//       </div>
+//       <div className="px-6 py-4">
+//         <p className="text-xs text-slate-500 mb-3">
+//           Usamos este número para avisarte cuando entra un turno nuevo desde la página de reservas.
+//         </p>
+//         <div className="flex items-center justify-between gap-4">
+//           <div className="flex-1 min-w-0">
+//             {editing ? (
+//               <input
+//                 autoFocus
+//                 type="tel"
+//                 value={draft}
+//                 onChange={(e) => setDraft(e.target.value)}
+//                 placeholder="+54 11 1234-5678"
+//                 className="w-full max-w-sm rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-teal-500"
+//               />
+//             ) : (
+//               <p className="text-sm font-medium text-slate-800">
+//                 {currentPhone || (
+//                   <span className="text-slate-400 italic">No configurado</span>
+//                 )}
+//               </p>
+//             )}
+//           </div>
+//           <div className="flex items-center gap-1 shrink-0">
+//             {editing ? (
+//               <>
+//                 <button
+//                   type="button"
+//                   onClick={() => {
+//                     setDraft(currentPhone ?? "");
+//                     setEditing(false);
+//                   }}
+//                   disabled={saving}
+//                   className="p-1.5 rounded-md text-slate-400 hover:bg-slate-100 transition-colors"
+//                 >
+//                   <X className="w-4 h-4" />
+//                 </button>
+//                 <button
+//                   type="button"
+//                   onClick={handleSave}
+//                   disabled={saving}
+//                   className="p-1.5 rounded-md text-teal-600 hover:bg-teal-50 transition-colors"
+//                 >
+//                   {saving ? (
+//                     <div className="w-4 h-4 border-2 border-teal-600 border-t-transparent rounded-full animate-spin" />
+//                   ) : (
+//                     <Check className="w-4 h-4" />
+//                   )}
+//                 </button>
+//               </>
+//             ) : (
+//               <button
+//                 type="button"
+//                 onClick={() => setEditing(true)}
+//                 className="p-1.5 rounded-md text-slate-300 hover:bg-slate-100 hover:text-slate-500 transition-colors"
+//               >
+//                 <Pencil className="w-3.5 h-3.5" />
+//               </button>
+//             )}
+//           </div>
+//         </div>
+//         {success && (
+//           <p className="flex items-center gap-1.5 text-xs text-emerald-600 mt-2">
+//             <Check className="w-3.5 h-3.5 shrink-0" />
+//             Número guardado correctamente
+//           </p>
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
 
 function EmailNotificationsSection({
   currentEnabled,

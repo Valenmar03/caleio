@@ -20,6 +20,7 @@ import {
   MessageCircle,
   Mail,
 } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import { apiFetch } from "../services/api";
 import PasswordInput from "../components/ui/PasswordInput";
 import CustomSelect from "../components/ui/CustomSelect";
@@ -198,6 +199,16 @@ export default function BusinessSettingsPage() {
   const { data: businessData, isLoading } = useBusiness();
   const { mutateAsync: update } = useUpdateBusiness();
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [billingSuccess, setBillingSuccess] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get("billing") === "success") {
+      setBillingSuccess(true);
+      setSearchParams({}, { replace: true });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const { data: professionalsData } = useProfessionals();
   const { data: servicesData } = useServices();
   const { data: clientsData } = useClients("");
@@ -224,6 +235,20 @@ export default function BusinessSettingsPage() {
           </p>
         </div>
       </div>
+
+      {billingSuccess && (
+        <div className="flex items-center gap-3 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-800">
+          <BadgeCheck className="w-4 h-4 shrink-0 text-emerald-600" />
+          <span>¡Tu suscripción fue activada correctamente! Ya podés usar todas las funciones del plan.</span>
+          <button
+            onClick={() => setBillingSuccess(false)}
+            className="ml-auto p-1 rounded-md hover:bg-emerald-100 transition-colors"
+            type="button"
+          >
+            <X className="w-4 h-4 text-emerald-600" />
+          </button>
+        </div>
+      )}
 
       {isLoading ? (
         <div className="bg-white rounded-xl border border-slate-200 p-8 text-sm text-slate-500">

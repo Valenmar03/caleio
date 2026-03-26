@@ -60,10 +60,12 @@ export default function SubscriptionGate({ children }: { children: React.ReactNo
     buttonLabel: "Suscribirme ahora",
   };
 
+  const subscriptionStatus = business.subscriptionStatus;
+
   async function handleSubscribe() {
     setRedirecting(true);
     try {
-      const status = business.subscriptionStatus;
+      const status = subscriptionStatus;
       // PAST_DUE already has a subscription — open portal to fix payment method
       const { url } = status === "PAST_DUE"
         ? await createPortalSession()
@@ -129,7 +131,7 @@ export default function SubscriptionGate({ children }: { children: React.ReactNo
                   Redirigiendo...
                 </>
               ) : (
-                {copy.buttonLabel}
+                copy.buttonLabel
               )}
             </button>
 

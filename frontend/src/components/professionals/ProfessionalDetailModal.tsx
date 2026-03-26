@@ -323,6 +323,7 @@ export default function ProfessionalDetailModal({
     if (!professional) return;
 
     const trimmedName = name.trim();
+    if (!trimmedName) return; // defensive guard — validation should have caught this
 
     try {
       await updateProfessionalMutation.mutateAsync({

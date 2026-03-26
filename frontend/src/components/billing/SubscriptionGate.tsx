@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { CreditCard, MessageCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { useBusiness } from "../../hooks/useBusiness";
-import { createCheckoutSession } from "../../services/billing.api";
+import { createCheckoutSession, createPortalSession } from "../../services/billing.api";
 
 function isBlocked(
   status: string,
@@ -41,10 +41,33 @@ export default function SubscriptionGate({ children }: { children: React.ReactNo
   const basePrice = currency === "USD" ? 18 : 16000;
   const extraPrice = currency === "USD" ? 7 : 7000;
 
+  const STATUS_COPY: Record<string, { title: string; subtitle: string; buttonLabel: string }> = {
+    PAST_DUE: {
+      title: "Tenés un pago pendiente",
+      subtitle: "Actualizá tu método de pago para recuperar el acceso.",
+      buttonLabel: "Actualizar método de pago",
+    },
+    CANCELED: {
+      title: "Tu suscripción fue cancelada",
+      subtitle: "Suscribite nuevamente para continuar usando Caleio.",
+      buttonLabel: "Suscribirme ahora",
+    },
+  };
+
+  const copy = STATUS_COPY[business.subscriptionStatus] ?? {
+    title: "Tu período de prueba ha vencido",
+    subtitle: "Suscribite para continuar usando Caleio.",
+    buttonLabel: "Suscribirme ahora",
+  };
+
   async function handleSubscribe() {
     setRedirecting(true);
     try {
-      const { url } = await createCheckoutSession();
+      const status = business.subscriptionStatus;
+      // PAST_DUE already has a subscription — open portal to fix payment method
+      const { url } = status === "PAST_DUE"
+        ? await createPortalSession()
+        : await createCheckoutSession();
       window.location.href = url;
     } catch {
       setRedirecting(false);
@@ -62,8 +85,8 @@ export default function SubscriptionGate({ children }: { children: React.ReactNo
             <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
               <CreditCard className="w-6 h-6" />
             </div>
-            <h2 className="text-xl font-semibold">Tu período de prueba ha vencido</h2>
-            <p className="text-teal-100 text-sm mt-1">Suscribite para continuar usando Caleio</p>
+            <h2 className="text-xl font-semibold">{copy.title}</h2>
+            <p className="text-teal-100 text-sm mt-1">{copy.subtitle}</p>
           </div>
 
           {/* Plan details */}
@@ -106,7 +129,7 @@ export default function SubscriptionGate({ children }: { children: React.ReactNo
                   Redirigiendo...
                 </>
               ) : (
-                "Suscribirme ahora"
+                {copy.buttonLabel}
               )}
             </button>
 

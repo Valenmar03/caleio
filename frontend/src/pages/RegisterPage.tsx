@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import type { FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { ChevronDown, Check, Loader2 } from "lucide-react";
+import { ChevronDown, Check, Loader2, X } from "lucide-react";
 import PasswordInput from "../components/ui/PasswordInput";
 import AR from "country-flag-icons/react/3x2/AR";
 import MX from "country-flag-icons/react/3x2/MX";
@@ -108,14 +108,35 @@ export default function RegisterPage() {
   const [timezone, setTimezone] = useState("America/Argentina/Buenos_Aires");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [slugStatus, setSlugStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
 
   function handleBusinessNameChange(value: string) {
     setBusinessName(value);
     setSlug(normalizeSlug(value));
+    setSlugStatus("idle");
   }
 
   function handleSlugChange(value: string) {
     setSlug(normalizeSlug(value));
+    setSlugStatus("idle");
+  }
+
+  async function checkSlugAvailability() {
+    if (!slug) return;
+    setSlugStatus("checking");
+    try {
+      const res = await fetch(`${API_URL}/auth/business/${slug}`);
+      setSlugStatus(res.ok ? "taken" : "available");
+    } catch {
+      setSlugStatus("idle");
+    }
+  }
+
+  function translateError(msg: string): string {
+    if (msg.includes("Email already in use")) return "El email ya está en uso";
+    if (msg.includes("Business URL already taken")) return "La URL del negocio ya está en uso";
+    if (msg.includes("Invalid slug")) return "URL inválida";
+    return msg;
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -138,7 +159,7 @@ export default function RegisterPage() {
 
       navigate(`/login/${slug}`, { state: { justRegistered: true, email } });
     } catch (err: any) {
-      setError(err?.message ?? "Error al registrar");
+      setError(translateError(err?.message ?? "Error al registrar"));
     } finally {
       setIsSubmitting(false);
     }
@@ -189,11 +210,21 @@ export default function RegisterPage() {
                   required
                   value={slug}
                   onChange={(e) => handleSlugChange(e.target.value)}
+                  onBlur={checkSlugAvailability}
                   className="flex-1 px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none"
                   placeholder="peluqueria-maria"
                 />
+                {slugStatus === "checking" && <Loader2 className="w-4 h-4 animate-spin text-slate-400 mr-3" />}
+                {slugStatus === "available" && <Check className="w-4 h-4 text-teal-600 mr-3" />}
+                {slugStatus === "taken" && <X className="w-4 h-4 text-red-500 mr-3" />}
               </div>
-              {slug && (
+              {slugStatus === "taken" && (
+                <p className="mt-1 text-xs text-red-500">Esta URL ya está en uso, elegí otra.</p>
+              )}
+              {slugStatus === "available" && (
+                <p className="mt-1 text-xs text-teal-600">URL disponible.</p>
+              )}
+              {slug && slugStatus !== "taken" && slugStatus !== "available" && (
                 <p className="mt-1 text-xs text-slate-400">
                   Tus profesionales ingresarán en: <span className="text-teal-600 font-medium">app.caleio.app/login/{slug}</span>
                 </p>

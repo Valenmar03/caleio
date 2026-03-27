@@ -20,9 +20,7 @@ import {
   MessageCircle,
   Mail,
 } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
 import { apiFetch } from "../services/api";
-import { createPortal } from "../services/billing.api";
 import PasswordInput from "../components/ui/PasswordInput";
 import CustomSelect from "../components/ui/CustomSelect";
 import { useBusiness, useUpdateBusiness } from "../hooks/useBusiness";
@@ -314,7 +312,6 @@ export default function BusinessSettingsPage() {
             <BillingSection
               plan={business.plan}
               subscriptionStatus={business.subscriptionStatus}
-              lsSubscriptionId={business.lsSubscriptionId ?? null}
             />
             {/* Cambiar contraseña */}
             <ChangePasswordForm />
@@ -577,20 +574,15 @@ function MercadoPagoSection({
   );
 }
 
+const CANCEL_WHATSAPP = "https://wa.me/5491138853213?text=Hola%2C%20quiero%20cancelar%20mi%20suscripci%C3%B3n%20a%20Caleio.";
+
 function BillingSection({
   plan,
   subscriptionStatus,
-  lsSubscriptionId,
 }: {
   plan: string;
   subscriptionStatus: string;
-  lsSubscriptionId: string | null;
 }) {
-  const portalMutation = useMutation({
-    mutationFn: createPortal,
-    onSuccess: ({ url }) => { window.open(url, "_blank"); },
-  });
-
   return (
     <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
       <div className="flex items-center gap-2.5 px-6 py-4 border-b border-slate-100">
@@ -618,18 +610,20 @@ function BillingSection({
             {SUBSCRIPTION_LABELS[subscriptionStatus] ?? subscriptionStatus}
           </span>
         </div>
-        {lsSubscriptionId && (
-          <div className="py-4">
-            <button
-              onClick={() => portalMutation.mutate()}
-              disabled={portalMutation.isPending}
-              className="flex items-center gap-2 text-sm text-teal-600 hover:text-teal-700 font-medium transition-colors disabled:opacity-60"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-              {portalMutation.isPending ? "Cargando..." : "Administrar suscripción"}
-            </button>
-          </div>
-        )}
+        <div className="py-4">
+          <p className="text-xs text-slate-400 mb-3">
+            Para cancelar tu suscripción contactanos por WhatsApp y lo gestionamos.
+          </p>
+          <a
+            href={CANCEL_WHATSAPP}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-sm text-red-500 hover:text-red-600 font-medium transition-colors"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            Cancelar suscripción
+          </a>
+        </div>
       </div>
     </div>
   );

@@ -6,7 +6,9 @@ import clientsRoutes from "./clients.routes";
 import servicesRoutes from "./services.routes";
 import businessRoutes from "./business.routes";
 import analyticsRoutes from "./analytics.routes";
+import billingRoutes from "./billing.routes";
 import { authenticate } from "../middleware/authenticate";
+import { requireSubscription } from "../middleware/requireSubscription";
 import { changePasswordHandler, updateUserHandler } from "../controllers/auth.controller";
 import { validate } from "../middleware/validate";
 import { changePasswordBody, updateUserBody } from "../validators";
@@ -17,6 +19,11 @@ router.use(authenticate);
 
 router.post("/auth/change-password", validate(changePasswordBody), changePasswordHandler);
 router.patch("/auth/me", validate(updateUserBody), updateUserHandler);
+
+// Billing routes don't require active subscription (needed to subscribe)
+router.use("/billing", billingRoutes);
+
+router.use(requireSubscription);
 
 router.use("/appointments", appointmentsRoutes);
 router.use("/agenda", agendaRoutes);

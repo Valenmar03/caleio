@@ -19,6 +19,8 @@ import {
 import type { NavItem } from "../../types/navigation";
 import { appRoutes, routeTitles } from "../../app/routes.ts";
 import ConfirmModal from "../ui/ConfirmModal";
+import { SubscriptionGate } from "../billing/SubscriptionGate";
+import { TrialBanner } from "../billing/TrialBanner";
 
 const NAV_ITEMS: NavItem[] = [
   { name: "Dashboard", to: appRoutes.dashboard, icon: LayoutDashboard },
@@ -66,6 +68,7 @@ export function Layout() {
   const [confirmLogout, setConfirmLogout] = useState(false);
 
   return (
+    <SubscriptionGate>
     <div className="min-h-screen bg-slate-50 flex">
       <style>{`
         :root {
@@ -184,6 +187,7 @@ export function Layout() {
 
       {/* Main */}
       <div className={`flex-1 min-w-0 flex flex-col min-h-screen overflow-x-hidden transition-all duration-300 ${desktopCollapsed ? "lg:ml-16" : "lg:ml-64"}`}>
+        <TrialBanner />
         <header className="h-14 lg:h-16 flex items-center justify-between px-4 lg:px-6 bg-white border-b border-slate-200 sticky top-0 z-30">
           <div className="flex items-center gap-3">
             {/* Mobile open */}
@@ -243,5 +247,6 @@ export function Layout() {
         confirmLabel="Cerrar sesión"
       />
     </div>
+    </SubscriptionGate>
   );
 }

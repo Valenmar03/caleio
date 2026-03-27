@@ -38,6 +38,10 @@ export type Business = {
   waReminderHours?: number | null;
   emailNotificationsEnabled?: boolean | null;
   emailReminderHours?: number | null;
+  lsCustomerId?: string | null;
+  lsSubscriptionId?: string | null;
+  trialEndsAt?: string | null;
+  billingExempt?: boolean;
 };
 
 //CLIENT

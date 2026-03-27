@@ -20,7 +20,9 @@ import {
   MessageCircle,
   Mail,
 } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
 import { apiFetch } from "../services/api";
+import { createPortal } from "../services/billing.api";
 import PasswordInput from "../components/ui/PasswordInput";
 import CustomSelect from "../components/ui/CustomSelect";
 import { useBusiness, useUpdateBusiness } from "../hooks/useBusiness";
@@ -309,49 +311,11 @@ export default function BusinessSettingsPage() {
             />
 
             {/* Plan y suscripción */}
-            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-              <div className="flex items-center gap-2.5 px-6 py-4 border-b border-slate-100">
-                <BadgeCheck className="w-4 h-4 text-slate-400" />
-                <h2 className="text-sm font-semibold text-slate-700">
-                  Plan y suscripción
-                </h2>
-              </div>
-              <div className="px-6 divide-y divide-slate-100">
-                <div className="py-4 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">
-                      Plan actual
-                    </p>
-                    <p className="text-sm font-medium text-slate-800">
-                      {PLAN_LABELS[business.plan] ?? business.plan}
-                    </p>
-                  </div>
-                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-teal-50 text-teal-700">
-                    {PLAN_LABELS[business.plan] ?? business.plan}
-                  </span>
-                </div>
-                <div className="py-4 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">
-                      Estado
-                    </p>
-                    <p className="text-sm font-medium text-slate-800">
-                      {SUBSCRIPTION_LABELS[business.subscriptionStatus] ??
-                        business.subscriptionStatus}
-                    </p>
-                  </div>
-                  <span
-                    className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                      SUBSCRIPTION_COLORS[business.subscriptionStatus] ??
-                      "bg-slate-100 text-slate-600"
-                    }`}
-                  >
-                    {SUBSCRIPTION_LABELS[business.subscriptionStatus] ??
-                      business.subscriptionStatus}
-                  </span>
-                </div>
-              </div>
-            </div>
+            <BillingSection
+              plan={business.plan}
+              subscriptionStatus={business.subscriptionStatus}
+              lsSubscriptionId={business.lsSubscriptionId ?? null}
+            />
             {/* Cambiar contraseña */}
             <ChangePasswordForm />
           </div>
@@ -607,6 +571,64 @@ function MercadoPagoSection({
             <Check className="w-3.5 h-3.5 shrink-0" />
             Token guardado correctamente
           </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function BillingSection({
+  plan,
+  subscriptionStatus,
+  lsSubscriptionId,
+}: {
+  plan: string;
+  subscriptionStatus: string;
+  lsSubscriptionId: string | null;
+}) {
+  const portalMutation = useMutation({
+    mutationFn: createPortal,
+    onSuccess: ({ url }) => { window.open(url, "_blank"); },
+  });
+
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+      <div className="flex items-center gap-2.5 px-6 py-4 border-b border-slate-100">
+        <BadgeCheck className="w-4 h-4 text-slate-400" />
+        <h2 className="text-sm font-semibold text-slate-700">Plan y suscripción</h2>
+      </div>
+      <div className="px-6 divide-y divide-slate-100">
+        <div className="py-4 flex items-center justify-between">
+          <div>
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">Plan actual</p>
+            <p className="text-sm font-medium text-slate-800">{PLAN_LABELS[plan] ?? plan}</p>
+          </div>
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-teal-50 text-teal-700">
+            {PLAN_LABELS[plan] ?? plan}
+          </span>
+        </div>
+        <div className="py-4 flex items-center justify-between">
+          <div>
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">Estado</p>
+            <p className="text-sm font-medium text-slate-800">
+              {SUBSCRIPTION_LABELS[subscriptionStatus] ?? subscriptionStatus}
+            </p>
+          </div>
+          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${SUBSCRIPTION_COLORS[subscriptionStatus] ?? "bg-slate-100 text-slate-600"}`}>
+            {SUBSCRIPTION_LABELS[subscriptionStatus] ?? subscriptionStatus}
+          </span>
+        </div>
+        {lsSubscriptionId && (
+          <div className="py-4">
+            <button
+              onClick={() => portalMutation.mutate()}
+              disabled={portalMutation.isPending}
+              className="flex items-center gap-2 text-sm text-teal-600 hover:text-teal-700 font-medium transition-colors disabled:opacity-60"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              {portalMutation.isPending ? "Cargando..." : "Administrar suscripción"}
+            </button>
+          </div>
         )}
       </div>
     </div>

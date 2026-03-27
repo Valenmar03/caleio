@@ -53,6 +53,10 @@ model Business {
   emailReminderHours        Int?     @default(24)
   plan               PlanType           @default(STARTER)
   subscriptionStatus SubscriptionStatus @default(TRIAL)
+  lsCustomerId       String?            @unique
+  lsSubscriptionId   String?            @unique
+  trialEndsAt        DateTime?
+  billingExempt      Boolean            @default(false)
   createdAt          DateTime           @default(now())
 
   users         User[]

@@ -23,15 +23,22 @@ async function sendEmail(to: string, subject: string, html: string): Promise<voi
   }
 }
 
-export async function sendVerificationEmail(email: string, token: string): Promise<void> {
+export async function sendVerificationEmail(email: string, token: string, businessName: string, slug: string): Promise<void> {
   const url = `${APP_URL}/verificar-email?token=${token}`;
+  const loginUrl = `${APP_URL}/login/${slug}`;
 
   await sendEmail(email, "Confirmá tu cuenta en Caleio", `
     <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color: #1e293b;">
       <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 8px;">Confirmá tu cuenta</h2>
-      <p style="color: #475569; margin-bottom: 24px;">
+      <p style="color: #475569; margin-bottom: 8px;">
         Hacé click en el botón para activar tu cuenta en Caleio. El link vence en 24 horas.
       </p>
+      <table style="background: #f8fafc; border-radius: 8px; padding: 12px 16px; margin-bottom: 24px; width: 100%; border-collapse: collapse;">
+        <tr><td style="font-size: 12px; color: #94a3b8; padding: 2px 0;">Negocio</td></tr>
+        <tr><td style="font-size: 14px; font-weight: 600; color: #0f172a; padding: 2px 0;">${businessName}</td></tr>
+        <tr><td style="font-size: 12px; color: #94a3b8; padding-top: 8px;">URL de acceso</td></tr>
+        <tr><td style="font-size: 13px; color: #0d9488; padding: 2px 0;">${loginUrl}</td></tr>
+      </table>
       <a href="${url}"
          style="display: inline-block; background: #0f172a; color: white; padding: 12px 24px;
                 border-radius: 8px; text-decoration: none; font-weight: 500;">

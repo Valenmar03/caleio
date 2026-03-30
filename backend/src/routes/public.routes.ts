@@ -28,7 +28,12 @@ router.get(
   validate(publicAvailabilityQuery, "query"),
   getAvailabilityHandler
 );
-router.get("/:slug/availability", validate(slugParams, "params"), getAggregatedAvailabilityHandler);
+router.get(
+  "/:slug/availability",
+  validate(slugParams, "params"),
+  validate(publicAvailabilityQuery, "query"),
+  getAggregatedAvailabilityHandler
+);
 router.post("/:slug/appointments", validate(slugParams, "params"), validate(publicCreateAppointmentBody), createAppointmentHandler);
 router.post(
   "/:slug/appointments/:appointmentId/confirm-payment",

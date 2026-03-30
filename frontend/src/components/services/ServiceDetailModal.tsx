@@ -65,6 +65,10 @@ export default function ServiceDetailModal({
         setBasePriceError(null);
     }, [open, service]);
 
+    useEffect(() => {
+        if (!bookableOnline) setAllowClientChooseProfessional(false);
+    }, [bookableOnline]);
+
   const isSaving =
     updateServiceMutation.isPending;
 

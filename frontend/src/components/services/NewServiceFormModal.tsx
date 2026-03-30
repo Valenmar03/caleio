@@ -47,6 +47,10 @@ export default function NewServicesFormModal({ open, onClose }: Props) {
     setBasePriceError(null);
   }, [open]);
 
+  useEffect(() => {
+    if (!bookableOnline) setAllowClientChooseProfessional(false);
+  }, [bookableOnline]);
+
   const isSaving = createServiceMutation.isPending;
 
   const nameInvalid = !name.trim();

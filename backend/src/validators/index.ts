@@ -93,6 +93,7 @@ export const createServiceBody = z.object({
   requiresDeposit: z.boolean().optional(),
   depositPercent: z.number().int().min(1).max(100).optional().nullable(),
   bookableOnline: z.boolean().optional(),
+  allowClientChooseProfessional: z.boolean().optional(),
 });
 
 export const updateServiceBody = createServiceBody.partial();
@@ -311,7 +312,7 @@ export const publicAvailabilityParams = z.object({
 
 export const publicCreateAppointmentBody = z.object({
   serviceId: uuid,
-  professionalId: uuid,
+  professionalId: uuid.optional(),
   startAt: isoDatetime,
   clientFullName: z.string().trim().min(1, "El nombre es requerido").max(100),
   clientPhone: z

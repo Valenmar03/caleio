@@ -327,3 +327,12 @@ export const publicCreateAppointmentBody = z.object({
 export const confirmPaymentBody = z.object({
   paymentId: z.string().min(1).max(100),
 });
+
+export const businessUnavailabilityIdParam = z.object({
+  unavailabilityId: uuid,
+});
+
+export const createBusinessUnavailabilityBody = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be yyyy-MM-dd"),
+  reason: z.string().trim().max(200).optional().nullable(),
+});

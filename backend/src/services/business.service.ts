@@ -54,3 +54,39 @@ export const businessService = {
     return prisma.business.update({ where: { id: businessId }, data: update });
   },
 };
+
+export async function getBusinessUnavailabilities(businessId: string) {
+  return prisma.businessUnavailability.findMany({
+    where: { businessId },
+    orderBy: { date: "asc" },
+  });
+}
+
+export async function createBusinessUnavailability(
+  businessId: string,
+  data: { date: string; reason?: string | null }
+) {
+  const existing = await prisma.businessUnavailability.findUnique({
+    where: { businessId_date: { businessId, date: data.date } },
+  });
+  if (existing) {
+    const err = new Error("Ya existe un cierre para esa fecha") as Error & { status?: number };
+    err.status = 409;
+    throw err;
+  }
+  return prisma.businessUnavailability.create({
+    data: { businessId, date: data.date, reason: data.reason ?? null },
+  });
+}
+
+export async function deleteBusinessUnavailability(businessId: string, id: string) {
+  const record = await prisma.businessUnavailability.findFirst({
+    where: { id, businessId },
+  });
+  if (!record) {
+    const err = new Error("Cierre no encontrado") as Error & { status?: number };
+    err.status = 404;
+    throw err;
+  }
+  await prisma.businessUnavailability.delete({ where: { id } });
+}

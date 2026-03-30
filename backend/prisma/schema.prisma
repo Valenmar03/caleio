@@ -67,6 +67,7 @@ model Business {
   schedules     ProfessionalSchedule[]
   professionalServices ProfessionalService[]
   professionalUnavailabilities ProfessionalUnavailability[]
+  businessUnavailabilities     BusinessUnavailability[]
 
   @@index([createdAt])
 }
@@ -182,6 +183,19 @@ model ProfessionalUnavailability {
   professional Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
 
   @@index([professionalId, startAt])
+  @@index([businessId])
+}
+
+model BusinessUnavailability {
+  id         String   @id @default(uuid())
+  businessId String
+  date       String   // yyyy-MM-dd
+  reason     String?
+  createdAt  DateTime @default(now())
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, date])
   @@index([businessId])
 }
 

@@ -47,6 +47,7 @@ export async function getPublicServices(slug: string) {
       basePrice: true,
       requiresDeposit: true,
       depositPercent: true,
+      allowClientChooseProfessional: true,
     },
     orderBy: { name: "asc" },
   });
@@ -93,11 +94,58 @@ export async function getPublicAvailability(
   return result;
 }
 
+export async function getPublicAggregatedAvailability(
+  slug: string,
+  date: string,
+  serviceId: string
+) {
+  const business = await getBusinessBySlug(slug);
+
+  const links = await prisma.professionalService.findMany({
+    where: {
+      serviceId,
+      professional: { businessId: business.id, active: true },
+    },
+    select: { professionalId: true },
+  });
+
+  if (links.length === 0) return { slots: [] };
+
+  const results = await Promise.allSettled(
+    links.map(({ professionalId }) =>
+      professionalService.getAvailability({
+        businessId: business.id,
+        professionalId,
+        date,
+        serviceId,
+      })
+    )
+  );
+
+  const slotMap = new Map<string, { startAt: string; endAt: string; label: string }>();
+  for (const result of results) {
+    if (result.status === "fulfilled") {
+      for (const slot of result.value.slots) {
+        if (!slotMap.has(slot.startAt)) {
+          slotMap.set(slot.startAt, slot);
+        }
+      }
+    }
+  }
+
+  const now = new Date();
+  const slots = Array.from(slotMap.values())
+    .filter((s) => new Date(s.startAt) > now)
+    .sort((a, b) => a.startAt.localeCompare(b.startAt));
+
+  return { slots };
+}
+
 export async function createPublicAppointment(
   slug: string,
   data: {
     serviceId: string;
-    professionalId: string;
+    professionalId?: string;
     startAt: string;
     clientFullName: string;
     clientPhone: string;
@@ -105,7 +153,7 @@ export async function createPublicAppointment(
   }
 ) {
   const business = await getBusinessBySlug(slug);
-  const { serviceId, professionalId, startAt, clientFullName, clientPhone, clientEmail } = data;
+  const { serviceId, startAt, clientFullName, clientPhone, clientEmail } = data;
 
   const startDate = new Date(startAt);
   if (startDate <= new Date()) {
@@ -116,7 +164,7 @@ export async function createPublicAppointment(
 
   const service = await prisma.service.findFirst({
     where: { id: serviceId, businessId: business.id },
-    select: { id: true, name: true, basePrice: true, requiresDeposit: true, depositPercent: true },
+    select: { id: true, name: true, basePrice: true, requiresDeposit: true, depositPercent: true, durationMin: true },
   });
 
   if (!service) {
@@ -125,6 +173,76 @@ export async function createPublicAppointment(
     throw err;
   }
 
+  // ── Resolve professionalId (auto-assign if not provided) ──────────────────
+  let professionalId = data.professionalId;
+
+  if (!professionalId) {
+    const endAt = new Date(startDate.getTime() + service.durationMin * 60_000);
+
+    const links = await prisma.professionalService.findMany({
+      where: {
+        serviceId,
+        professional: { businessId: business.id, active: true },
+      },
+      select: { professionalId: true },
+    });
+
+    const allProfessionalIds = links.map((l) => l.professionalId);
+
+    if (allProfessionalIds.length === 0) {
+      const err = new Error("No hay profesionales disponibles para este servicio") as Error & { status?: number };
+      err.status = 409;
+      throw err;
+    }
+
+    const pendingPaymentCutoff = new Date(Date.now() - 30 * 60 * 1000);
+
+    const [busyFromAppointments, busyFromUnavailabilities, busyFromPending] = await Promise.all([
+      prisma.appointment.findMany({
+        where: {
+          professionalId: { in: allProfessionalIds },
+          status: { notIn: ["CANCELED"] },
+          startAt: { lt: endAt },
+          endAt: { gt: startDate },
+        },
+        select: { professionalId: true },
+      }),
+      prisma.professionalUnavailability.findMany({
+        where: {
+          professionalId: { in: allProfessionalIds },
+          startAt: { lt: endAt },
+          endAt: { gt: startDate },
+        },
+        select: { professionalId: true },
+      }),
+      prisma.pendingBooking.findMany({
+        where: {
+          professionalId: { in: allProfessionalIds },
+          createdAt: { gte: pendingPaymentCutoff },
+          startAt: { gte: startDate, lt: endAt },
+        },
+        select: { professionalId: true },
+      }),
+    ]);
+
+    const busyIds = new Set([
+      ...busyFromAppointments.map((a) => a.professionalId),
+      ...busyFromUnavailabilities.map((u) => u.professionalId),
+      ...busyFromPending.map((p) => p.professionalId),
+    ]);
+
+    const availableIds = allProfessionalIds.filter((id) => !busyIds.has(id));
+
+    if (availableIds.length === 0) {
+      const err = new Error("No hay profesionales disponibles en ese horario") as Error & { status?: number };
+      err.status = 409;
+      throw err;
+    }
+
+    professionalId = availableIds[Math.floor(Math.random() * availableIds.length)];
+  }
+
+  // ── Client upsert ─────────────────────────────────────────────────────────
   let client = await prisma.client.findFirst({
     where: { businessId: business.id, phone: clientPhone },
   });
@@ -153,7 +271,6 @@ export async function createPublicAppointment(
   if (needsDeposit) {
     const depositAmount = Math.round(Number(service.basePrice) * service.depositPercent! / 100);
 
-    // Check slot availability before creating pending booking
     const availability = await professionalService.getAvailability({
       businessId: business.id,
       professionalId,
@@ -167,7 +284,6 @@ export async function createPublicAppointment(
       throw err;
     }
 
-    // Save temp booking — appointment is NOT created yet
     const pending = await prisma.pendingBooking.create({
       data: {
         businessId: business.id,
@@ -198,11 +314,10 @@ export async function createPublicAppointment(
     startAt,
   });
 
-  // Notificaciones: turno confirmado + aviso al dueño
-  const professionalName = await prisma.professional
-    .findUnique({ where: { id: professionalId }, select: { name: true } })
-    .then((p) => p?.name ?? "");
+  const assignedProfessional = await prisma.professional
+    .findUnique({ where: { id: professionalId }, select: { id: true, name: true, color: true } });
 
+  const professionalName = assignedProfessional?.name ?? "";
   const dateStr = formatWaDate(new Date(startAt), business.timezone);
   const timeStr = formatWaTime(new Date(startAt), business.timezone);
 
@@ -228,12 +343,12 @@ export async function createPublicAppointment(
           phoneNumberId: business.waPhoneNumberId,
           to: owner.phone,
           templateName: "nuevo_turno_negocio",
-          variables: [client.fullName, service.name, professionalName, dateStr, timeStr],
+          variables: [client!.fullName, service.name, professionalName, dateStr, timeStr],
         });
       }
       if (owner.email && business.emailNotificationsEnabled) {
         sendNewAppointmentOwner(owner.email, {
-          clientName: client.fullName,
+          clientName: client!.fullName,
           professionalName,
           serviceName: service.name,
           date: dateStr,
@@ -256,7 +371,7 @@ export async function createPublicAppointment(
     });
   }
 
-  return { appointment };
+  return { appointment, assignedProfessional };
 }
 
 export async function confirmPublicPayment(slug: string, pendingBookingId: string, paymentId: string) {

@@ -264,20 +264,33 @@ export default function NewServicesFormModal({ open, onClose }: Props) {
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-slate-800">El cliente puede elegir profesional</p>
-              <p className="text-xs text-slate-400">El cliente puede seleccionar un profesional al reservar online</p>
+              <p className="text-xs text-slate-400">El cliente puede elegir un profesional al reservar. Si está desactivado, se asigna uno automáticamente.</p>
             </div>
             <button
               type="button"
-              onClick={() => setAllowClientChooseProfessional((prev) => !prev)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${allowClientChooseProfessional ? "bg-teal-600" : "bg-slate-200"}`}
+              onClick={() => bookableOnline && setAllowClientChooseProfessional((prev) => !prev)}
+              disabled={!bookableOnline}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                !bookableOnline ? "opacity-40 cursor-not-allowed bg-slate-200" :
+                allowClientChooseProfessional ? "bg-teal-600" : "bg-slate-200"
+              }`}
             >
               <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${allowClientChooseProfessional ? "translate-x-6" : "translate-x-1"}`} />
             </button>
           </div>
+
+          {!bookableOnline && (
+            <div className="flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2">
+              <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+              <p className="text-xs text-amber-700">
+                Esta opción solo aplica cuando el servicio es agendable online.
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">

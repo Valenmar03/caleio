@@ -108,7 +108,7 @@ export async function register(
   const expiresAt = new Date();
   expiresAt.setHours(expiresAt.getHours() + EMAIL_VERIFICATION_EXPIRES_HOURS);
   await prisma.emailVerification.create({ data: { userId: user.id, tokenHash, expiresAt } });
-  await sendVerificationEmail(normalizedEmail, rawToken);
+  await sendVerificationEmail(normalizedEmail, rawToken, businessName, normalizedSlug);
 
   return {
     user: {

@@ -296,6 +296,7 @@ export const agendaMonthlyQuery = z.object({
 
 export const analyticsQuery = z.object({
   period: z.enum(["day", "week", "month", "year"]).optional(),
+  refDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
 });
 
 // ─── Public booking ───────────────────────────────────────────────────────────

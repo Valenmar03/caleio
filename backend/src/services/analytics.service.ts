@@ -1,19 +1,19 @@
 import { prisma } from "../db/prisma";
 
-function getDateRange(period: "week" | "month"): { from: Date; to: Date } {
-  const now = new Date();
+function getDateRange(period: "week" | "month", refDate?: string): { from: Date; to: Date } {
+  const ref = refDate ? new Date(refDate + "T12:00:00") : new Date();
   if (period === "week") {
-    const day = now.getDay();
-    const from = new Date(now);
-    from.setDate(now.getDate() - ((day + 6) % 7));
+    const day = ref.getDay();
+    const from = new Date(ref);
+    from.setDate(ref.getDate() - ((day + 6) % 7));
     from.setHours(0, 0, 0, 0);
     const to = new Date(from);
     to.setDate(from.getDate() + 6);
     to.setHours(23, 59, 59, 999);
     return { from, to };
   } else {
-    const from = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
-    const to = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+    const from = new Date(ref.getFullYear(), ref.getMonth(), 1, 0, 0, 0, 0);
+    const to = new Date(ref.getFullYear(), ref.getMonth() + 1, 0, 23, 59, 59, 999);
     return { from, to };
   }
 }
@@ -33,8 +33,8 @@ function toDateStr(d: Date): string {
 }
 
 export const analyticsService = {
-  async getAnalytics(businessId: string, period: "week" | "month") {
-    const { from, to } = getDateRange(period);
+  async getAnalytics(businessId: string, period: "week" | "month", refDate?: string) {
+    const { from, to } = getDateRange(period, refDate);
 
     const appointments = await prisma.appointment.findMany({
       where: { businessId, startAt: { gte: from, lte: to } },
@@ -144,6 +144,18 @@ export const analyticsService = {
     appointments.forEach((a) => { dowMap[a.startAt.getDay()]++; });
     const appointmentsByDayOfWeek = DOW_LABELS.map((day, i) => ({ day, count: dowMap[i] }));
 
+    const revBySvc: Record<string, { name: string; revenue: number }> = {};
+    completed.forEach((a) => {
+      const svcId = a.service.id;
+      if (!revBySvc[svcId])
+        revBySvc[svcId] = { name: a.service.name, revenue: 0 };
+      revBySvc[svcId].revenue += Number(a.totalPrice ?? 0);
+    });
+    const revenueByService = Object.values(revBySvc)
+      .map((s) => ({ name: s.name, revenue: Math.round(s.revenue) }))
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 6);
+
     return {
       period,
       from: from.toISOString().slice(0, 10),
@@ -164,6 +176,7 @@ export const analyticsService = {
       revenueByProfessional,
       revenueByPaymentMethod,
       appointmentsByDayOfWeek,
+      revenueByService,
     };
   },
 };

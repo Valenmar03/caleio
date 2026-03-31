@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { addDays, format, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { CalendarOff, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 
 import type { AgendaAppointment, Professional } from "../../types/entities";
 import type { AgendaView } from "../../pages/AgendaPage";
+import type { BusinessUnavailability } from "../../services/business.api";
 import MobileDayView from "./MobileDayView.tsx";
 import MobileWeekView from "./MobileWeekView.tsx";
 import CustomSelect from "../ui/CustomSelect.tsx";
@@ -22,6 +23,7 @@ type Props = {
   selectedProfessional: Professional | null;
   professionals: Professional[];
   isPro?: boolean;
+  closedDays?: BusinessUnavailability[];
   handleSlotClick: (
     date: Date,
     time: string,
@@ -42,10 +44,12 @@ export default function MobileAgenda({
     selectedProfessional,
     professionals,
     isPro = false,
+    closedDays = [],
     setSelectedProfessionalId,
     handleSlotClick,
     handleAppointmentClick,
 }: Props) {
+  const closedDaySet = new Map(closedDays.map((u) => [u.date, u.reason]));
   const [selectedWeekDay, setSelectedWeekDay] = useState(currentDate);
 
   useEffect(() => {
@@ -152,8 +156,11 @@ export default function MobileAgenda({
             <div className="px-2 pb-3">
                 <div className="grid grid-cols-7 gap-1.5">
                 {weekDays.map((day) => {
+                    const dayStr = format(day, "yyyy-MM-dd");
                     const active = isSameDay(day, selectedWeekDay);
                     const today = isSameDay(day, new Date());
+                    const isClosed = closedDaySet.has(dayStr);
+                    const closedReason = closedDaySet.get(dayStr);
 
                     return (
                     <button
@@ -162,8 +169,13 @@ export default function MobileAgenda({
                         setSelectedWeekDay(day);
                         setCurrentDate(day);
                         }}
+                        title={isClosed ? (closedReason ?? "Día cerrado") : undefined}
                         className={`min-w-0 rounded-xl border py-2 text-center transition-colors ${
-                        active
+                        active && isClosed
+                            ? "border-amber-400 bg-amber-50"
+                            : isClosed
+                            ? "border-amber-200 bg-amber-50/60"
+                            : active
                             ? "border-teal-500 bg-teal-50"
                             : "border-slate-200 bg-white"
                         }`}
@@ -174,11 +186,19 @@ export default function MobileAgenda({
 
                         <p
                         className={`text-sm font-semibold ${
-                            active || today ? "text-teal-600" : "text-slate-800"
+                            isClosed
+                            ? "text-amber-600"
+                            : active || today
+                            ? "text-teal-600"
+                            : "text-slate-800"
                         }`}
                         >
                         {format(day, "d")}
                         </p>
+
+                        {isClosed && (
+                        <CalendarOff className="w-3 h-3 text-amber-500 mx-auto mt-0.5" />
+                        )}
                     </button>
                     );
                 })}

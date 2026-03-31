@@ -7,6 +7,7 @@ import {
   useCreateBusinessUnavailability,
   useDeleteBusinessUnavailability,
 } from "../../hooks/useBusinessUnavailabilities";
+import CustomDatePicker from "../ui/CustomDatePicker";
 
 export default function ClosedDaysSection() {
   const { data, isLoading } = useBusinessUnavailabilities();
@@ -45,13 +46,14 @@ export default function ClosedDaysSection() {
       <div className="px-6 py-4 space-y-4">
         {/* Add form */}
         <div className="flex flex-col sm:flex-row gap-2">
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            min={format(new Date(), "yyyy-MM-dd")}
-            className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-teal-500"
-          />
+          <div className="sm:w-64">
+            <CustomDatePicker
+              value={date}
+              onChange={setDate}
+              placeholder="Seleccionar fecha"
+              color="slate"
+            />
+          </div>
           <input
             type="text"
             value={reason}

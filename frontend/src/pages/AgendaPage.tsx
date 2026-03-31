@@ -6,9 +6,11 @@ import { ChevronLeft, ChevronRight, Plus, Search, Loader2, Users } from "lucide-
 import { useProfessionals } from "../hooks/useProfessionals";
 import { useAuth } from "../hooks/useAuth";
 import { useAgendaDaily, useAgendaWeekly } from "../hooks/useAgenda";
+import { useBusinessUnavailabilities } from "../hooks/useBusinessUnavailabilities";
 import type { AgendaAppointment, Professional } from "../types/entities";
 import NewAppointmentModal from "../components/appointment/NewAppointmentModal.tsx";
 import DayView from "../components/agenda/DayView";
+import { CalendarOff } from "lucide-react";
 import WeekView from "../components/agenda/WeekView";
 import MobileAgenda from "../components/agenda/MobileAgenda.tsx";
 import CustomSelect from "../components/ui/CustomSelect.tsx";
@@ -63,6 +65,11 @@ export default function AgendaPage() {
    const effectiveProfessionalId = isPro && user?.professionalId
       ? user.professionalId
       : selectedProfessionalId === "all" ? undefined : selectedProfessionalId;
+
+   const { data: unavailabilitiesData } = useBusinessUnavailabilities();
+   const closedDay = (unavailabilitiesData?.unavailabilities ?? []).find(
+     (u) => u.date === currentDateYMD,
+   ) ?? null;
 
    const { data: dailyAgenda, isLoading: dailyLoading } = useAgendaDaily(
       effectiveProfessionalId,
@@ -268,6 +275,18 @@ export default function AgendaPage() {
                </div>
             ) : (
                <>
+                  {closedDay && view === "day" && (
+                    <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+                      <CalendarOff className="w-4 h-4 text-amber-500 shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-amber-800">Día cerrado</p>
+                        {closedDay.reason && (
+                          <p className="text-xs text-amber-600 mt-0.5">{closedDay.reason}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="block md:hidden">
                      <MobileAgenda
                         view={view}
@@ -281,6 +300,7 @@ export default function AgendaPage() {
                         selectedProfessional={selectedProfessional}
                         professionals={professionals}
                         isPro={isPro}
+                        closedDays={unavailabilitiesData?.unavailabilities ?? []}
                         setSelectedProfessionalId={setSelectedProfessionalId}
                         handleSlotClick={handleSlotClick}
                         handleAppointmentClick={handleAppointmentClick}
@@ -309,6 +329,7 @@ export default function AgendaPage() {
                         appointments={appointments}
                         selectedProfessionalId={selectedProfessionalId}
                         selectedProfessional={selectedProfessional}
+                        closedDays={unavailabilitiesData?.unavailabilities ?? []}
                         handleSlotClick={handleSlotClick}
                         handleAppointmentClick={handleAppointmentClick}
                         getAppointmentTopAndHeight={getAppointmentTopAndHeight}

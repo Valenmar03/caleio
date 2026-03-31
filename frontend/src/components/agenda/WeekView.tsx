@@ -1,9 +1,11 @@
 import { format, isSameDay, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
+import { CalendarOff } from "lucide-react";
 import TimeLabel from "./TimeLabel";
 import AppointmentCard from "../appointment/AppointmentCard";
 import type { AgendaAppointment, Professional } from "../../types/entities";
 import type { AgendaView } from "../../pages/AgendaPage";
+import type { BusinessUnavailability } from "../../services/business.api";
 
 type WeekViewProps = {
   weekDays: Date[];
@@ -11,6 +13,7 @@ type WeekViewProps = {
   appointments: AgendaAppointment[];
   selectedProfessionalId: string;
   selectedProfessional?: Professional | null;
+  closedDays: BusinessUnavailability[];
   handleSlotClick: (date: Date, time: string, professionalId?: string) => void
   handleAppointmentClick: (appt: AgendaAppointment) => void;
   getAppointmentTopAndHeight: (appt: AgendaAppointment) => { top: number; height: number };
@@ -72,42 +75,64 @@ export default function WeekView({
   appointments,
   selectedProfessionalId,
   selectedProfessional,
+  closedDays,
   handleSlotClick,
   handleAppointmentClick,
   getAppointmentTopAndHeight,
   setCurrentDate,
   setView,
 }: WeekViewProps) {
+  const closedDaySet = new Map(closedDays.map((u) => [u.date, u.reason]));
+
   return (
     <div className="overflow-x-auto">
       <div className="min-w-225">
         <div className="grid grid-cols-8 border-b border-slate-200 sticky top-0 bg-white z-10">
           <div className="p-2 text-xs text-slate-400 border-r border-slate-100" />
-          {weekDays.map((day) => (
+          {weekDays.map((day) => {
+            const dayStr = format(day, "yyyy-MM-dd");
+            const isClosed = closedDaySet.has(dayStr);
+            const closedReason = closedDaySet.get(dayStr);
+
+            return (
             <div
               key={day.toISOString()}
-              className={`p-3 text-center border-r border-slate-100 last:border-r-0 cursor-pointer hover:bg-slate-50 ${
-                isSameDay(day, new Date()) ? "bg-teal-50" : ""
+              className={`p-3 text-center border-r border-slate-100 last:border-r-0 cursor-pointer ${
+                isClosed
+                  ? "bg-amber-50 hover:bg-amber-100/70"
+                  : isSameDay(day, new Date())
+                  ? "bg-teal-50 hover:bg-slate-50"
+                  : "hover:bg-slate-50"
               }`}
               onClick={() => {
                 setCurrentDate(day);
                 setView("day");
               }}
+              title={isClosed ? (closedReason ?? "Día cerrado") : undefined}
             >
               <p className="text-xs text-slate-400">
                 {format(day, "EEE", { locale: es })}
               </p>
               <p
                 className={`text-lg font-semibold ${
-                  isSameDay(day, new Date())
+                  isClosed
+                    ? "text-amber-600"
+                    : isSameDay(day, new Date())
                     ? "text-teal-600"
                     : "text-slate-700"
                 }`}
               >
                 {format(day, "d")}
               </p>
+              {isClosed && (
+                <div className="flex items-center justify-center gap-1 mt-1">
+                  <CalendarOff className="w-3 h-3 text-amber-500" />
+                  <span className="text-[10px] font-medium text-amber-600">Cerrado</span>
+                </div>
+              )}
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {HOURS.map((hour) => (
@@ -119,6 +144,7 @@ export default function WeekView({
 
             {weekDays.map((day) => {
               const dayStr = format(day, "yyyy-MM-dd");
+              const isClosed = closedDaySet.has(dayStr);
 
               const hourAppointments = appointments.filter((appt) => {
                 const start = parseISO(appt.startAt);
@@ -131,7 +157,9 @@ export default function WeekView({
               return (
                 <div
                   key={`${dayStr}-${hour}`}
-                  className="h-14 border-r border-slate-50 last:border-r-0 relative cursor-pointer hover:bg-teal-50/20"
+                  className={`h-14 border-r border-slate-50 last:border-r-0 relative cursor-pointer ${
+                    isClosed ? "bg-amber-50/40 hover:bg-amber-50/70" : "hover:bg-teal-50/20"
+                  }`}
                   onClick={() =>
                     handleSlotClick(
                       day,

@@ -420,7 +420,7 @@ export default function BookingPage() {
                         <p className="font-medium text-slate-800 text-sm">{svc.name}</p>
                         {svc.requiresDeposit && svc.depositPercent && (
                           <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200">
-                            Seña {svc.depositPercent}%
+                            Seña {formatPrice(Math.round(Number(svc.basePrice) * svc.depositPercent / 100))}
                           </span>
                         )}
                       </div>
@@ -569,7 +569,7 @@ export default function BookingPage() {
                 <div className="flex justify-between gap-4 items-center">
                   <span className="text-slate-400">Seña requerida</span>
                   <span className="font-semibold text-teal-700">
-                    {formatPrice(depositAmount)} ({selectedService?.depositPercent}%)
+                    {formatPrice(depositAmount)}
                   </span>
                 </div>
               )}

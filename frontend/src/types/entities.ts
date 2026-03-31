@@ -20,6 +20,7 @@ export type AnalyticsResponse = {
   revenueByProfessional: Array<{ id: string; name: string; color: string | null; revenue: number }>;
   revenueByPaymentMethod: Array<{ method: string; label: string; count: number; percentage: number }>;
   appointmentsByDayOfWeek: Array<{ day: string; count: number }>;
+  revenueByService: Array<{ name: string; revenue: number }>;
 };
 
 // BUSINESS

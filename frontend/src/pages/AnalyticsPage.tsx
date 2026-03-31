@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Calendar, DollarSign, TrendingUp, XCircle } from "lucide-react";
+import { Calendar, DollarSign, TrendingUp, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { format, addWeeks, addMonths, startOfWeek, endOfWeek } from "date-fns";
+import { es } from "date-fns/locale";
 import {
   BarChart,
   Bar,
@@ -42,7 +44,27 @@ function getProColor(color: string | null) {
 
 export default function AnalyticsPage() {
   const [period, setPeriod] = useState<Period>("month");
-  const { data, isLoading } = useAnalytics(period);
+  const [refDate, setRefDate] = useState<Date>(new Date());
+
+  const refDateStr = format(refDate, "yyyy-MM-dd");
+
+  const navigate = (direction: -1 | 1) => {
+    setRefDate((prev) =>
+      period === "week" ? addWeeks(prev, direction) : addMonths(prev, direction),
+    );
+  };
+
+  const handlePeriodChange = (p: Period) => {
+    setPeriod(p);
+    setRefDate(new Date());
+  };
+
+  const periodLabel =
+    period === "week"
+      ? `${format(startOfWeek(refDate, { weekStartsOn: 1 }), "d MMM", { locale: es })} – ${format(endOfWeek(refDate, { weekStartsOn: 1 }), "d MMM yyyy", { locale: es })}`
+      : format(refDate, "MMMM yyyy", { locale: es });
+
+  const { data, isLoading } = useAnalytics(period, refDateStr);
 
   const summary = data?.summary;
   const revenueByDay = data?.revenueByDay ?? [];
@@ -55,6 +77,8 @@ export default function AnalyticsPage() {
   const maxProRevenue = revenueByProfessional[0]?.revenue ?? 1;
   const revenueByPaymentMethod = data?.revenueByPaymentMethod ?? [];
   const appointmentsByDayOfWeek = data?.appointmentsByDayOfWeek ?? [];
+  const revenueByService = data?.revenueByService ?? [];
+  const maxSvcRevenue = revenueByService[0]?.revenue ?? 1;
 
   const tickInterval = period === "week" ? 0 : Math.ceil(revenueByDay.length / 10) - 1;
 
@@ -66,11 +90,35 @@ export default function AnalyticsPage() {
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Análisis</h1>
           <p className="text-sm text-slate-500 mt-0.5">Métricas del negocio</p>
         </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate(-1)}
+            className="h-9 w-9 inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-colors"
+            aria-label="Período anterior"
+          >
+            <ChevronLeft className="w-4 h-4 text-slate-500" />
+          </button>
+
+          <span className="text-sm font-medium text-slate-700 capitalize min-w-36 text-center">
+            {periodLabel}
+          </span>
+
+          <button
+            onClick={() => navigate(1)}
+            disabled={refDateStr >= format(new Date(), "yyyy-MM-dd")}
+            className="h-9 w-9 inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            aria-label="Período siguiente"
+          >
+            <ChevronRight className="w-4 h-4 text-slate-500" />
+          </button>
+        </div>
+
         <div className="flex rounded-lg border border-slate-200 overflow-hidden bg-white self-start sm:self-auto">
           {(["week", "month"] as Period[]).map((p) => (
             <button
               key={p}
-              onClick={() => setPeriod(p)}
+              onClick={() => handlePeriodChange(p)}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 period === p
                   ? "bg-slate-900 text-white"
@@ -406,6 +454,37 @@ export default function AnalyticsPage() {
                             style={{
                               width: `${Math.round((pro.revenue / maxProRevenue) * 100)}%`,
                               backgroundColor: getProColor(pro.color),
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Revenue by service */}
+            <div className="bg-white rounded-xl border border-slate-200 p-5">
+              <h2 className="text-sm font-semibold text-slate-700 mb-4">Ingresos por servicio</h2>
+              {revenueByService.length === 0 ? (
+                <p className="text-sm text-slate-400 text-center py-8">Sin datos</p>
+              ) : (
+                <div className="space-y-4">
+                  {revenueByService.map((svc) => (
+                    <div key={svc.name} className="flex items-center gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-sm text-slate-700 truncate">{svc.name}</span>
+                          <span className="text-sm font-semibold text-slate-800 ml-2 shrink-0">
+                            {formatCurrency(svc.revenue)}
+                          </span>
+                        </div>
+                        <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-teal-500"
+                            style={{
+                              width: `${Math.round((svc.revenue / maxSvcRevenue) * 100)}%`,
                             }}
                           />
                         </div>

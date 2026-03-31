@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Allow navigating back/forward between weeks and months in the Analytics page, and add a "Ingresos por servicio" chart.
+**Goal:** Allow navigating back/forward between weeks and months in the Analytics page, add a "Ingresos por servicio" chart, and show the deposit amount as a money value in the booking page.
 
 **Architecture:** Add an optional `refDate` (yyyy-MM-dd) query param to the analytics endpoint so the backend computes ranges relative to any date, not just today. The frontend manages a `refDate` state and renders nav arrows + a period label. A new `revenueByService` field is added to the response and rendered as a progress-bar card.
 
@@ -21,6 +21,7 @@
 | `frontend/src/services/analytics.api.ts` | Accept and send `refDate` param |
 | `frontend/src/hooks/useAnalytics.ts` | Accept `refDate`, include in query key |
 | `frontend/src/pages/AnalyticsPage.tsx` | Add `refDate` state, nav arrows, period label, revenueByService card |
+| `frontend/src/pages/BookingPage.tsx` | Show deposit as money amount (`$500`) instead of percentage in service badge |
 
 ---
 
@@ -387,4 +388,64 @@ In the "Charts row 3" grid (the `grid-cols-1 lg:grid-cols-3` div), add a new car
 ```bash
 git add frontend/src/pages/AnalyticsPage.tsx
 git commit -m "feat: add period navigation and revenue by service chart to analytics"
+```
+
+---
+
+## Task 4 — BookingPage: show deposit as money amount
+
+**Files:**
+- Modify: `frontend/src/pages/BookingPage.tsx`
+
+**Context:** In the service selection step (step 1), each service card shows a badge `Seña 30%`. This should instead show the calculated money amount (e.g., `Seña $500`). The formula is already used elsewhere in the file: `Math.round(Number(svc.basePrice) * svc.depositPercent / 100)`.
+
+In the confirm step, the line `{formatPrice(depositAmount)} ({selectedService?.depositPercent}%)` already shows both — remove the percentage part and leave only the money amount.
+
+- [ ] **Step 1: Fix the badge in the service card**
+
+Find this block in `BookingPage.tsx` (around line 421):
+
+```tsx
+{svc.requiresDeposit && svc.depositPercent && (
+  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200">
+    Seña {svc.depositPercent}%
+  </span>
+)}
+```
+
+Replace with:
+
+```tsx
+{svc.requiresDeposit && svc.depositPercent && (
+  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200">
+    Seña {formatPrice(Math.round(Number(svc.basePrice) * svc.depositPercent / 100))}
+  </span>
+)}
+```
+
+- [ ] **Step 2: Fix the confirm step summary line**
+
+Find this block in `BookingPage.tsx` (around line 570):
+
+```tsx
+{formatPrice(depositAmount)} ({selectedService?.depositPercent}%)
+```
+
+Replace with:
+
+```tsx
+{formatPrice(depositAmount)}
+```
+
+- [ ] **Step 3: Verify in browser**
+
+- Open the booking page (`/reservar/:slug`)
+- Select a service that has `requiresDeposit: true` — the badge should show e.g. `Seña $500` instead of `Seña 30%`
+- Proceed to the confirm step — the deposit line should show only the money amount
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add frontend/src/pages/BookingPage.tsx
+git commit -m "feat: show deposit as money amount in booking page service badge"
 ```

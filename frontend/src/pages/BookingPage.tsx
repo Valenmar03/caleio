@@ -628,29 +628,34 @@ export default function BookingPage() {
             ) : professionals.length === 0 ? (
               <p className="text-slate-400 text-sm text-center py-6">No hay profesionales disponibles para este servicio.</p>
             ) : (
-              <div className="space-y-2">
-                {professionals.map((pro) => (
-                  <button
-                    key={pro.id}
-                    onClick={() => setSelectedProfessional(pro)}
-                    className={`w-full flex items-center gap-3 rounded-xl border px-4 py-3.5 text-left transition-colors ${
-                      selectedProfessional?.id === pro.id
-                        ? "border-teal-500 bg-teal-50"
-                        : "border-slate-200 bg-white hover:border-slate-300"
-                    }`}
-                  >
-                    <div
-                      className="w-8 h-8 rounded-full shrink-0 flex items-center justify-center text-white text-xs font-semibold"
-                      style={{ backgroundColor: pro.color || "#0d9488" }}
+              <div className="space-y-3">
+                {professionals.map((pro) => {
+                  const active = selectedProfessional?.id === pro.id;
+                  return (
+                    <button
+                      key={pro.id}
+                      onClick={() => setSelectedProfessional(pro)}
+                      className={`w-full flex items-center gap-4 rounded-2xl border px-4 py-4 text-left transition-all cursor-pointer ${
+                        active
+                          ? "border-teal-500 bg-teal-50"
+                          : "border-slate-200 bg-white hover:border-slate-300"
+                      }`}
                     >
-                      {pro.name.charAt(0).toUpperCase()}
-                    </div>
-                    <span className="font-medium text-slate-800 text-sm">{pro.name}</span>
-                    {selectedProfessional?.id === pro.id && (
-                      <Check className="w-4 h-4 text-teal-600 ml-auto" />
-                    )}
-                  </button>
-                ))}
+                      <div
+                        className="w-11 h-11 rounded-xl shrink-0 flex items-center justify-center text-white text-base font-bold"
+                        style={{ backgroundColor: pro.color || "#0d9488" }}
+                      >
+                        {pro.name.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="font-semibold text-slate-800 text-base flex-1">{pro.name}</span>
+                      {active && (
+                        <div className="w-5 h-5 rounded-full bg-teal-600 flex items-center justify-center shrink-0">
+                          <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </StepWrapper>

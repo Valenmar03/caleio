@@ -7,6 +7,7 @@ import servicesRoutes from "./services.routes";
 import businessRoutes from "./business.routes";
 import analyticsRoutes from "./analytics.routes";
 import billingRoutes from "./billing.routes";
+import uploadRoutes from "./upload.routes";
 import { authenticate } from "../middleware/authenticate";
 import { requireSubscription } from "../middleware/requireSubscription";
 import { changePasswordHandler, updateUserHandler } from "../controllers/auth.controller";
@@ -32,5 +33,6 @@ router.use("/clients", clientsRoutes);
 router.use("/services", servicesRoutes);
 router.use("/business", businessRoutes);
 router.use("/analytics", analyticsRoutes);
+router.use("/upload", uploadRoutes);
 
 export default router;

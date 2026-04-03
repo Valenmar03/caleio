@@ -44,6 +44,10 @@ export type Business = {
   trialEndsAt?: string | null;
   billingExempt?: boolean;
   onboardingCompleted?: boolean;
+  address?: string | null;
+  logoUrl?: string | null;
+  whatsappPhone?: string | null;
+  bookingTheme?: string | null;
 };
 
 export type BusinessUnavailability = {

@@ -2,19 +2,56 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { format, addDays, startOfToday, isToday } from "date-fns";
 import { es } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Clock, Check, Loader2, CreditCard } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, Check, Loader2, CreditCard, MapPin, MessageCircle, CalendarPlus } from "lucide-react";
 import PhoneInput from "../components/ui/PhoneInput";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type BusinessInfo = { id: string; name: string; slug: string };
+type BusinessInfo = {
+  id: string;
+  name: string;
+  slug: string;
+  address?: string | null;
+  logoUrl?: string | null;
+  whatsappPhone?: string | null;
+  bookingTheme?: string | null;
+};
 type Professional = { id: string; name: string; color: string };
 type Slot = { startAt: string; endAt: string; label: string };
 
 type Service = { id: string; name: string; description?: string; durationMin: number; basePrice: number; requiresDeposit: boolean; depositPercent: number | null; allowClientChooseProfessional: boolean };
-type Step = "service" | "professional" | "datetime" | "client" | "confirm" | "redirecting" | "done";
+type Step = "landing" | "service" | "professional" | "datetime" | "client" | "confirm" | "redirecting" | "done";
 
-const STEPS: Step[] = ["service", "professional", "datetime", "client", "confirm", "redirecting", "done"];
+const STEPS: Step[] = ["landing", "service", "professional", "datetime", "client", "confirm", "redirecting", "done"];
+
+// ─── Booking themes ──────────────────────────────────────────────────────────
+
+type ThemeColors = { primary: string; primaryDark: string; primaryLight: string; ring: string; connector: string; todayText: string };
+
+const THEME_COLORS: Record<string, ThemeColors | null> = {
+  default: null,
+  rose:   { primary: "#e11d48", primaryDark: "#be123c", primaryLight: "#fff1f2", ring: "#fce7f3", connector: "#fb7185", todayText: "#f43f5e" },
+  violet: { primary: "#7c3aed", primaryDark: "#6d28d9", primaryLight: "#f5f3ff", ring: "#ede9fe", connector: "#a78bfa", todayText: "#8b5cf6" },
+  amber:  { primary: "#d97706", primaryDark: "#b45309", primaryLight: "#fffbeb", ring: "#fef3c7", connector: "#fcd34d", todayText: "#f59e0b" },
+  ocean:  { primary: "#0284c7", primaryDark: "#0369a1", primaryLight: "#f0f9ff", ring: "#e0f2fe", connector: "#38bdf8", todayText: "#0ea5e9" },
+  slate:  { primary: "#475569", primaryDark: "#334155", primaryLight: "#f8fafc", ring: "#e2e8f0", connector: "#94a3b8", todayText: "#64748b" },
+};
+
+function buildThemeCSS(c: ThemeColors): string {
+  return `
+    .booking-themed .bg-teal-600 { background-color: ${c.primary} !important; }
+    .booking-themed .hover\\:bg-teal-700:hover { background-color: ${c.primaryDark} !important; }
+    .booking-themed .text-teal-600 { color: ${c.primary} !important; }
+    .booking-themed .text-teal-700 { color: ${c.primaryDark} !important; }
+    .booking-themed .bg-teal-50 { background-color: ${c.primaryLight} !important; }
+    .booking-themed .border-teal-500 { border-color: ${c.primary} !important; }
+    .booking-themed .bg-teal-400 { background-color: ${c.connector} !important; }
+    .booking-themed .text-teal-100 { color: ${c.ring} !important; }
+    .booking-themed .text-teal-500 { color: ${c.todayText} !important; }
+    .booking-themed .hover\\:border-teal-400:hover { border-color: ${c.connector} !important; }
+    .booking-themed .ring-teal-100 { --tw-ring-color: ${c.ring} !important; }
+  `;
+}
 
 function stepIndex(s: Step) {
   return STEPS.indexOf(s);
@@ -38,6 +75,7 @@ function formatDuration(min: number) {
 // ─── Step indicator ──────────────────────────────────────────────────────────
 
 const STEP_LABELS: Record<Step, string> = {
+  landing: "",
   service: "Servicio",
   professional: "Profesional",
   datetime: "Fecha y hora",
@@ -155,7 +193,7 @@ export default function BookingPage() {
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [slots, setSlots] = useState<Slot[]>([]);
 
-  const [step, setStep] = useState<Step>("service");
+  const [step, setStep] = useState<Step>("landing");
 
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedProfessional, setSelectedProfessional] = useState<Professional | null>(null);
@@ -229,7 +267,8 @@ export default function BookingPage() {
 
   function goBack() {
     const prev: Record<Step, Step> = {
-      service: "service",
+      landing: "landing",
+      service: "landing",
       professional: "service",
       datetime: showProfessionalStep ? "professional" : "service",
       client: "datetime",
@@ -354,6 +393,7 @@ export default function BookingPage() {
     : null;
 
   const canGoNext: Record<Step, boolean> = {
+    landing: true,
     service: !!selectedService,
     professional: showProfessionalStep ? !!selectedProfessional : true,
     datetime: !!selectedSlot,
@@ -364,6 +404,7 @@ export default function BookingPage() {
   };
 
   const nextStep: Record<Step, Step> = {
+    landing: "service",
     service: showProfessionalStep ? "professional" : "datetime",
     professional: "datetime",
     datetime: "client",
@@ -373,24 +414,101 @@ export default function BookingPage() {
     done: "done",
   };
 
+  const themeColors = THEME_COLORS[business?.bookingTheme ?? "default"] ?? null;
+
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-lg mx-auto px-4 py-4 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center">
-            <span className="text-white text-xs font-bold">
-              {business?.name.charAt(0).toUpperCase()}
-            </span>
+    <div className="min-h-screen bg-slate-50 booking-themed">
+      {themeColors && <style>{buildThemeCSS(themeColors)}</style>}
+
+      {/* ── STEP: Landing ── */}
+      {step === "landing" && (
+        <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+          <div className="w-full max-w-sm flex flex-col items-center gap-6">
+            {/* Logo / initial */}
+            <div className="w-20 h-20 rounded-2xl bg-teal-600 flex items-center justify-center overflow-hidden shadow-md">
+              {business?.logoUrl ? (
+                <img src={business.logoUrl} alt={business.name} className="w-full h-full object-contain p-1" />
+              ) : (
+                <span className="text-white text-3xl font-bold">
+                  {business?.name.charAt(0).toUpperCase()}
+                </span>
+              )}
+            </div>
+
+            {/* Name + tagline */}
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-slate-800">{business?.name}</h1>
+              <p className="text-slate-500 text-sm mt-1">Reservá tu turno online</p>
+            </div>
+
+            {/* Action buttons */}
+            <div className="w-full flex flex-col gap-3 mt-2">
+              <button
+                onClick={() => setStep("service")}
+                className="w-full flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl py-3.5 transition-colors text-sm"
+              >
+                <CalendarPlus className="w-4.5 h-4.5" />
+                Reservar un turno
+              </button>
+
+              {business?.whatsappPhone && (
+                <a
+                  href={`https://wa.me/${business.whatsappPhone}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium rounded-xl py-3 transition-colors text-sm"
+                >
+                  <MessageCircle className="w-4 h-4 text-emerald-500" />
+                  Hablar por WhatsApp
+                </a>
+              )}
+
+              {business?.address && (
+                <a
+                  href={`https://maps.google.com/?q=${encodeURIComponent(business.address)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium rounded-xl py-3 transition-colors text-sm"
+                >
+                  <MapPin className="w-4 h-4 text-rose-500" />
+                  Cómo llegar
+                </a>
+              )}
+            </div>
           </div>
-          <div>
-            <p className="font-semibold text-slate-800 text-sm leading-tight">{business?.name}</p>
-            <p className="text-xs text-slate-400">Reservar turno online</p>
+
+          <footer className="flex flex-col items-center gap-2 pt-12">
+            <div className="flex items-center gap-1.5">
+              <img src="/logo.png" alt="Caleio" className="w-4 h-4 object-contain opacity-40" />
+              <span className="text-xs text-slate-300">Powered by Caleio</span>
+            </div>
+          </footer>
+        </div>
+      )}
+
+      {/* Header (shown for all steps except landing) */}
+      {step !== "landing" && (
+        <div className="bg-white border-b border-slate-100">
+          <div className="max-w-lg mx-auto px-4 py-4 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center overflow-hidden shrink-0">
+              {business?.logoUrl ? (
+                <img src={business.logoUrl} alt={business.name} className="w-full h-full object-contain p-0.5" />
+              ) : (
+                <span className="text-white text-xs font-bold">
+                  {business?.name.charAt(0).toUpperCase()}
+                </span>
+              )}
+            </div>
+            <div>
+              <p className="font-semibold text-slate-800 text-sm leading-tight">{business?.name}</p>
+              <p className="text-xs text-slate-400">Reservar turno online</p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Content */}
+      {step !== "landing" && (
       <div className="max-w-lg mx-auto px-4 py-6">
         <StepBar current={step} showProfessional={showProfessionalStep} />
 
@@ -626,7 +744,7 @@ export default function BookingPage() {
           <div className="flex items-center justify-between mt-6">
             <button
               onClick={goBack}
-              disabled={step === "service"}
+              disabled={false}
               className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 disabled:opacity-0 transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -674,6 +792,7 @@ export default function BookingPage() {
           </a>
         </div>
       </footer>
+      )}
     </div>
   );
 }

@@ -6,6 +6,7 @@ export const appRoutes = {
   clients: "/clients",
   analytics: "/analytics",
   businessSettings: "/business-settings",
+  businessProfile: "/profile",
 } as const;
 
 export const routeTitles: Record<string, string> = {
@@ -16,4 +17,5 @@ export const routeTitles: Record<string, string> = {
   [appRoutes.clients]: "Clientes",
   [appRoutes.analytics]: "Análisis",
   [appRoutes.businessSettings]: "Administración",
+  [appRoutes.businessProfile]: "Perfil del negocio",
 };

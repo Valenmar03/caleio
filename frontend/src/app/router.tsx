@@ -17,6 +17,7 @@ import BookingPaymentSuccessPage from "../pages/BookingPaymentSuccessPage.tsx";
 import BookingPaymentFailurePage from "../pages/BookingPaymentFailurePage.tsx";
 import BookingPaymentPendingPage from "../pages/BookingPaymentPendingPage.tsx";
 import OnboardingPage from "../pages/OnboardingPage.tsx";
+import BusinessProfilePage from "../pages/BusinessProfilePage.tsx";
 import PrivacyPolicyPage from "../pages/PrivacyPolicyPage.tsx";
 import TermsPage from "../pages/TermsPage.tsx";
 import CookiePolicyPage from "../pages/CookiePolicyPage.tsx";
@@ -127,6 +128,7 @@ export const router = createBrowserRouter([
               { path: "services", element: <ServicesPage /> },
               { path: "analytics", element: <AnalyticsPage /> },
               { path: "business-settings", element: <BusinessSettingsPage /> },
+              { path: "profile", element: <BusinessProfilePage /> },
             ],
           },
         ],

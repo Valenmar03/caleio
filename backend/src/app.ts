@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import path from "path";
 import { prisma } from "./db/prisma";
 import authRoutes from "./routes/auth.routes";
 import publicRoutes from "./routes/public.routes";
@@ -20,6 +21,7 @@ app.post("/billing/webhook", express.raw({ type: "application/json" }), webhookH
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(express.static(path.join(__dirname, "..", "public")));
 
 app.get("/health", (_req, res) => {
   res.json({ ok: true, name: "lumina-api" });

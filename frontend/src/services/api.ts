@@ -67,3 +67,42 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
 
   return res.json();
 }
+
+export async function apiFetchFormData<T>(path: string, formData: FormData): Promise<T> {
+  const headers: Record<string, string> = {};
+  if (_accessToken) headers["Authorization"] = `Bearer ${_accessToken}`;
+
+  const res = await fetch(`${API_URL}${path}`, {
+    method: "POST",
+    headers,
+    credentials: "include",
+    body: formData,
+  });
+
+  if (res.status === 401) {
+    const refreshed = await tryRefreshToken();
+    if (refreshed) {
+      headers["Authorization"] = `Bearer ${_accessToken!}`;
+      const retry = await fetch(`${API_URL}${path}`, {
+        method: "POST",
+        headers,
+        credentials: "include",
+        body: formData,
+      });
+      if (retry.ok) return retry.json();
+    }
+    setAccessToken(null);
+    window.location.href = "/login";
+    throw new Error("Session expired");
+  }
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ error: "Request failed" }));
+    const err = new Error(body.error ?? "Request failed") as Error & { status: number; body: unknown };
+    err.status = res.status;
+    err.body = body;
+    throw err;
+  }
+
+  return res.json();
+}

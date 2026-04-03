@@ -58,6 +58,10 @@ model Business {
   trialEndsAt        DateTime?
   billingExempt         Boolean            @default(false)
   onboardingCompleted   Boolean            @default(false)
+  address              String?
+  logoUrl              String?
+  whatsappPhone        String?
+  bookingTheme         String?            @default("default")
   createdAt          DateTime           @default(now())
 
   users         User[]

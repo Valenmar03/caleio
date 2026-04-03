@@ -72,6 +72,9 @@ export const updateBusinessBody = z.object({
   emailNotificationsEnabled: z.boolean().optional(),
   emailReminderHours: z.number().int().min(1).max(168).optional().nullable(),
   onboardingCompleted: z.boolean().optional(),
+  address: z.string().trim().max(200).optional().nullable(),
+  whatsappPhone: z.string().trim().max(30).optional().nullable(),
+  bookingTheme: z.string().trim().max(30).optional().nullable(),
 });
 
 // ─── Services ─────────────────────────────────────────────────────────────────

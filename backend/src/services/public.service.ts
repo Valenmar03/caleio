@@ -26,6 +26,10 @@ async function getBusinessBySlug(slug: string) {
       waPhoneNumberId: true,
       waAccessToken: true,
       emailNotificationsEnabled: true,
+      address: true,
+      logoUrl: true,
+      whatsappPhone: true,
+      bookingTheme: true,
     },
   });
   if (!business) throw notFound("Business not found");

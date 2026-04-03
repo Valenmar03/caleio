@@ -10,6 +10,7 @@ import {
   UserCircle,
   BarChart3,
   Settings,
+  Store,
   Menu,
   X,
   ChevronRight,
@@ -29,6 +30,7 @@ const NAV_ITEMS: NavItem[] = [
   { name: "Servicios", to: appRoutes.services, icon: Scissors },
   { name: "Clientes", to: appRoutes.clients, icon: UserCircle },
   { name: "Análisis", to: appRoutes.analytics, icon: BarChart3 },
+  { name: "Perfil", to: appRoutes.businessProfile, icon: Store },
   { name: "Administración", to: appRoutes.businessSettings, icon: Settings },
 ];
 

@@ -38,6 +38,7 @@ const THEME_COLORS: Record<string, ThemeColors | null> = {
   "desert-sand": { primary: "#bf7450", primaryDark: "#b16145", primaryLight: "#faf6f2", ring: "#f4eae0", connector: "#dab497", todayText: "#ca8f6d" },
   "bay-of-many": { primary: "#2b68e5", primaryDark: "#2354d2", primaryLight: "#f0f6fe", ring: "#dcebfd", connector: "#96c7fa", todayText: "#65a8f5" },
   "hippie-blue": { primary: "#3d6a7d", primaryDark: "#375867", primaryLight: "#f2f8f9", ring: "#deecef", connector: "#95bfcb", todayText: "#5a97aa" },
+  "carissma":    { primary: "#ba486c", primaryDark: "#9f3755", primaryLight: "#fbf4f7", ring: "#f8ebf1", connector: "#eab7cc", todayText: "#ce668c" },
 };
 
 function buildThemeCSS(c: ThemeColors): string {

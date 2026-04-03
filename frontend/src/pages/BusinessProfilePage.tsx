@@ -24,6 +24,7 @@ const BOOKING_THEMES: BookingTheme[] = [
   { id: "desert-sand",  name: "Desert Sand",   primary: "#bf7450", color: "#ca8f6d" },
   { id: "bay-of-many",  name: "Bay of Many",   primary: "#2b68e5", color: "#4186f0" },
   { id: "hippie-blue",  name: "Hippie Blue",   primary: "#3d6a7d", color: "#5a97aa" },
+  { id: "carissma",     name: "Carissma",      primary: "#ba486c", color: "#db87a8" },
 ];
 
 // ─── Section wrapper ──────────────────────────────────────────────────────────

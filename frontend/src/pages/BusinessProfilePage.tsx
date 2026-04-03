@@ -208,7 +208,7 @@ export default function BusinessProfilePage() {
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 items-start">
 
       {/* ── Columna izquierda (logo + contacto + link) ── */}
-      <div className="lg:col-span-3 space-y-4">
+      <div className="lg:col-span-2 space-y-4">
 
         {/* Logo */}
         <Section title="Imagen del negocio" icon={Building2}>
@@ -281,9 +281,9 @@ export default function BusinessProfilePage() {
       </div>
 
       {/* ── Columna derecha (estilo) ── */}
-      <div className="lg:col-span-2">
+      <div className="lg:col-span-3">
         <Section title="Estilo de reservas" icon={Palette}>
-          <div className="grid grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
             {BOOKING_THEMES.map((theme) => {
               const active = bookingTheme === theme.id;
               return (

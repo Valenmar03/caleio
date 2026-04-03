@@ -583,18 +583,18 @@ export default function BookingPage() {
                       {/* Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-semibold text-slate-800 text-sm">{svc.name}</p>
+                          <p className="font-semibold text-slate-800 text-base">{svc.name}</p>
                           {svc.requiresDeposit && svc.depositPercent && (
-                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200">
+                            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white text-slate-500 border border-slate-300">
                               Seña {formatPrice(Math.round(Number(svc.basePrice) * svc.depositPercent / 100))}
                             </span>
                           )}
                         </div>
                         {svc.description && (
-                          <p className="text-xs text-slate-400 mt-0.5 line-clamp-2">{svc.description}</p>
+                          <p className="text-sm text-slate-400 mt-0.5 line-clamp-2">{svc.description}</p>
                         )}
-                        <p className="text-xs text-slate-400 flex items-center gap-1 mt-1">
-                          <Clock className="w-3 h-3" />
+                        <p className="text-sm text-slate-400 flex items-center gap-1 mt-1">
+                          <Clock className="w-3.5 h-3.5" />
                           {formatDuration(svc.durationMin)}
                         </p>
                       </div>
@@ -602,7 +602,7 @@ export default function BookingPage() {
                       {/* Price + check */}
                       <div className="flex flex-col items-end gap-2 shrink-0">
                         {formatPrice(svc.basePrice) && (
-                          <span className="text-sm font-bold text-slate-800">{formatPrice(svc.basePrice)}</span>
+                          <span className="text-base font-bold text-slate-800">{formatPrice(svc.basePrice)}</span>
                         )}
                         {active && (
                           <div className="w-5 h-5 rounded-full bg-teal-600 flex items-center justify-center">

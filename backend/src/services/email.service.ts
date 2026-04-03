@@ -199,3 +199,35 @@ export async function sendNewAppointmentOwner(to: string, data: AppointmentEmail
     console.error("[email] sendNewAppointmentOwner error:", err);
   }
 }
+
+const ADMIN_NOTIFY_EMAIL = "valenmrtnz8@gmail.com";
+
+export async function sendNewBusinessNotification(businessName: string, email: string, slug: string): Promise<void> {
+  try {
+    await sendEmail(
+      ADMIN_NOTIFY_EMAIL,
+      `Nuevo registro: ${businessName}`,
+      `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
+        <h2 style="color: #0f172a; margin-bottom: 16px;">Nuevo negocio registrado</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 6px 0; color: #64748b; width: 40%;">Negocio</td>
+            <td style="padding: 6px 0; font-weight: 500; color: #1e293b;">${businessName}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #64748b;">Email</td>
+            <td style="padding: 6px 0; font-weight: 500; color: #1e293b;">${email}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #64748b;">Slug</td>
+            <td style="padding: 6px 0; font-weight: 500; color: #1e293b;">${slug}</td>
+          </tr>
+        </table>
+      </div>
+      `
+    );
+  } catch (err) {
+    console.error("[email] sendNewBusinessNotification error:", err);
+  }
+}

@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { prisma } from "../db/prisma";
 import { AuthPayload } from "../middleware/authenticate";
-import { sendVerificationEmail, sendPasswordResetEmail } from "./email.service";
+import { sendVerificationEmail, sendPasswordResetEmail, sendNewBusinessNotification } from "./email.service";
 
 const ACCESS_TOKEN_EXPIRES_IN = "1h";
 const REFRESH_TOKEN_EXPIRES_DAYS = 30;
@@ -109,6 +109,7 @@ export async function register(
   expiresAt.setHours(expiresAt.getHours() + EMAIL_VERIFICATION_EXPIRES_HOURS);
   await prisma.emailVerification.create({ data: { userId: user.id, tokenHash, expiresAt } });
   await sendVerificationEmail(normalizedEmail, rawToken, businessName, normalizedSlug);
+  sendNewBusinessNotification(businessName, normalizedEmail, normalizedSlug).catch(() => {});
 
   return {
     user: {

@@ -572,6 +572,16 @@ function MercadoPagoSection({
             Token guardado correctamente
           </p>
         )}
+
+        <div className="mt-5 rounded-lg border border-slate-100 bg-slate-50 px-4 py-3 space-y-2 text-xs text-slate-500">
+          <p className="font-medium text-slate-600">Sobre los pagos con MercadoPago</p>
+          <ul className="space-y-1.5 list-disc list-inside">
+            <li>Los pagos se acreditan directamente en tu cuenta de MercadoPago. Caleio no interviene ni retiene fondos.</li>
+            <li>MercadoPago aplica una comisión de aprox. <strong className="text-slate-600">4,3%</strong> por transferencia bancaria estándar. Esta comisión es cobrada por MercadoPago, no por Caleio.</li>
+            <li>Caleio no almacena datos de tarjetas ni información bancaria. Solo registra el estado de cada transacción.</li>
+            <li>Sos responsable de facturar los ingresos recibidos conforme la normativa fiscal vigente.</li>
+          </ul>
+        </div>
       </div>
     </div>
   );

@@ -15,12 +15,7 @@ type BookingTheme = {
 };
 
 const BOOKING_THEMES: BookingTheme[] = [
-  { id: "default",      name: "Verde azulado", primary: "#0d9488", color: "#14b8a6" },
-  { id: "rose",         name: "Rosa",          primary: "#e11d48", color: "#f43f5e" },
-  { id: "violet",       name: "Violeta",       primary: "#7c3aed", color: "#8b5cf6" },
-  { id: "amber",        name: "Ámbar",         primary: "#d97706", color: "#f59e0b" },
-  { id: "ocean",        name: "Océano",        primary: "#0284c7", color: "#0ea5e9" },
-  { id: "slate",        name: "Gris neutro",   primary: "#475569", color: "#64748b" },
+  { id: "default",      name: "Caleio", primary: "#0d9488", color: "#14b8a6" },
   { id: "desert-sand",  name: "Desert Sand",   primary: "#bf7450", color: "#ca8f6d" },
   { id: "bay-of-many",  name: "Bay of Many",   primary: "#2b68e5", color: "#4186f0" },
   { id: "hippie-blue",  name: "Hippie Blue",   primary: "#3d6a7d", color: "#5a97aa" },

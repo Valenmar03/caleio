@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { format, addDays, startOfToday, isToday } from "date-fns";
 import { es } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Clock, Check, Loader2, CreditCard, MessageCircle, CalendarPlus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, Check, Loader2, CreditCard, MessageCircle, CalendarPlus, Scissors, MapPin } from "lucide-react";
 import PhoneInput from "../components/ui/PhoneInput";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -31,11 +31,6 @@ type ThemeColors = { primary: string; primaryDark: string; primaryLight: string;
 
 const THEME_COLORS: Record<string, ThemeColors | null> = {
   default: null,
-  rose:   { primary: "#e11d48", primaryDark: "#be123c", primaryLight: "#fff1f2", ring: "#fce7f3", connector: "#fb7185", todayText: "#f43f5e" },
-  violet: { primary: "#7c3aed", primaryDark: "#6d28d9", primaryLight: "#f5f3ff", ring: "#ede9fe", connector: "#a78bfa", todayText: "#8b5cf6" },
-  amber:  { primary: "#d97706", primaryDark: "#b45309", primaryLight: "#fffbeb", ring: "#fef3c7", connector: "#fcd34d", todayText: "#f59e0b" },
-  ocean:        { primary: "#0284c7", primaryDark: "#0369a1", primaryLight: "#f0f9ff", ring: "#e0f2fe", connector: "#38bdf8", todayText: "#0ea5e9" },
-  slate:        { primary: "#475569", primaryDark: "#334155", primaryLight: "#f8fafc", ring: "#e2e8f0", connector: "#94a3b8", todayText: "#64748b" },
   "desert-sand": { primary: "#bf7450", primaryDark: "#b16145", primaryLight: "#faf6f2", ring: "#f4eae0", connector: "#dab497", todayText: "#ca8f6d" },
   "bay-of-many": { primary: "#2b68e5", primaryDark: "#2354d2", primaryLight: "#f0f6fe", ring: "#dcebfd", connector: "#96c7fa", todayText: "#65a8f5" },
   "hippie-blue": { primary: "#3d6a7d", primaryDark: "#375867", primaryLight: "#f2f8f9", ring: "#deecef", connector: "#95bfcb", todayText: "#5a97aa" },
@@ -448,9 +443,9 @@ export default function BookingPage() {
 
             {/* Name + tagline */}
             <div className="text-center space-y-1.5">
-              <h1 className="text-2xl font-bold text-slate-900">{business?.name}</h1>
+              <h1 className="text-4xl font-bold text-slate-900">{business?.name}</h1>
               {business?.tagline && (
-                <p className="text-slate-500 text-sm leading-relaxed">{business.tagline}</p>
+                <p className="text-slate-500 font-semibold text-lg leading-relaxed">{business.tagline}</p>
               )}
             </div>
 
@@ -466,43 +461,47 @@ export default function BookingPage() {
             {/* Primary CTA */}
             <button
               onClick={() => setStep("service")}
-              className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-full py-4 text-sm transition-colors"
+              className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-2xl py-4 text-lg transition-colors cursor-pointer"
             >
               Reservar turno
             </button>
 
             {/* Secondary buttons */}
-            <div className="grid grid-cols-2 gap-3 w-full">
-              <button
-                onClick={() => setStep("service")}
-                className="flex items-center justify-center border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium rounded-2xl py-3 transition-colors text-sm"
+              {
+                business?.whatsappPhone && business?.address ? (
+                <div className="grid grid-cols-2 gap-3 w-full">
+                  <a
+                    href={`https://wa.me/${business.whatsappPhone}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center border gap-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium rounded-2xl py-3 transition-colors text-sm"
+                    >
+                    <MessageCircle className="w-4 h-4 text-emerald-500" />
+                    WhatsApp
+                  </a>
+                  <a
+                    href={`https://maps.google.com/?q=${encodeURIComponent(business.address)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 justify-center border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium rounded-2xl py-3 transition-colors text-sm"
+                    >
+                      <MapPin className="w-4 h-4" />
+                      Ubicación
+                  </a>
+                </div>
+              ) :  null}
+            {business?.address && !business?.whatsappPhone ? (
+              <a
+                href={`https://wa.me/${business.whatsappPhone}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-center gap-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium rounded-2xl py-3 transition-colors text-sm"
               >
-                Nuestros servicios
-              </button>
-
-              {business?.address ? (
-                <a
-                  href={`https://maps.google.com/?q=${encodeURIComponent(business.address)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium rounded-2xl py-3 transition-colors text-sm"
-                >
-                  Ubicación
-                </a>
-              ) : business?.whatsappPhone ? (
-                <a
-                  href={`https://wa.me/${business.whatsappPhone}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium rounded-2xl py-3 transition-colors text-sm"
-                >
-                  WhatsApp
-                </a>
-              ) : null}
-            </div>
-
-            {/* WhatsApp extra (solo si tiene dirección Y whatsapp) */}
-            {business?.address && business?.whatsappPhone && (
+                <MapPin className="w-4 h-4" />
+                Ubicación
+              </a>
+            ) : null}
+            {!business?.address && business?.whatsappPhone ? (
               <a
                 href={`https://wa.me/${business.whatsappPhone}`}
                 target="_blank"
@@ -512,7 +511,7 @@ export default function BookingPage() {
                 <MessageCircle className="w-4 h-4 text-emerald-500" />
                 WhatsApp
               </a>
-            )}
+            ) : null}
           </div>
 
           <footer className="flex flex-col items-center gap-2 pt-12">
@@ -557,43 +556,63 @@ export default function BookingPage() {
             {services.length === 0 ? (
               <p className="text-slate-400 text-sm text-center py-6">No hay servicios disponibles.</p>
             ) : (
-              <div className="space-y-2">
-                {services.map((svc) => (
-                  <button
-                    key={svc.id}
-                    onClick={() => {
-                      setSelectedService(svc);
-                      setSelectedProfessional(null);
-                      setSelectedSlot(null);
-                    }}
-                    className={`w-full flex items-center justify-between rounded-xl border px-4 py-3.5 text-left transition-colors ${
-                      selectedService?.id === svc.id
-                        ? "border-teal-500 bg-teal-50"
-                        : "border-slate-200 bg-white hover:border-slate-300"
-                    }`}
-                  >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-slate-800 text-sm">{svc.name}</p>
-                        {svc.requiresDeposit && svc.depositPercent && (
-                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200">
-                            Seña {formatPrice(Math.round(Number(svc.basePrice) * svc.depositPercent / 100))}
-                          </span>
+              <div className="space-y-3">
+                {services.map((svc) => {
+                  const active = selectedService?.id === svc.id;
+                  return (
+                    <button
+                      key={svc.id}
+                      onClick={() => {
+                        setSelectedService(svc);
+                        setSelectedProfessional(null);
+                        setSelectedSlot(null);
+                      }}
+                      className={`w-full flex items-center gap-4 rounded-2xl border px-4 py-4 text-left transition-all cursor-pointer ${
+                        active
+                          ? "border-teal-500 bg-teal-50"
+                          : "border-slate-200 bg-white hover:border-slate-300"
+                      }`}
+                    >
+                      {/* Icon */}
+                      <div className={`w-11 h-11 rounded-xl shrink-0 flex items-center justify-center transition-colors ${
+                        active ? "bg-teal-600" : "bg-slate-100"
+                      }`}>
+                        <Scissors className={`w-5 h-5 ${active ? "text-white" : "text-slate-400"}`} />
+                      </div>
+
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-semibold text-slate-800 text-sm">{svc.name}</p>
+                          {svc.requiresDeposit && svc.depositPercent && (
+                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200">
+                              Seña {formatPrice(Math.round(Number(svc.basePrice) * svc.depositPercent / 100))}
+                            </span>
+                          )}
+                        </div>
+                        {svc.description && (
+                          <p className="text-xs text-slate-400 mt-0.5 line-clamp-2">{svc.description}</p>
+                        )}
+                        <p className="text-xs text-slate-400 flex items-center gap-1 mt-1">
+                          <Clock className="w-3 h-3" />
+                          {formatDuration(svc.durationMin)}
+                        </p>
+                      </div>
+
+                      {/* Price + check */}
+                      <div className="flex flex-col items-end gap-2 shrink-0">
+                        {formatPrice(svc.basePrice) && (
+                          <span className="text-sm font-bold text-slate-800">{formatPrice(svc.basePrice)}</span>
+                        )}
+                        {active && (
+                          <div className="w-5 h-5 rounded-full bg-teal-600 flex items-center justify-center">
+                            <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                          </div>
                         )}
                       </div>
-                      {svc.description && (
-                        <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{svc.description}</p>
-                      )}
-                      <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
-                        <Clock className="w-3 h-3" />
-                        {formatDuration(svc.durationMin)}
-                      </p>
-                    </div>
-                    {formatPrice(svc.basePrice) && (
-                      <span className="text-sm font-semibold text-slate-700">{formatPrice(svc.basePrice)}</span>
-                    )}
-                  </button>
-                ))}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </StepWrapper>

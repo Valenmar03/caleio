@@ -241,8 +241,9 @@ export default function BusinessProfilePage() {
   }
 
   function handleLogoUploaded(logoUrl: string) {
+    const bustedUrl = `${logoUrl}?t=${Date.now()}`;
     queryClient.setQueryData(["business"], (old: any) =>
-      old ? { ...old, business: { ...old.business, logoUrl } } : old
+      old ? { ...old, business: { ...old.business, logoUrl: bustedUrl } } : old
     );
     showSaved("logo");
   }

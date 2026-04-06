@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { format, addDays, startOfToday, isToday } from "date-fns";
 import { es } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Clock, Check, Loader2, CreditCard, MessageCircle, CalendarPlus, Scissors, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, Check, Loader2, CreditCard, MessageCircle, CalendarPlus, MapPin } from "lucide-react";
 import PhoneInput from "../components/ui/PhoneInput";
+import { getServiceIcon } from "../components/services/serviceIcons";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -20,7 +21,7 @@ type BusinessInfo = {
 type Professional = { id: string; name: string; color: string };
 type Slot = { startAt: string; endAt: string; label: string };
 
-type Service = { id: string; name: string; description?: string; durationMin: number; basePrice: number; requiresDeposit: boolean; depositPercent: number | null; allowClientChooseProfessional: boolean };
+type Service = { id: string; name: string; icon?: string | null; description?: string; durationMin: number; basePrice: number; requiresDeposit: boolean; depositPercent: number | null; allowClientChooseProfessional: boolean };
 type Step = "landing" | "service" | "professional" | "datetime" | "client" | "confirm" | "redirecting" | "done";
 
 const STEPS: Step[] = ["landing", "service", "professional", "datetime", "client", "confirm", "redirecting", "done"];
@@ -561,6 +562,7 @@ export default function BookingPage() {
               <div className="space-y-3">
                 {services.map((svc) => {
                   const active = selectedService?.id === svc.id;
+                  const SvcIcon = getServiceIcon(svc.icon);
                   return (
                     <button
                       key={svc.id}
@@ -579,7 +581,7 @@ export default function BookingPage() {
                       <div className={`w-11 h-11 rounded-xl shrink-0 flex items-center justify-center transition-colors ${
                         active ? "bg-teal-600" : "bg-slate-100"
                       }`}>
-                        <Scissors className={`w-5 h-5 ${active ? "text-white" : "text-slate-400"}`} />
+                        <SvcIcon className={`w-5 h-5 ${active ? "text-white" : "text-slate-400"}`} />
                       </div>
 
                       {/* Info */}

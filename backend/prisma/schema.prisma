@@ -209,6 +209,7 @@ model Service {
   id          String   @id @default(uuid())
   businessId  String
   name        String
+  icon        String?  @default("Scissors")
   durationMin Int
   description String?
   basePrice       Decimal

@@ -107,6 +107,7 @@ export type Service = {
   id: string;
   businessId: string;
   name: string;
+  icon?: string | null;
   durationMin: number;
   basePrice: string;
   active: boolean;
@@ -122,6 +123,7 @@ export type Service = {
 export type ServiceWithProfessional = {
   id: string;
   name: string;
+  icon?: string | null;
   durationMin: number;
   basePrice: number;
   active: boolean;
@@ -144,6 +146,7 @@ export type ServiceWithProfessional = {
 export type UpdateServicePayload = {
   serviceId: string;
   name?: string;
+  icon?: string | null;
   description?: string;
   durationMin?: number;
   basePrice?: number;
@@ -156,6 +159,7 @@ export type UpdateServicePayload = {
 
 export type CreateServicePayload = {
   name: string;
+  icon?: string | null;
   description?: string;
   durationMin: number;
   basePrice: number;

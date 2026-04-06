@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { Clock3, FileText, AlertCircle } from "lucide-react";
+import { Clock3, FileText, AlertCircle, Wand2 } from "lucide-react";
 
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
 import { useCreateService } from "../../hooks/useServices";
 import { useBusiness } from "../../hooks/useBusiness";
+import ServiceIconPicker from "./ServiceIconPicker";
+import { getServiceIcon } from "./serviceIcons";
 
 type Props = {
   open: boolean;
@@ -17,6 +19,7 @@ export default function NewServicesFormModal({ open, onClose }: Props) {
   const hasMpToken = !!businessData?.business?.mpAccessToken;
 
   const [name, setName] = useState("");
+  const [icon, setIcon] = useState("Scissors");
   const [description, setDescription] = useState("");
   const [durationMin, setDurationMin] = useState(30);
   const [basePrice, setBasePrice] = useState(0);
@@ -34,6 +37,7 @@ export default function NewServicesFormModal({ open, onClose }: Props) {
     if (!open) return;
 
     setName("");
+    setIcon("Scissors");
     setDescription("");
     setDurationMin(30);
     setBasePrice(0);
@@ -82,6 +86,7 @@ export default function NewServicesFormModal({ open, onClose }: Props) {
     try {
       await createServiceMutation.mutateAsync({
         name: trimmedName,
+        icon,
         description: description.trim(),
         durationMin: Number(durationMin),
         basePrice: Number(basePrice),
@@ -121,8 +126,8 @@ export default function NewServicesFormModal({ open, onClose }: Props) {
     >
       <div className="space-y-6">
         <div className="flex items-start gap-4">
-          <div className="w-14 h-14 rounded-xl bg-teal-600 flex items-center justify-center text-white font-semibold text-xl shrink-0">
-            {name?.[0]?.toUpperCase() || "+"}
+          <div className="w-14 h-14 rounded-xl bg-teal-600 flex items-center justify-center text-white shrink-0">
+            {(() => { const Icon = getServiceIcon(icon); return <Icon className="w-6 h-6" />; })()}
           </div>
 
           <div className="flex-1 min-w-0">
@@ -167,6 +172,14 @@ export default function NewServicesFormModal({ open, onClose }: Props) {
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Wand2 className="w-4 h-4 text-slate-500" />
+            <h4 className="text-sm font-medium text-slate-800">Ícono</h4>
+          </div>
+          <ServiceIconPicker value={icon} onChange={setIcon} />
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">

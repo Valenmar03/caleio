@@ -9,6 +9,7 @@ type ListServicesParams = {
 type CreateServiceInput = {
   businessId: string;
   name: string;
+  icon?: string | null;
   durationMin: number;
   basePrice: number;
   active?: boolean;
@@ -20,6 +21,7 @@ type CreateServiceInput = {
 
 type UpdateServiceInput = {
   name?: string;
+  icon?: string | null;
   durationMin?: number;
   basePrice?: number;
   active?: boolean;
@@ -123,6 +125,7 @@ export class ServiceService {
       data: {
         businessId,
         name,
+        icon: data.icon ?? "Scissors",
         durationMin: data.durationMin,
         basePrice: data.basePrice,
         description: data.description ?? "",
@@ -192,6 +195,10 @@ export class ServiceService {
 
     if (data.depositPercent !== undefined) {
       updateData.depositPercent = data.depositPercent;
+    }
+
+    if (data.icon !== undefined) {
+      updateData.icon = data.icon;
     }
 
     if (data.bookableOnline !== undefined) {

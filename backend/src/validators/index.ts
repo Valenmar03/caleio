@@ -82,6 +82,7 @@ export const updateBusinessBody = z.object({
 
 export const createServiceBody = z.object({
   name: z.string().trim().min(1, "El nombre es requerido").max(100),
+  icon: z.string().trim().max(50).optional().nullable(),
   durationMin: z
     .number({ error: "durationMin debe ser un número" })
     .int()

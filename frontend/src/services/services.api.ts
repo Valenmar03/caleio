@@ -18,6 +18,7 @@ export async function updateService(payload: UpdateServicePayload) {
       method: "PATCH",
       body: JSON.stringify({
         ...(payload.name !== undefined && { name: payload.name }),
+        ...(payload.icon !== undefined && { icon: payload.icon }),
         ...(payload.description !== undefined && { description: payload.description }),
         ...(payload.durationMin !== undefined && { durationMin: payload.durationMin }),
         ...(payload.basePrice !== undefined && { basePrice: payload.basePrice }),
@@ -38,6 +39,7 @@ export async function createService(payload: CreateServicePayload) {
       method: "POST",
       body: JSON.stringify({
         name: payload.name,
+        icon: payload.icon ?? "Scissors",
         description: payload.description,
         durationMin: payload.durationMin,
         basePrice: payload.basePrice,

@@ -1,5 +1,6 @@
 import { Clock, DollarSign, Banknote, Globe, EyeOff, Shuffle } from "lucide-react";
 import type { ServiceWithProfessional } from "../../types/entities";
+import { getServiceIcon } from "./serviceIcons";
 type Props = {
     service: ServiceWithProfessional;
     onClick?: () => void
@@ -8,18 +9,23 @@ type Props = {
 
 export default function ServiceCard({service, onClick}: Props) {
 
-    const assignedProfs = service.professionalServices
-
+    const assignedProfs = service.professionalServices;
+    const Icon = getServiceIcon(service.icon);
 
    return (
       <div
          className="bg-white rounded-xl border border-slate-200/80 p-4 hover:shadow-sm transition-all cursor-pointer"
          onClick={onClick}
       >
-         <div className="flex items-start justify-between">
-            <h4 className="text-sm font-semibold text-slate-800">
-               {service.name}
-            </h4>
+         <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+               <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center shrink-0">
+                  <Icon className="w-4 h-4 text-white" />
+               </div>
+               <h4 className="text-sm font-semibold text-slate-800 truncate">
+                  {service.name}
+               </h4>
+            </div>
             <span
                 className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${
                   service.active

@@ -48,6 +48,7 @@ export async function getPublicServices(slug: string) {
     select: {
       id: true,
       name: true,
+      icon: true,
       description: true,
       durationMin: true,
       basePrice: true,

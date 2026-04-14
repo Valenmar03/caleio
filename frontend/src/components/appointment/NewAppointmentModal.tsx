@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
-import { Check, ChevronDown, Search, X } from "lucide-react";
+import { Check, ChevronDown, Plus, Search, X } from "lucide-react";
 import CustomSelect from "../ui/CustomSelect";
 import CustomDatePicker from "../ui/CustomDatePicker";
 
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
+import NewClientFormModal from "../clients/NewClientFormModal";
 import { useClients } from "../../hooks/useClients";
 import { useProfessionals } from "../../hooks/useProfessionals";
 import { useProfessionalServices } from "../../hooks/useProfessionalServices";
@@ -35,6 +36,7 @@ export default function NewAppointmentModal({
   const [clientSearch, setClientSearch] = useState("");
   const [clientId, setClientId] = useState("");
   const [clientComboboxOpen, setClientComboboxOpen] = useState(false);
+  const [newClientModalOpen, setNewClientModalOpen] = useState(false);
 
   const [selectedProfessionalId, setSelectedProfessionalId] = useState("");
   const [serviceId, setServiceId] = useState("");
@@ -187,6 +189,10 @@ export default function NewAppointmentModal({
     setClientComboboxOpen(false);
   };
 
+  const handleNewClientCreated = (client: { id: string; fullName: string; phone: string | null; email: string | null }) => {
+    handleSelectClient({ id: client.id, fullName: client.fullName, phone: client.phone, email: client.email });
+  };
+
   const handleProfessionalChange = (nextProfessionalId: string) => {
     setSelectedProfessionalId(nextProfessionalId);
     setServiceId("");
@@ -228,6 +234,7 @@ export default function NewAppointmentModal({
   );
 
   return (
+    <>
     <Modal
       open={open}
       onClose={onClose}
@@ -247,9 +254,19 @@ export default function NewAppointmentModal({
     >
       <div className="space-y-5">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">
-            Cliente
-          </label>
+          <div className="mb-1.5 flex items-center justify-between">
+            <label className="block text-sm font-medium text-slate-700">
+              Cliente
+            </label>
+            <button
+              type="button"
+              onClick={() => setNewClientModalOpen(true)}
+              className="flex items-center gap-1 text-xs text-teal-600 hover:text-teal-700 font-medium"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Nuevo cliente
+            </button>
+          </div>
 
           <div ref={clientBoxRef} className="relative">
             <div className="relative">
@@ -465,5 +482,12 @@ export default function NewAppointmentModal({
         )}
       </div>
     </Modal>
+
+    <NewClientFormModal
+      open={newClientModalOpen}
+      onClose={() => setNewClientModalOpen(false)}
+      onSuccess={handleNewClientCreated}
+    />
+    </>
   );
 }

@@ -9,9 +9,10 @@ import { useCreateClient } from "../../hooks/useClients";
 type Props = {
   open: boolean;
   onClose: () => void;
+  onSuccess?: (client: { id: string; fullName: string; phone: string | null; email: string | null }) => void;
 };
 
-export default function NewClientFormModal({ open, onClose }: Props) {
+export default function NewClientFormModal({ open, onClose, onSuccess }: Props) {
   const createClientMutation = useCreateClient();
 
   const [fullName, setFullName] = useState("");
@@ -50,13 +51,14 @@ export default function NewClientFormModal({ open, onClose }: Props) {
     setPhoneError(null);
 
     try {
-      await createClientMutation.mutateAsync({
+      const result = await createClientMutation.mutateAsync({
         fullName: fullName.trim(),
         phone: phone.trim(),
         email: email.trim(),
         notes: notes.trim(),
       });
 
+      onSuccess?.(result.client);
       onClose();
     } catch (error) {
       const err = error as { status?: number };

@@ -9,7 +9,7 @@ import { useCreateClient } from "../../hooks/useClients";
 type Props = {
   open: boolean;
   onClose: () => void;
-  onSuccess?: (client: { id: string; fullName: string; phone: string | null; email: string | null }) => void;
+  onSuccess?: (client: { id: string; fullName: string; phone: string; email?: string | null }) => void;
 };
 
 export default function NewClientFormModal({ open, onClose, onSuccess }: Props) {

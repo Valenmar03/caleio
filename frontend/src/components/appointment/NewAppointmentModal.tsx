@@ -189,7 +189,7 @@ export default function NewAppointmentModal({
     setClientComboboxOpen(false);
   };
 
-  const handleNewClientCreated = (client: { id: string; fullName: string; phone: string | null; email: string | null }) => {
+  const handleNewClientCreated = (client: { id: string; fullName: string; phone: string; email?: string | null }) => {
     handleSelectClient({ id: client.id, fullName: client.fullName, phone: client.phone, email: client.email });
   };
 

@@ -1,7 +1,8 @@
 import Sheet from "../ui/Sheet";
-import { Phone, Mail, Calendar, DollarSign, Hash, Clock3, Trash2, UserX2, CheckCircle2, AlertCircle, X, Check } from "lucide-react";
+import { Phone, Mail, Calendar, DollarSign, Hash, Clock3, Trash2, UserX2, CheckCircle2, AlertCircle, X, Check, ExternalLink } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
+import { useNavigate } from "react-router-dom";
 
 import type { AppointmentStatus, Client } from "../../types/entities";
 import { useClientAppointments } from "../../hooks/useClients";
@@ -83,6 +84,7 @@ export function formatStatus(status?: AppointmentUiStatus): StatusFormat {
 }
 
 export default function ClientDetailSheet({ open, onClose, client }: Props) {
+   const navigate = useNavigate();
    const { data, isLoading } = useClientAppointments(client?.id);
    const appointments = data?.appointments ?? [];
 
@@ -273,6 +275,19 @@ export default function ClientDetailSheet({ open, onClose, client }: Props) {
                                             {status.icon}
                                             {status.label}
                                        </span>
+
+                                       <button
+                                          type="button"
+                                          onClick={() => {
+                                             const dateStr = format(parseISO(appt.startAt), "yyyy-MM-dd");
+                                             onClose();
+                                             navigate(`/agenda?date=${dateStr}`);
+                                          }}
+                                          className="ml-auto inline-flex items-center gap-1 text-xs text-teal-600 hover:text-teal-700 font-medium"
+                                       >
+                                          <ExternalLink className="w-3.5 h-3.5" />
+                                          Ver en agenda
+                                       </button>
                                     </div>
                                  </div>
                               </div>

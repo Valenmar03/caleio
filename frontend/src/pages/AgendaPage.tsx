@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { addDays, format, parseISO, startOfWeek } from "date-fns";
 import { es } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Plus, Search, Loader2, Users } from "lucide-react";
@@ -41,7 +42,15 @@ export default function AgendaPage() {
    const { user } = useAuth();
    const isPro = user?.role === "PRO";
 
-   const [currentDate, setCurrentDate] = useState(new Date());
+   const [searchParams] = useSearchParams();
+   const [currentDate, setCurrentDate] = useState(() => {
+      const dateParam = searchParams.get("date");
+      if (dateParam) {
+         const parsed = new Date(dateParam + "T00:00:00");
+         if (!isNaN(parsed.getTime())) return parsed;
+      }
+      return new Date();
+   });
    const [view, setView] = useState<AgendaView>("day");
    const [search, setSearch] = useState("");
    const [selectedProfessionalId, setSelectedProfessionalId] =

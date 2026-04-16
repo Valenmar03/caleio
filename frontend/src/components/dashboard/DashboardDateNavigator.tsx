@@ -31,41 +31,43 @@ export default function DashboardDateNavigator({ value, onChange }: Props) {
         </p>
       </div>
 
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={handlePrev}
-          aria-label="Día anterior"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </button>
-
-        <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
-          <CustomDatePicker
-            value={value}
-            onChange={onChange}
-          />
-        </div>
-
-        <button
-          type="button"
-          onClick={handleNext}
-          aria-label="Día siguiente"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </button>
-
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         {!isToday(currentDate) && (
           <button
             type="button"
             onClick={() => onChange(todayStr)}
-            className="h-10 px-3 rounded-xl border border-slate-200 bg-white text-sm font-medium text-teal-600 transition hover:bg-slate-50"
+            className="order-2 sm:order-1 h-10 w-full sm:w-auto px-3 rounded-xl border border-slate-200 bg-white text-sm font-medium text-teal-600 transition hover:bg-slate-50"
           >
             Hoy
           </button>
         )}
+
+        <div className="order-1 sm:order-2 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handlePrev}
+            aria-label="Día anterior"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+
+          <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+            <CustomDatePicker
+              value={value}
+              onChange={onChange}
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleNext}
+            aria-label="Día siguiente"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </div>
   );

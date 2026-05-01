@@ -4,7 +4,7 @@ import { appointmentService } from "../services/appointments.service";
 export async function createAppointmentHandler(req: Request, res: Response) {
   try {
     const { businessId } = req.user!;
-    const { professionalId, clientId, serviceId, startAt } = req.body;
+    const { professionalId, clientId, serviceId, startAt, depositAmount, depositMethod } = req.body;
 
     if (!professionalId || !clientId || !serviceId || !startAt) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -16,6 +16,8 @@ export async function createAppointmentHandler(req: Request, res: Response) {
       clientId,
       serviceId,
       startAt,
+      depositAmount,
+      depositMethod,
     });
 
     return res.json(result);

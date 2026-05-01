@@ -6,6 +6,8 @@ export function createAppointment(data: {
   clientId: string;
   serviceId: string;
   startAt: string;
+  depositAmount?: number;
+  depositMethod?: PaymentMethod;
 }) {
   return apiFetch("/appointments", {
     method: "POST",

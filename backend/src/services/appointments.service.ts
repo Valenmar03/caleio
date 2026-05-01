@@ -53,6 +53,8 @@ type CreateAppointmentInput = {
   serviceId: string;
   startAt: string; // ISO
   status?: AppointmentStatus;
+  depositAmount?: number;
+  depositMethod?: PaymentMethod;
 };
 
 type UpdateAppointmentInput = {
@@ -89,7 +91,7 @@ export class AppointmentService {
   }
 
   async create(input: CreateAppointmentInput) {
-    const { businessId, professionalId, clientId, serviceId, startAt, status: inputStatus } = input;
+    const { businessId, professionalId, clientId, serviceId, startAt, status: inputStatus, depositAmount, depositMethod } = input;
 
     const startDate = new Date(startAt);
     if (Number.isNaN(startDate.getTime())) throw badRequest("Invalid startAt");
@@ -158,6 +160,9 @@ export class AppointmentService {
       }
     }
 
+    const hasDeposit = !!(depositAmount && depositMethod);
+    const resolvedStatus = hasDeposit ? "DEPOSIT_PAID" : (inputStatus ?? "RESERVED");
+
     const appointment = await prisma.appointment.create({
       data: {
         businessId,
@@ -167,7 +172,12 @@ export class AppointmentService {
         startAt: startDate,
         endAt: endDate,
         totalPrice: service.basePrice,
-        status: inputStatus ?? "RESERVED",
+        status: resolvedStatus,
+        ...(hasDeposit && {
+          depositAmount,
+          depositMethod,
+          depositPaidAt: new Date(),
+        }),
       },
     });
 

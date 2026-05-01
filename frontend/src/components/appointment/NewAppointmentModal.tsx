@@ -13,6 +13,8 @@ import { useProfessionals } from "../../hooks/useProfessionals";
 import { useProfessionalServices } from "../../hooks/useProfessionalServices";
 import { useAvailability } from "../../hooks/useAvailability";
 import { createAppointment } from "../../services/appointments.api";
+import type { PaymentMethod } from "../../types/entities";
+import { paymentMethodOptions } from "../../types/entities";
 
 type Props = {
   open: boolean;
@@ -43,6 +45,11 @@ export default function NewAppointmentModal({
   const [selectedStartAt, setSelectedStartAt] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState("");
 
+  const [withDeposit, setWithDeposit] = useState(false);
+  const [depositAmount, setDepositAmount] = useState("");
+  const [depositMethod, setDepositMethod] = useState<PaymentMethod | "">("");
+  const [depositTouched, setDepositTouched] = useState(false);
+
   const clientBoxRef = useRef<HTMLDivElement | null>(null);
 
   const { data: clientsData, isLoading: clientsLoading } = useClients(clientSearch);
@@ -68,6 +75,10 @@ export default function NewAppointmentModal({
       setServiceId("");
       setSelectedStartAt("");
       setSelectedDate("");
+      setWithDeposit(false);
+      setDepositAmount("");
+      setDepositMethod("");
+      setDepositTouched(false);
       return;
     }
 
@@ -154,11 +165,29 @@ export default function NewAppointmentModal({
     },
   });
 
+  const selectedServicePrice = useMemo(() => {
+    if (!serviceId) return null;
+    const item = professionalServices.find((i) => i.service.id === serviceId);
+    return item ? parseFloat(item.service.basePrice) : null;
+  }, [serviceId, professionalServices]);
+
+  const parsedDepositAmount = Number(depositAmount);
+  const hasDepositValue = depositAmount.trim() !== "" && !isNaN(parsedDepositAmount);
+  const isDepositGreaterThanService =
+    hasDepositValue && selectedServicePrice !== null && selectedServicePrice > 0 && parsedDepositAmount > selectedServicePrice;
+  const hasValidDepositAmount = hasDepositValue && parsedDepositAmount > 0 && !isDepositGreaterThanService;
+  const hasValidDepositMethod = depositMethod.trim() !== "";
+  const shouldShowDepositError = withDeposit && depositTouched && !hasValidDepositAmount;
+  const shouldShowDepositMethodError = withDeposit && depositTouched && !hasValidDepositMethod;
+
+  const depositValid = !withDeposit || (hasValidDepositAmount && hasValidDepositMethod);
+
   const canSubmit =
     !!selectedProfessionalId &&
     !!clientId &&
     !!serviceId &&
     !!selectedStartAt &&
+    depositValid &&
     !mutation.isPending;
 
   const handleSubmit = () => {
@@ -169,6 +198,10 @@ export default function NewAppointmentModal({
       clientId,
       serviceId,
       startAt: selectedStartAt,
+      ...(withDeposit && depositMethod && {
+        depositAmount: parsedDepositAmount,
+        depositMethod,
+      }),
     });
   };
 
@@ -228,7 +261,7 @@ export default function NewAppointmentModal({
       professionalServices.map((item) => ({
         value: item.service.id,
         label: item.service.name,
-        description: `${item.service.durationMin} min`,
+        description: `${item.service.durationMin} min · $${parseFloat(item.service.basePrice).toLocaleString("es-AR")}`,
       })),
     [professionalServices]
   );
@@ -474,6 +507,93 @@ export default function NewAppointmentModal({
             </p>
           </div>
         )}
+
+        <div className="border-t border-slate-100 pt-4">
+          <label className="flex cursor-pointer items-center gap-3">
+            <div
+              onClick={() => {
+                setWithDeposit((prev) => {
+                  if (prev) {
+                    setDepositAmount("");
+                    setDepositMethod("");
+                    setDepositTouched(false);
+                  }
+                  return !prev;
+                });
+              }}
+              className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
+                withDeposit ? "bg-teal-500" : "bg-slate-200"
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${
+                  withDeposit ? "translate-x-4" : "translate-x-0.5"
+                }`}
+              />
+            </div>
+            <span className="text-sm font-medium text-slate-700">Registrar seña</span>
+          </label>
+
+          {withDeposit && (
+            <div className="mt-4 rounded-xl border border-teal-200 bg-teal-50 px-4 py-4 space-y-3">
+              <label className="block text-sm font-medium text-slate-700">
+                Monto de seña
+              </label>
+
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={depositAmount}
+                onChange={(e) => {
+                  setDepositAmount(e.target.value);
+                  setDepositTouched(true);
+                }}
+                onBlur={() => setDepositTouched(true)}
+                placeholder="Ej: 5000"
+                className={`w-full rounded-lg border bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal-500 ${
+                  shouldShowDepositError ? "border-red-300" : "border-slate-200"
+                }`}
+              />
+              {shouldShowDepositError && (
+                <p className="text-xs text-red-600">
+                  {isDepositGreaterThanService
+                    ? "La seña no puede ser mayor al valor del servicio."
+                    : "Tenés que ingresar una seña válida mayor a 0."}
+                </p>
+              )}
+
+              <CustomSelect
+                label="Método de pago de la seña"
+                placeholder="Seleccionar método de pago"
+                value={depositMethod}
+                onChange={(value) => {
+                  setDepositMethod(value as PaymentMethod | "");
+                  setDepositTouched(true);
+                }}
+                options={paymentMethodOptions}
+              />
+
+              {shouldShowDepositMethodError && (
+                <p className="text-xs text-red-600">
+                  Tenés que seleccionar un método de pago para la seña.
+                </p>
+              )}
+
+              <p className="text-xs text-slate-500">
+                Ingresá cuánto abonó el cliente para marcar el turno como señado.
+                {selectedServicePrice !== null && selectedServicePrice > 0 && (
+                  <>
+                    {" "}El valor del servicio es{" "}
+                    <span className="font-medium text-slate-700">
+                      ${selectedServicePrice.toLocaleString("es-AR")}
+                    </span>.
+                  </>
+                )}
+              </p>
+            </div>
+          )}
+        </div>
 
         {mutation.isError && (
           <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">

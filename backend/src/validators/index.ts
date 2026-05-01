@@ -234,6 +234,8 @@ export const createAppointmentBody = z.object({
   clientId: uuid,
   serviceId: uuid,
   startAt: isoDatetime,
+  depositAmount: z.number().min(0.01).max(1_000_000).optional(),
+  depositMethod: z.enum(DEPOSIT_METHODS).optional(),
 });
 
 export const appointmentIdParams = z.object({

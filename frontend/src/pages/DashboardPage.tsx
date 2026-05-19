@@ -20,7 +20,10 @@ import UpcomingAppointmentsSkeleton from "../components/dashboard/skeleton/Upcom
 import RevenueBreakdownCard from "../components/dashboard/RevenueBreakDownCard";
 import DashboardDateNavigator from "../components/dashboard/DashboardDateNavigator";
 import AppointmentDetailModal from "../components/appointment/AppointmentDetailModal";
-import type { AgendaAppointment } from "../types/entities";
+import ResolveAllModal from "../components/dashboard/ResolveAllModal";
+import { changeAppointmentStatus } from "../services/appointments.api";
+import { useQueryClient } from "@tanstack/react-query";
+import type { AgendaAppointment, PaymentMethod } from "../types/entities";
 import { appointmentStatusLabels, appointmentStatusColors } from "../types/entities";
 
 function getInitials(name: string) {
@@ -69,6 +72,8 @@ export default function DashboardPage() {
   );
   const [selectedAppointment, setSelectedAppointment] =
     useState<AgendaAppointment | null>(null);
+  const queryClient = useQueryClient();
+  const [resolveAllOpen, setResolveAllOpen] = useState(false);
 
   const { data: professionalsData, isLoading: professionalsLoading } =
     useProfessionals();
@@ -248,6 +253,28 @@ export default function DashboardPage() {
 
   const isLoading = professionalsLoading || dailyLoading;
 
+  const handleResolveAll = async (paymentMethod: PaymentMethod) => {
+    const results = await Promise.allSettled(
+      dashboardData.pendingAppointments.map((appt) =>
+        changeAppointmentStatus({
+          id: appt.id,
+          status: "COMPLETED",
+          finalPaymentMethod: paymentMethod,
+        })
+      )
+    );
+
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["agenda"] }),
+      queryClient.invalidateQueries({ queryKey: ["availability"] }),
+    ]);
+
+    const failCount = results.filter((r) => r.status === "rejected").length;
+    if (failCount > 0) {
+      throw new Error(String(failCount));
+    }
+  };
+
   return (
     <div className="max-w-full space-y-6">
       <DashboardDateNavigator
@@ -337,9 +364,18 @@ export default function DashboardPage() {
                   Pendientes de resolución
                 </h2>
                 {dashboardData.pendingAppointments.length > 0 && (
-                  <span className="ml-auto rounded-full bg-violet-200 px-2.5 py-0.5 text-xs font-semibold text-violet-800">
-                    {dashboardData.pendingAppointments.length}
-                  </span>
+                  <div className="ml-auto flex items-center gap-2">
+                    <span className="rounded-full bg-violet-200 px-2.5 py-0.5 text-xs font-semibold text-violet-800">
+                      {dashboardData.pendingAppointments.length}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setResolveAllOpen(true)}
+                      className="rounded-lg border border-violet-300 bg-white px-2.5 py-1 text-xs font-medium text-violet-700 hover:bg-violet-50 transition-colors"
+                    >
+                      Resolver todos
+                    </button>
+                  </div>
                 )}
               </div>
 
@@ -469,6 +505,12 @@ export default function DashboardPage() {
         open={!!selectedAppointment}
         appointment={selectedAppointment}
         onClose={() => setSelectedAppointment(null)}
+      />
+      <ResolveAllModal
+        open={resolveAllOpen}
+        onClose={() => setResolveAllOpen(false)}
+        appointments={dashboardData.pendingAppointments}
+        onConfirm={handleResolveAll}
       />
     </div>
   );

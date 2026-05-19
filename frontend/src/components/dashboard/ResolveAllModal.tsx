@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { format, parseISO } from "date-fns";
 import { Loader2 } from "lucide-react";
 import Modal from "../ui/Modal";
@@ -21,6 +21,13 @@ export default function ResolveAllModal({
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | "">("");
   const [isBusy, setIsBusy] = useState(false);
   const [errorCount, setErrorCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      setPaymentMethod("");
+      setErrorCount(null);
+    }
+  }, [open]);
 
   const handleConfirm = async () => {
     if (!paymentMethod || isBusy) return;
@@ -96,10 +103,11 @@ export default function ResolveAllModal({
 
         {/* Selector de método de pago */}
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <label htmlFor="resolve-all-payment-method" className="text-xs font-semibold uppercase tracking-wide text-slate-500">
             Método de pago
           </label>
           <select
+            id="resolve-all-payment-method"
             value={paymentMethod}
             onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod | "")}
             disabled={isBusy}

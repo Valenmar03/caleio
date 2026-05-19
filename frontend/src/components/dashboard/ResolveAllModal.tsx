@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { format, parseISO } from "date-fns";
 import { Loader2 } from "lucide-react";
 import Modal from "../ui/Modal";
+import CustomSelect from "../ui/CustomSelect";
 import type { AgendaAppointment, PaymentMethod } from "../../types/entities";
 import { paymentMethodOptions } from "../../types/entities";
 
@@ -102,25 +103,14 @@ export default function ResolveAllModal({
         </div>
 
         {/* Selector de método de pago */}
-        <div className="space-y-1.5">
-          <label htmlFor="resolve-all-payment-method" className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-            Método de pago
-          </label>
-          <select
-            id="resolve-all-payment-method"
-            value={paymentMethod}
-            onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod | "")}
-            disabled={isBusy}
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-200 disabled:opacity-50"
-          >
-            <option value="">Seleccionar método...</option>
-            {paymentMethodOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </div>
+        <CustomSelect
+          label="Método de pago"
+          placeholder="Seleccionar método..."
+          value={paymentMethod}
+          onChange={(v) => setPaymentMethod(v as PaymentMethod)}
+          options={paymentMethodOptions}
+          disabled={isBusy}
+        />
 
         {/* Error parcial */}
         {errorCount !== null && (

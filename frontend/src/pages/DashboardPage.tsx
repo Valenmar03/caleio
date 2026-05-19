@@ -264,12 +264,15 @@ export default function DashboardPage() {
       )
     );
 
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ["agenda"] }),
-      queryClient.invalidateQueries({ queryKey: ["availability"] }),
-    ]);
-
     const failCount = results.filter((r) => r.status === "rejected").length;
+
+    if (failCount < results.length) {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["agenda"] }),
+        queryClient.invalidateQueries({ queryKey: ["availability"] }),
+      ]);
+    }
+
     if (failCount > 0) {
       throw new Error(String(failCount));
     }

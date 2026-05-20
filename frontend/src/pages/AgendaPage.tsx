@@ -278,7 +278,7 @@ export default function AgendaPage() {
                      <Users className="w-6 h-6 text-slate-400" />
                   </div>
                   <div>
-                     <p className="text-sm font-medium text-slate-700">No hay profesionales cargados</p>
+                     <p className="text-sm font-medium text-slate-700">No se cargaron profesionales</p>
                      <p className="text-xs text-slate-400 mt-0.5">Agregá al menos un profesional para ver la agenda</p>
                   </div>
                </div>

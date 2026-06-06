@@ -1,6 +1,6 @@
 import { format, differenceInDays, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
-import { Eye, Plus, Search, Phone, Link2, Check, UserCircle } from "lucide-react";
+import { Eye, Plus, Search, Phone, Link2, Check, UserCircle, ChevronUp, ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import Button from "../components/ui/Button";
@@ -11,10 +11,45 @@ import ClientDetailModal from "../components/clients/ClientDetailModal";
 import NewClientFormModal from "../components/clients/NewClientFormModal";
 import ClientDetailSheet from "../components/clients/ClientDetailSheet";
 
+type SortField = "lastServiceDate" | "visitsCount" | "totalSpent";
+
+function SortHeader({
+  label,
+  field,
+  sortField,
+  sortDir,
+  onSort,
+  className = "",
+}: {
+  label: string;
+  field: SortField;
+  sortField: SortField | null;
+  sortDir: "asc" | "desc";
+  onSort: (f: SortField) => void;
+  className?: string;
+}) {
+  const active = sortField === field;
+  return (
+    <button
+      type="button"
+      onClick={() => onSort(field)}
+      className={`inline-flex items-center gap-1 hover:text-slate-700 transition-colors ${active ? "text-slate-700" : ""} ${className}`}
+    >
+      {label}
+      <span className="flex flex-col">
+        <ChevronUp className={`w-2.5 h-2.5 -mb-0.5 ${active && sortDir === "asc" ? "text-teal-600" : "text-slate-300"}`} />
+        <ChevronDown className={`w-2.5 h-2.5 ${active && sortDir === "desc" ? "text-teal-600" : "text-slate-300"}`} />
+      </span>
+    </button>
+  );
+}
+
 export default function ClientsPage() {
   const currentDate = new Date();
 
   const [search, setSearch] = useState("");
+  const [sortField, setSortField] = useState<"lastServiceDate" | "visitsCount" | "totalSpent" | null>(null);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [showClientModal, setShowClientModal] = useState(false);
   const [showNewClientModal, setShowNewClientModal] = useState(false);
@@ -41,21 +76,45 @@ export default function ClientsPage() {
       .replace(/[\u0300-\u036f]/g, "");
 
   const filteredClients = useMemo(() => {
-    if (!search.trim()) return clients;
+    const filtered = !search.trim()
+      ? clients
+      : clients.filter((client) => {
+          const fullName = normalize(client.fullName ?? "");
+          const phone = normalize(client.phone ?? "");
+          const email = normalize(client.email ?? "");
+          const query = normalize(search);
+          return fullName.includes(query) || phone.includes(query) || email.includes(query);
+        });
 
-    return clients.filter((client) => {
-      const fullName = normalize(client.fullName ?? "");
-      const phone = normalize(client.phone ?? "");
-      const email = normalize(client.email ?? "");
-      const query = normalize(search);
+    if (!sortField) return filtered;
 
-      return (
-        fullName.includes(query) ||
-        phone.includes(query) ||
-        email.includes(query)
-      );
+    return [...filtered].sort((a, b) => {
+      let aVal: number;
+      let bVal: number;
+
+      if (sortField === "lastServiceDate") {
+        aVal = a.lastServiceDate ? parseISO(a.lastServiceDate).getTime() : 0;
+        bVal = b.lastServiceDate ? parseISO(b.lastServiceDate).getTime() : 0;
+      } else if (sortField === "visitsCount") {
+        aVal = a.visitsCount ?? 0;
+        bVal = b.visitsCount ?? 0;
+      } else {
+        aVal = a.totalSpent ?? 0;
+        bVal = b.totalSpent ?? 0;
+      }
+
+      return sortDir === "desc" ? bVal - aVal : aVal - bVal;
     });
-  }, [clients, search]);
+  }, [clients, search, sortField, sortDir]);
+
+  const handleSort = (field: typeof sortField) => {
+    if (sortField === field) {
+      setSortDir((d) => (d === "desc" ? "asc" : "desc"));
+    } else {
+      setSortField(field);
+      setSortDir("desc");
+    }
+  };
 
   const getInitials = (fullName: string) => {
     return fullName
@@ -233,11 +292,11 @@ const handleCloseNewClientModal = () => {
                 <div className="col-span-3">Cliente</div>
                 <div className="col-span-2">Teléfono</div>
                 <div className="col-span-1">Email</div>
-                <div className="col-span-2">Último servicio</div>
-                <div className="col-span-1 text-center">Visitas</div>
-                <div className="col-span-1 text-center">Total gastado</div>
-                <div className="col-span-1 text-center"></div>
-                <div className="col-span-1 text-right"></div>
+                <SortHeader label="Último servicio" field="lastServiceDate" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="col-span-2" />
+                <SortHeader label="Visitas" field="visitsCount" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="col-span-1 justify-center" />
+                <SortHeader label="Total gastado" field="totalSpent" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="col-span-1 justify-center" />
+                <div className="col-span-1"></div>
+                <div className="col-span-1"></div>
               </div>
 
               <div className="divide-y divide-slate-100">

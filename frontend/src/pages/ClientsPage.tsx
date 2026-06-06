@@ -312,11 +312,28 @@ const handleCloseNewClientModal = () => {
                 {filteredClients.map((client) => {
                   const visits = client.visitsCount ?? 0;
                   const totalSpent = client.totalSpent ?? 0;
+                  const daysSinceLast = client.lastServiceDate
+                    ? differenceInDays(new Date(), parseISO(client.lastServiceDate))
+                    : null;
+                  const rowAlert =
+                    !client.nextServiceDate && daysSinceLast !== null
+                      ? daysSinceLast >= 45
+                        ? "red"
+                        : daysSinceLast >= 30
+                        ? "yellow"
+                        : null
+                      : null;
 
                   return (
                     <div
                       key={client.id}
-                      className="grid grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-slate-50/70 transition-colors"
+                      className={`grid grid-cols-12 gap-4 px-6 py-4 items-center transition-colors ${
+                        rowAlert === "red"
+                          ? "bg-red-50 hover:bg-red-100/60"
+                          : rowAlert === "yellow"
+                          ? "bg-amber-50 hover:bg-amber-100/60"
+                          : "hover:bg-slate-50/70"
+                      }`}
                     >
                       <div className="col-span-2 flex items-center gap-3 min-w-0">
                         <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-sm font-semibold text-slate-600 shrink-0">
@@ -423,11 +440,28 @@ const handleCloseNewClientModal = () => {
               {filteredClients.map((client) => {
                 const visits = client.visitsCount ?? 0;
                 const totalSpent = client.totalSpent ?? 0;
+                const daysSinceLast = client.lastServiceDate
+                  ? differenceInDays(new Date(), parseISO(client.lastServiceDate))
+                  : null;
+                const rowAlert =
+                  !client.nextServiceDate && daysSinceLast !== null
+                    ? daysSinceLast >= 45
+                      ? "red"
+                      : daysSinceLast >= 30
+                      ? "yellow"
+                      : null
+                    : null;
 
                 return (
                   <div
                     key={client.id}
-                    className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3"
+                    className={`rounded-2xl border p-4 space-y-3 ${
+                      rowAlert === "red"
+                        ? "border-red-200 bg-red-50"
+                        : rowAlert === "yellow"
+                        ? "border-amber-200 bg-amber-50"
+                        : "border-slate-200 bg-white"
+                    }`}
                   >
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-sm font-semibold text-slate-600 shrink-0">

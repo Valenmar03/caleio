@@ -37,8 +37,8 @@ function SortHeader({
     >
       {label}
       <span className="flex flex-col">
-        <ChevronUp className={`w-2.5 h-2.5 -mb-0.5 ${active && sortDir === "asc" ? "text-teal-600" : "text-slate-300"}`} />
-        <ChevronDown className={`w-2.5 h-2.5 ${active && sortDir === "desc" ? "text-teal-600" : "text-slate-300"}`} />
+        <ChevronUp className={`w-3.5 h-3.5 -mb-0.5 ${active && sortDir === "asc" ? "text-teal-600" : "text-slate-400"}`} />
+        <ChevronDown className={`w-3.5 h-3.5 ${active && sortDir === "desc" ? "text-teal-600" : "text-slate-400"}`} />
       </span>
     </button>
   );
@@ -89,19 +89,24 @@ export default function ClientsPage() {
     if (!sortField) return filtered;
 
     return [...filtered].sort((a, b) => {
-      let aVal: number;
-      let bVal: number;
+      let aVal: number | null;
+      let bVal: number | null;
 
       if (sortField === "lastServiceDate") {
-        aVal = a.lastServiceDate ? parseISO(a.lastServiceDate).getTime() : 0;
-        bVal = b.lastServiceDate ? parseISO(b.lastServiceDate).getTime() : 0;
+        aVal = a.lastServiceDate ? parseISO(a.lastServiceDate).getTime() : null;
+        bVal = b.lastServiceDate ? parseISO(b.lastServiceDate).getTime() : null;
       } else if (sortField === "visitsCount") {
-        aVal = a.visitsCount ?? 0;
-        bVal = b.visitsCount ?? 0;
+        aVal = a.visitsCount ?? null;
+        bVal = b.visitsCount ?? null;
       } else {
-        aVal = a.totalSpent ?? 0;
-        bVal = b.totalSpent ?? 0;
+        aVal = a.totalSpent ?? null;
+        bVal = b.totalSpent ?? null;
       }
+
+      // nulls always last
+      if (aVal === null && bVal === null) return 0;
+      if (aVal === null) return 1;
+      if (bVal === null) return -1;
 
       return sortDir === "desc" ? bVal - aVal : aVal - bVal;
     });

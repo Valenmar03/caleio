@@ -56,9 +56,19 @@ class ClientService {
         0
       );
 
+      const now = new Date();
+
       const lastCompleted = client.appointments
         .filter((appt) => appt.status === "COMPLETED")
         .sort((a, b) => new Date(b.startAt).getTime() - new Date(a.startAt).getTime())[0];
+
+      const nextUpcoming = client.appointments
+        .filter(
+          (appt) =>
+            (appt.status === "RESERVED" || appt.status === "DEPOSIT_PAID") &&
+            new Date(appt.startAt) > now
+        )
+        .sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime())[0];
 
       return {
         id: client.id,
@@ -72,6 +82,8 @@ class ClientService {
         totalSpent,
         lastServiceDate: lastCompleted?.startAt ?? null,
         lastServiceName: lastCompleted?.service?.name ?? null,
+        nextServiceDate: nextUpcoming?.startAt ?? null,
+        nextServiceName: nextUpcoming?.service?.name ?? null,
       };
     });
   }

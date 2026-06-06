@@ -11,7 +11,7 @@ import ClientDetailModal from "../components/clients/ClientDetailModal";
 import NewClientFormModal from "../components/clients/NewClientFormModal";
 import ClientDetailSheet from "../components/clients/ClientDetailSheet";
 
-type SortField = "lastServiceDate" | "visitsCount" | "totalSpent";
+type SortField = "lastServiceDate" | "nextServiceDate" | "visitsCount" | "totalSpent";
 
 function SortHeader({
   label,
@@ -48,7 +48,7 @@ export default function ClientsPage() {
   const currentDate = new Date();
 
   const [search, setSearch] = useState("");
-  const [sortField, setSortField] = useState<"lastServiceDate" | "visitsCount" | "totalSpent" | null>(null);
+  const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [showClientModal, setShowClientModal] = useState(false);
@@ -95,6 +95,9 @@ export default function ClientsPage() {
       if (sortField === "lastServiceDate") {
         aVal = a.lastServiceDate ? parseISO(a.lastServiceDate).getTime() : null;
         bVal = b.lastServiceDate ? parseISO(b.lastServiceDate).getTime() : null;
+      } else if (sortField === "nextServiceDate") {
+        aVal = a.nextServiceDate ? parseISO(a.nextServiceDate).getTime() : null;
+        bVal = b.nextServiceDate ? parseISO(b.nextServiceDate).getTime() : null;
       } else if (sortField === "visitsCount") {
         aVal = a.visitsCount ?? null;
         bVal = b.visitsCount ?? null;
@@ -294,10 +297,11 @@ const handleCloseNewClientModal = () => {
           <>
             <div className="hidden md:block rounded-2xl border border-slate-200 bg-white overflow-hidden">
               <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-slate-50 border-b border-slate-200 text-xs font-medium text-slate-500">
-                <div className="col-span-3">Cliente</div>
-                <div className="col-span-2">Teléfono</div>
+                <div className="col-span-2">Cliente</div>
+                <div className="col-span-1">Teléfono</div>
                 <div className="col-span-1">Email</div>
                 <SortHeader label="Último servicio" field="lastServiceDate" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="col-span-2" />
+                <SortHeader label="Próximo servicio" field="nextServiceDate" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="col-span-2" />
                 <SortHeader label="Visitas" field="visitsCount" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="col-span-1 justify-center" />
                 <SortHeader label="Total gastado" field="totalSpent" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="col-span-1 justify-center" />
                 <div className="col-span-1"></div>
@@ -314,7 +318,7 @@ const handleCloseNewClientModal = () => {
                       key={client.id}
                       className="grid grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-slate-50/70 transition-colors"
                     >
-                      <div className="col-span-3 flex items-center gap-3 min-w-0">
+                      <div className="col-span-2 flex items-center gap-3 min-w-0">
                         <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-sm font-semibold text-slate-600 shrink-0">
                           {getInitials(client.fullName)}
                         </div>
@@ -329,7 +333,7 @@ const handleCloseNewClientModal = () => {
                         </div>
                       </div>
 
-                      <div className="col-span-2 min-w-0">
+                      <div className="col-span-1 min-w-0">
                         <div className="inline-flex items-center gap-2 text-sm text-slate-600 truncate">
                           <Phone className="w-4 h-4 text-slate-400 shrink-0" />
                           <span className="truncate">{client.phone}</span>
@@ -354,6 +358,24 @@ const handleCloseNewClientModal = () => {
                               })()}
                             </div>
                             <div className="text-xs text-slate-400 truncate">{client.lastServiceName}</div>
+                          </div>
+                        ) : (
+                          <span className="text-sm text-slate-300">—</span>
+                        )}
+                      </div>
+
+                      <div className="col-span-2 min-w-0">
+                        {client.nextServiceDate ? (
+                          <div>
+                            <div className="text-xs font-medium text-teal-700">
+                              {(() => {
+                                const days = differenceInDays(parseISO(client.nextServiceDate), new Date());
+                                if (days === 0) return "Hoy";
+                                if (days === 1) return "Mañana";
+                                return `En ${days} días`;
+                              })()}
+                            </div>
+                            <div className="text-xs text-slate-400 truncate">{client.nextServiceName}</div>
                           </div>
                         ) : (
                           <span className="text-sm text-slate-300">—</span>
@@ -441,6 +463,20 @@ const handleCloseNewClientModal = () => {
                           })()}
                         </span>
                         {client.lastServiceName && ` · ${client.lastServiceName}`}
+                      </div>
+                    )}
+
+                    {client.nextServiceDate && (
+                      <div className="text-xs text-teal-600">
+                        <span className="font-medium">
+                          {(() => {
+                            const days = differenceInDays(parseISO(client.nextServiceDate), new Date());
+                            if (days === 0) return "Próximo: Hoy";
+                            if (days === 1) return "Próximo: Mañana";
+                            return `Próximo: En ${days} días`;
+                          })()}
+                        </span>
+                        {client.nextServiceName && ` · ${client.nextServiceName}`}
                       </div>
                     )}
 

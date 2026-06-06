@@ -71,6 +71,8 @@ export type Client = {
   totalSpent?: number;
   lastServiceDate?: string | null;
   lastServiceName?: string | null;
+  nextServiceDate?: string | null;
+  nextServiceName?: string | null;
 };
 
 export type CreateClientPayload = {

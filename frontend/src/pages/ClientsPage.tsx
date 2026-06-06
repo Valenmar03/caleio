@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { format, differenceInDays, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { Eye, Plus, Search, Phone, Link2, Check, UserCircle } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -230,9 +230,10 @@ const handleCloseNewClientModal = () => {
           <>
             <div className="hidden md:block rounded-2xl border border-slate-200 bg-white overflow-hidden">
               <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-slate-50 border-b border-slate-200 text-xs font-medium text-slate-500">
-                <div className="col-span-4">Cliente</div>
+                <div className="col-span-3">Cliente</div>
                 <div className="col-span-2">Teléfono</div>
-                <div className="col-span-2">Email</div>
+                <div className="col-span-1">Email</div>
+                <div className="col-span-2">Último servicio</div>
                 <div className="col-span-1 text-center">Visitas</div>
                 <div className="col-span-1 text-center">Total gastado</div>
                 <div className="col-span-1 text-center"></div>
@@ -249,7 +250,7 @@ const handleCloseNewClientModal = () => {
                       key={client.id}
                       className="grid grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-slate-50/70 transition-colors"
                     >
-                      <div className="col-span-4 flex items-center gap-3 min-w-0">
+                      <div className="col-span-3 flex items-center gap-3 min-w-0">
                         <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-sm font-semibold text-slate-600 shrink-0">
                           {getInitials(client.fullName)}
                         </div>
@@ -271,10 +272,28 @@ const handleCloseNewClientModal = () => {
                         </div>
                       </div>
 
-                      <div className="col-span-2 min-w-0">
+                      <div className="col-span-1 min-w-0">
                         <div className="text-sm text-slate-600 truncate">
                           {client.email || "—"}
                         </div>
+                      </div>
+
+                      <div className="col-span-2 min-w-0">
+                        {client.lastServiceDate ? (
+                          <div>
+                            <div className="text-xs font-medium text-slate-700">
+                              {(() => {
+                                const days = differenceInDays(new Date(), parseISO(client.lastServiceDate));
+                                if (days === 0) return "Hoy";
+                                if (days === 1) return "Hace 1 día";
+                                return `Hace ${days} días`;
+                              })()}
+                            </div>
+                            <div className="text-xs text-slate-400 truncate">{client.lastServiceName}</div>
+                          </div>
+                        ) : (
+                          <span className="text-sm text-slate-300">—</span>
+                        )}
                       </div>
 
                       <div className="col-span-1 text-center text-sm font-medium text-slate-700">
@@ -346,6 +365,20 @@ const handleCloseNewClientModal = () => {
                       </div>
                       <div className="truncate">{client.email || "Sin email"}</div>
                     </div>
+
+                    {client.lastServiceDate && (
+                      <div className="text-xs text-slate-500">
+                        <span className="font-medium text-slate-700">
+                          {(() => {
+                            const days = differenceInDays(new Date(), parseISO(client.lastServiceDate));
+                            if (days === 0) return "Hoy";
+                            if (days === 1) return "Hace 1 día";
+                            return `Hace ${days} días`;
+                          })()}
+                        </span>
+                        {client.lastServiceName && ` · ${client.lastServiceName}`}
+                      </div>
+                    )}
 
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-slate-500">Visitas: {visits}</span>

@@ -34,7 +34,13 @@ class ClientService {
       },
       include: {
         appointments: {
-          select: { id: true, totalPrice: true, status: true },
+          select: {
+            id: true,
+            totalPrice: true,
+            status: true,
+            startAt: true,
+            service: { select: { name: true } },
+          },
         },
       },
       orderBy: [{ fullName: "asc" }, { createdAt: "desc" }],
@@ -49,6 +55,11 @@ class ClientService {
         (acc, appt) => acc + Number(appt.totalPrice ?? 0),
         0
       );
+
+      const lastCompleted = client.appointments
+        .filter((appt) => appt.status === "COMPLETED")
+        .sort((a, b) => new Date(b.startAt).getTime() - new Date(a.startAt).getTime())[0];
+
       return {
         id: client.id,
         businessId: client.businessId,
@@ -59,6 +70,8 @@ class ClientService {
         createdAt: client.createdAt,
         visitsCount,
         totalSpent,
+        lastServiceDate: lastCompleted?.startAt ?? null,
+        lastServiceName: lastCompleted?.service?.name ?? null,
       };
     });
   }

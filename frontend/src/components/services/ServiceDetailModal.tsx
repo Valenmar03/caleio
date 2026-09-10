@@ -23,7 +23,7 @@ export default function ServiceDetailModal({
 }: Props) {
   const { data: professionalsData, isLoading: professionalsLoading } = useProfessionals();
   const { data: businessData } = useBusiness();
-  const hasMpToken = !!businessData?.business?.mpAccessToken;
+  const hasMpToken = !!businessData?.business?.mpAccessTokenSet;
 
   const updateServiceMutation = useUpdateService();
 

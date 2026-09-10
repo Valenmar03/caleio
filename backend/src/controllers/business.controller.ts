@@ -13,10 +13,7 @@ export async function getBusinessHandler(req: Request, res: Response) {
 
 export async function updateBusinessHandler(req: Request, res: Response) {
   try {
-    const { businessId, role } = req.user!;
-    if (role !== "OWNER") {
-      return res.status(403).json({ error: "Solo el owner puede modificar el negocio" });
-    }
+    const { businessId } = req.user!;
     const { name, slug, timezone, mpAccessToken, waPhoneNumberId, waAccessToken, waReminderHours, emailNotificationsEnabled, emailReminderHours, onboardingCompleted, address, whatsappPhone, bookingTheme, tagline } = req.body;
     const business = await businessService.updateBusiness(businessId, { name, slug, timezone, mpAccessToken, waPhoneNumberId, waAccessToken, waReminderHours, emailNotificationsEnabled, emailReminderHours, onboardingCompleted, address, whatsappPhone, bookingTheme, tagline });
     return res.json({ business });
@@ -37,10 +34,7 @@ export async function getBusinessUnavailabilitiesHandler(req: Request, res: Resp
 
 export async function createBusinessUnavailabilityHandler(req: Request, res: Response) {
   try {
-    const { businessId, role } = req.user!;
-    if (role !== "OWNER") {
-      return res.status(403).json({ error: "Solo el owner puede modificar el negocio" });
-    }
+    const { businessId } = req.user!;
     const { date, reason } = req.body;
     const unavailability = await createBusinessUnavailability(businessId, { date, reason });
     return res.status(201).json({ unavailability });
@@ -51,10 +45,7 @@ export async function createBusinessUnavailabilityHandler(req: Request, res: Res
 
 export async function deleteBusinessUnavailabilityHandler(req: Request, res: Response) {
   try {
-    const { businessId, role } = req.user!;
-    if (role !== "OWNER") {
-      return res.status(403).json({ error: "Solo el owner puede modificar el negocio" });
-    }
+    const { businessId } = req.user!;
     const unavailabilityId = req.params.unavailabilityId as string;
     await deleteBusinessUnavailability(businessId, unavailabilityId);
     return res.status(204).send();

@@ -16,7 +16,7 @@ type Props = {
 export default function NewServicesFormModal({ open, onClose }: Props) {
   const createServiceMutation = useCreateService();
   const { data: businessData } = useBusiness();
-  const hasMpToken = !!businessData?.business?.mpAccessToken;
+  const hasMpToken = !!businessData?.business?.mpAccessTokenSet;
 
   const [name, setName] = useState("");
   const [icon, setIcon] = useState("Scissors");

@@ -14,7 +14,12 @@ function notFound(message: string) {
 const professionalService = new ProfessionalService();
 const appointmentService = new AppointmentService();
 
-async function getBusinessBySlug(slug: string) {
+/**
+ * Devuelve el negocio CON sus credenciales (mpAccessToken, waAccessToken).
+ * Uso exclusivamente interno: nunca serializar el resultado en una respuesta HTTP.
+ * Para responderle al cliente, usar getPublicBusinessInfo().
+ */
+async function getBusinessWithSecretsBySlug(slug: string) {
   const business = await prisma.business.findUnique({
     where: { slug },
     select: {
@@ -37,12 +42,26 @@ async function getBusinessBySlug(slug: string) {
   return business;
 }
 
+/** Campos seguros para exponer en la ruta pública GET /booking/:slug/info. */
 export async function getPublicBusinessInfo(slug: string) {
-  return getBusinessBySlug(slug);
+  const business = await getBusinessWithSecretsBySlug(slug);
+
+  return {
+    id: business.id,
+    name: business.name,
+    slug: business.slug,
+    timezone: business.timezone,
+    address: business.address,
+    logoUrl: business.logoUrl,
+    whatsappPhone: business.whatsappPhone,
+    bookingTheme: business.bookingTheme,
+    tagline: business.tagline,
+    acceptsOnlinePayments: !!business.mpAccessToken,
+  };
 }
 
 export async function getPublicServices(slug: string) {
-  const business = await getBusinessBySlug(slug);
+  const business = await getBusinessWithSecretsBySlug(slug);
   return prisma.service.findMany({
     where: { businessId: business.id, active: true, bookableOnline: true },
     select: {
@@ -61,7 +80,7 @@ export async function getPublicServices(slug: string) {
 }
 
 export async function getPublicProfessionals(slug: string, serviceId?: string) {
-  const business = await getBusinessBySlug(slug);
+  const business = await getBusinessWithSecretsBySlug(slug);
 
   if (serviceId) {
     const links = await prisma.professionalService.findMany({
@@ -89,7 +108,7 @@ export async function getPublicAvailability(
   date: string,
   serviceId: string
 ) {
-  const business = await getBusinessBySlug(slug);
+  const business = await getBusinessWithSecretsBySlug(slug);
   const result = await professionalService.getAvailability({
     businessId: business.id,
     professionalId,
@@ -106,7 +125,7 @@ export async function getPublicAggregatedAvailability(
   date: string,
   serviceId: string
 ) {
-  const business = await getBusinessBySlug(slug);
+  const business = await getBusinessWithSecretsBySlug(slug);
 
   const links = await prisma.professionalService.findMany({
     where: {
@@ -159,7 +178,7 @@ export async function createPublicAppointment(
     clientEmail?: string;
   }
 ) {
-  const business = await getBusinessBySlug(slug);
+  const business = await getBusinessWithSecretsBySlug(slug);
   const { serviceId, startAt, clientFullName, clientPhone, clientEmail } = data;
 
   const startDate = new Date(startAt);
@@ -382,7 +401,7 @@ export async function createPublicAppointment(
 }
 
 export async function confirmPublicPayment(slug: string, pendingBookingId: string, paymentId: string) {
-  const business = await getBusinessBySlug(slug);
+  const business = await getBusinessWithSecretsBySlug(slug);
   if (!business.mpAccessToken) throw Object.assign(new Error("Pagos no configurados"), { status: 400 });
 
   const payment = await getMPPayment(business.mpAccessToken, paymentId);

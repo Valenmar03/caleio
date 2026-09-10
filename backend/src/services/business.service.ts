@@ -1,12 +1,55 @@
+import type { Prisma } from "@prisma/client";
 import { prisma } from "../db/prisma";
 import { normalizeSlug } from "./auth.service";
+
+/**
+ * Campos del negocio que se devuelven al frontend.
+ * NO incluye mpAccessToken ni waAccessToken: son credenciales write-only.
+ * En su lugar se exponen los flags booleanos mpAccessTokenSet / waAccessTokenSet.
+ */
+const businessSelect = {
+  id: true,
+  name: true,
+  slug: true,
+  timezone: true,
+  mpAccessToken: true,
+  waPhoneNumberId: true,
+  waAccessToken: true,
+  waReminderHours: true,
+  emailNotificationsEnabled: true,
+  emailReminderHours: true,
+  plan: true,
+  subscriptionStatus: true,
+  trialEndsAt: true,
+  billingExempt: true,
+  onboardingCompleted: true,
+  address: true,
+  logoUrl: true,
+  whatsappPhone: true,
+  bookingTheme: true,
+  tagline: true,
+  createdAt: true,
+} as const;
+
+type BusinessWithSecrets = Prisma.BusinessGetPayload<{ select: typeof businessSelect }>;
+
+/** Reemplaza los tokens por flags booleanos antes de serializar la respuesta. */
+function toSafeBusiness(business: BusinessWithSecrets) {
+  const { mpAccessToken, waAccessToken, ...rest } = business;
+  return {
+    ...rest,
+    mpAccessTokenSet: !!mpAccessToken,
+    waAccessTokenSet: !!waAccessToken,
+  };
+}
 
 export const businessService = {
   async getBusiness(businessId: string) {
     const business = await prisma.business.findUniqueOrThrow({
       where: { id: businessId },
+      select: businessSelect,
     });
-    return business;
+    return toSafeBusiness(business);
   },
 
   async updateBusiness(
@@ -61,7 +104,13 @@ export const businessService = {
     if (data.bookingTheme !== undefined) update.bookingTheme = data.bookingTheme ?? "default";
     if (data.tagline !== undefined) update.tagline = data.tagline ?? null;
 
-    return prisma.business.update({ where: { id: businessId }, data: update });
+    const business = await prisma.business.update({
+      where: { id: businessId },
+      data: update,
+      select: businessSelect,
+    });
+
+    return toSafeBusiness(business);
   },
 };
 

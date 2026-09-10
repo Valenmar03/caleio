@@ -7,6 +7,7 @@ import {
   deleteBusinessUnavailabilityHandler,
 } from "../controllers/business.controller";
 import { validate } from "../middleware/validate";
+import { requireOwner } from "../middleware/requireOwner";
 import {
   updateBusinessBody,
   businessUnavailabilityIdParam,
@@ -16,16 +17,18 @@ import {
 const router = Router();
 
 router.get("/", getBusinessHandler);
-router.patch("/", validate(updateBusinessBody), updateBusinessHandler);
+router.patch("/", requireOwner, validate(updateBusinessBody), updateBusinessHandler);
 
 router.get("/unavailabilities", getBusinessUnavailabilitiesHandler);
 router.post(
   "/unavailabilities",
+  requireOwner,
   validate(createBusinessUnavailabilityBody),
   createBusinessUnavailabilityHandler
 );
 router.delete(
   "/unavailabilities/:unavailabilityId",
+  requireOwner,
   validate(businessUnavailabilityIdParam, "params"),
   deleteBusinessUnavailabilityHandler
 );

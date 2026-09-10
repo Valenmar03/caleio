@@ -132,11 +132,7 @@ export async function replaceProfessionalServicesHandler(req: Request, res: Resp
 
 export async function createProfessionalAccountHandler(req: Request, res: Response) {
   try {
-    const { businessId, role } = req.user!;
-    if (role !== "OWNER") {
-      return res.status(403).json({ error: "Only owners can create professional accounts" });
-    }
-
+    const { businessId } = req.user!;
     const professionalId = String(req.params.id);
     const { username, password } = req.body;
 

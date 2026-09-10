@@ -33,14 +33,12 @@ export type Business = {
   plan: "STARTER" | "PRO";
   subscriptionStatus: "TRIAL" | "ACTIVE" | "PAST_DUE" | "CANCELED";
   createdAt: string;
-  mpAccessToken?: string | null;
+  mpAccessTokenSet?: boolean;
   waPhoneNumberId?: string | null;
-  waAccessToken?: string | null;
+  waAccessTokenSet?: boolean;
   waReminderHours?: number | null;
   emailNotificationsEnabled?: boolean | null;
   emailReminderHours?: number | null;
-  lsCustomerId?: string | null;
-  lsSubscriptionId?: string | null;
   trialEndsAt?: string | null;
   billingExempt?: boolean;
   onboardingCompleted?: boolean;

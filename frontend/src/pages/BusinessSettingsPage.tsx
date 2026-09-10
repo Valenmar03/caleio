@@ -282,7 +282,7 @@ export default function BusinessSettingsPage() {
 
             {/* MercadoPago */}
             <MercadoPagoSection
-              currentToken={business.mpAccessToken ?? null}
+              hasToken={business.mpAccessTokenSet ?? false}
               onSave={(mpAccessToken) => update({ mpAccessToken }).then(() => {})}
             />
 
@@ -433,29 +433,44 @@ function CopyUrlRow({ url, accent = "teal" }: { url: string; accent?: "teal" | "
 }
 
 function MercadoPagoSection({
-  currentToken,
+  hasToken,
   onSave,
 }: {
-  currentToken: string | null;
+  hasToken: boolean;
   onSave: (token: string | null) => Promise<void>;
 }) {
   const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(currentToken ?? "");
+  const [draft, setDraft] = useState("");
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    if (!editing) setDraft(currentToken ?? "");
-  }, [currentToken, editing]);
+    if (!editing) {
+      setDraft("");
+      setConfirmingDelete(false);
+    }
+  }, [editing]);
 
   const handleSave = async () => {
+    const value = draft.trim();
+
+    // El campo arranca vacio al editar (el token nunca vuelve del backend),
+    // asi que un guardado vacio se confirma dos veces antes de borrar.
+    if (!value && hasToken && !confirmingDelete) {
+      setConfirmingDelete(true);
+      setError("El campo está vacío. Tocá Guardar de nuevo para borrar el token guardado.");
+      return;
+    }
+
     setSaving(true);
     setError(null);
     setSuccess(false);
     try {
-      await onSave(draft.trim() || null);
+      await onSave(value || null);
       setEditing(false);
+      setConfirmingDelete(false);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
@@ -466,8 +481,9 @@ function MercadoPagoSection({
   };
 
   const handleCancel = () => {
-    setDraft(currentToken ?? "");
+    setDraft("");
     setEditing(false);
+    setConfirmingDelete(false);
     setError(null);
   };
 
@@ -515,7 +531,7 @@ function MercadoPagoSection({
                 <PasswordInput
                   autoFocus
                   value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
+                  onChange={(e) => { setDraft(e.target.value); setConfirmingDelete(false); }}
                   className="w-full max-w-sm rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-teal-500"
                   placeholder="APP_USR-..."
                 />
@@ -528,7 +544,7 @@ function MercadoPagoSection({
               </div>
             ) : (
               <p className="text-sm font-medium text-slate-800">
-                {currentToken ? "••••••••••••••••" : <span className="text-slate-400 italic">No configurado</span>}
+                {hasToken ? "••••••••••••••••" : <span className="text-slate-400 italic">No configurado</span>}
               </p>
             )}
           </div>

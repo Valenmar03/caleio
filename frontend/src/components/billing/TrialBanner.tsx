@@ -2,8 +2,10 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { differenceInDays } from "date-fns";
 import { AlertTriangle } from "lucide-react";
 import { getBillingStatus, createCheckout } from "../../services/billing.api";
+import { useAuth } from "../../hooks/useAuth";
 
 export function TrialBanner() {
+  const { user } = useAuth();
   const { data } = useQuery({
     queryKey: ["billingStatus"],
     queryFn: getBillingStatus,
@@ -34,13 +36,15 @@ export function TrialBanner() {
           Suscribite para no perder el acceso.
         </span>
       </div>
-      <button
-        onClick={() => checkoutMutation.mutate()}
-        disabled={checkoutMutation.isPending}
-        className="shrink-0 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium rounded-lg px-3 py-1.5 transition-colors disabled:opacity-60"
-      >
-        {checkoutMutation.isPending ? "..." : "Suscribirme"}
-      </button>
+      {user?.role === "OWNER" && (
+        <button
+          onClick={() => checkoutMutation.mutate()}
+          disabled={checkoutMutation.isPending}
+          className="shrink-0 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium rounded-lg px-3 py-1.5 transition-colors disabled:opacity-60"
+        >
+          {checkoutMutation.isPending ? "..." : "Suscribirme"}
+        </button>
+      )}
     </div>
   );
 }

@@ -21,7 +21,17 @@ app.post("/billing/webhook", express.raw({ type: "application/json" }), webhookH
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "..", "public")));
+// Los archivos subidos por usuarios se sirven con headers que impiden que el
+// navegador los ejecute como documento (SVG/HTML) en el origen de la API.
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "..", "public", "uploads"), {
+    setHeaders: (res) => {
+      res.setHeader("Content-Security-Policy", "default-src 'none'; sandbox");
+      res.setHeader("X-Content-Type-Options", "nosniff");
+    },
+  })
+);
 
 app.get("/health", (_req, res) => {
   res.json({ ok: true, name: "lumina-api" });

@@ -8,6 +8,7 @@ import { useServices } from "../../hooks/useServices";
 import { useCreateProfessional } from "../../hooks/useProfessionals";
 import { useUpdateProfessionalServices } from "../../hooks/useProfessionalServices";
 import { useProfessionalSchedule } from "../../hooks/useProfessionalSchedule";
+import { PROFESSIONAL_COLORS } from "./professionalColors";
 
 type Props = {
   open: boolean;
@@ -31,19 +32,6 @@ const DAY_LABELS: Record<number, string> = {
   5: "Viernes",
   6: "Sábado",
 };
-
-const COLORS = [
-  "#0D9488",
-  "#14B8A6",
-  "#3B82F6",
-  "#6366F1",
-  "#8B5CF6",
-  "#EC4899",
-  "#F59E0B",
-  "#EF4444",
-  "#10B981",
-  "#F43F5E",
-];
 
 function buildEmptyScheduleState(): Record<number, EditableDay> {
   return {
@@ -376,7 +364,7 @@ export default function NewProfessionalFormModal({
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {COLORS.map((item) => {
+            {PROFESSIONAL_COLORS.map((item) => {
               const selected = color === item;
 
               return (

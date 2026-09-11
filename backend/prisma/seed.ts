@@ -5,18 +5,23 @@ const prisma = new PrismaClient();
 
 const TZ_OFFSET = -3; // Argentina UTC-3
 
+// Fecha calendario en Argentina (hoy + N días), expresada en campos UTC.
+// Independiente de la zona horaria de la máquina y de la hora a la que se corra el seed.
+function artDate(daysFromToday: number) {
+  const d = new Date(Date.now() + TZ_OFFSET * 60 * 60 * 1000);
+  d.setUTCDate(d.getUTCDate() + daysFromToday);
+  return d;
+}
+
 function dt(hour: number, minute = 0, daysFromToday = 0) {
-  const d = new Date();
-  d.setDate(d.getDate() + daysFromToday);
+  const d = artDate(daysFromToday);
   d.setUTCHours(hour - TZ_OFFSET, minute, 0, 0);
   return d;
 }
 
-// Devuelve true si el día relativo a hoy es domingo (0) o sábado (6) con hora > 14
+// Devuelve true si el día relativo a hoy es domingo (no se trabaja)
 function isWeekend(daysFromToday: number) {
-  const d = new Date();
-  d.setDate(d.getDate() + daysFromToday);
-  return d.getDay() === 0; // domingo no trabajan
+  return artDate(daysFromToday).getUTCDay() === 0;
 }
 
 async function main() {
@@ -49,7 +54,7 @@ async function main() {
       phone: "+54 11 3885-3213",
     },
   });
-  console.log("✓ Usuario admin (user: admin / pass: admin123)");
+  console.log("✓ Usuario admin (user: admin / pass: Admin.123)");
 
   // ─── Services ───────────────────────────────────────────────────────────────
   const [corte, tintura, mechas, manicura, depilacion, facial, pedicura, keratina] =
@@ -248,7 +253,7 @@ async function main() {
   console.log(`✓ ${appts.length} turnos creados (semana pasada, ayer, hoy, y próximos 3 días)`);
 
   console.log("\n✅ Seed completo!");
-  console.log("   Login: admin / admin123");
+  console.log("   Login: admin / Admin.123");
   console.log(`   Business ID: ${business.id}`);
 }
 

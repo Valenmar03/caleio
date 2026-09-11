@@ -35,18 +35,6 @@ function getInitials(name: string) {
     .toUpperCase();
 }
 
-function getAvatarColor(index: number) {
-  const colors = [
-    "bg-violet-500",
-    "bg-pink-500",
-    "bg-blue-500",
-    "bg-emerald-500",
-    "bg-amber-500",
-  ];
-
-  return colors[index % colors.length];
-}
-
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("es-AR", {
     style: "currency",
@@ -331,11 +319,12 @@ export default function DashboardPage() {
               <p className="text-sm text-slate-400">Sin profesionales hoy</p>
             ) : (
               <div className="space-y-2.5">
-                {dashboardData.activeTeam.map((person, index) => (
+                {dashboardData.activeTeam.map((person) => (
                   <div key={person.id} className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                       <div
-                        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-white ${getAvatarColor(index)}`}
+                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-white"
+                        style={{ backgroundColor: person.color || "#0D9488" }}
                       >
                         {getInitials(person.name)}
                       </div>
